@@ -18,7 +18,8 @@
     "setup": "prisma generate && prisma db push && npm run db:seed",
     "test:browser": "node tests/browser/smoke.mjs",
     "test:lifecycle": "node tests/browser/lifecycle.mjs",
-    "test:all": "npm test && npm run test:browser && npm run test:lifecycle"
+    "test:all": "npm test && npm run test:browser && npm run test:lifecycle",
+    "screenshots": "node tests/browser/screenshots.mjs"
   },
   "dependencies": {
     "@prisma/client": "6.1.0",
