@@ -1,0 +1,51 @@
+{
+  "name": "kogi-csc-portal",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Kogi State Civil Service Commission Portal with Integrated Civil Service Recruitment Management System",
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "prisma:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:reset": "prisma db push --force-reset && npm run db:seed",
+    "db:seed": "tsx prisma/seed.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "setup": "prisma generate && prisma db push && npm run db:seed",
+    "test:browser": "node tests/browser/smoke.mjs",
+    "test:lifecycle": "node tests/browser/lifecycle.mjs",
+    "test:all": "npm test && npm run test:browser && npm run test:lifecycle"
+  },
+  "dependencies": {
+    "@prisma/client": "6.1.0",
+    "bcryptjs": "2.4.3",
+    "exceljs": "4.4.0",
+    "jose": "5.9.6",
+    "next": "15.1.3",
+    "nodemailer": "6.9.16",
+    "pdfkit": "0.15.2",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "server-only": "^0.0.1",
+    "zod": "3.24.1"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "2.4.6",
+    "@types/node": "22.10.2",
+    "@types/nodemailer": "6.4.17",
+    "@types/pdfkit": "0.13.9",
+    "@types/react": "19.0.2",
+    "@types/react-dom": "19.0.2",
+    "autoprefixer": "10.4.20",
+    "postcss": "8.4.49",
+    "prisma": "6.1.0",
+    "tailwindcss": "3.4.17",
+    "tsx": "4.19.2",
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
+  }
+}

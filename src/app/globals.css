@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  @apply bg-slate-50 text-slate-800 antialiased;
+}
+
+@layer components {
+  .container-page { @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8; }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold
+           transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+           disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .btn-primary { @apply btn bg-kogi-700 text-white hover:bg-kogi-800 focus-visible:ring-kogi-600; }
+  .btn-secondary { @apply btn border border-kogi-700 bg-white text-kogi-800 hover:bg-kogi-50 focus-visible:ring-kogi-600; }
+  .btn-ghost { @apply btn text-slate-700 hover:bg-slate-100 focus-visible:ring-slate-400; }
+  .btn-danger { @apply btn bg-red-700 text-white hover:bg-red-800 focus-visible:ring-red-600; }
+  .btn-gold { @apply btn bg-gold-500 text-gold-950 hover:bg-gold-400 focus-visible:ring-gold-500; }
+  .btn-sm { @apply px-2.5 py-1.5 text-xs; }
+
+  .card { @apply rounded-lg border border-slate-200 bg-white shadow-sm; }
+  .card-header { @apply flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-4; }
+  .card-title { @apply text-base font-semibold text-slate-900; }
+  .card-body { @apply px-5 py-4; }
+
+  .label { @apply mb-1.5 block text-sm font-medium text-slate-700; }
+  .hint { @apply mt-1 text-xs text-slate-500; }
+  .error-text { @apply mt-1 text-xs font-medium text-red-700; }
+
+  .input {
+    @apply block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900
+           placeholder:text-slate-400 focus:border-kogi-600 focus:outline-none focus:ring-1 focus:ring-kogi-600
+           disabled:bg-slate-100 disabled:text-slate-500;
+  }
+  .input-error { @apply border-red-400 focus:border-red-500 focus:ring-red-500; }
+  .select { @apply input pr-8; }
+  .textarea { @apply input min-h-[110px]; }
+  .checkbox { @apply h-4 w-4 rounded border-slate-300 text-kogi-700 focus:ring-kogi-600; }
+
+  .badge { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold; }
+  .badge-green { @apply badge bg-kogi-100 text-kogi-800; }
+  .badge-amber { @apply badge bg-amber-100 text-amber-800; }
+  .badge-red { @apply badge bg-red-100 text-red-800; }
+  .badge-blue { @apply badge bg-sky-100 text-sky-800; }
+  .badge-slate { @apply badge bg-slate-100 text-slate-700; }
+  .badge-purple { @apply badge bg-purple-100 text-purple-800; }
+
+  .table-wrap { @apply w-full overflow-x-auto; }
+  .table { @apply w-full border-collapse text-sm; }
+  .table thead th {
+    @apply whitespace-nowrap border-b border-slate-200 bg-slate-50 px-3 py-2.5 text-left
+           text-xs font-semibold uppercase tracking-wide text-slate-600;
+  }
+  .table tbody td { @apply border-b border-slate-100 px-3 py-2.5 align-top text-slate-700; }
+  .table tbody tr:hover { @apply bg-slate-50/70; }
+
+  .prose-content { @apply text-sm leading-relaxed text-slate-700; }
+  .prose-content p { @apply mb-3; }
+  .prose-content h2 { @apply mb-2 mt-5 text-lg font-semibold text-slate-900; }
+  .prose-content h3 { @apply mb-2 mt-4 text-base font-semibold text-slate-900; }
+  .prose-content ul { @apply mb-3 list-disc space-y-1 pl-5; }
+  .prose-content ol { @apply mb-3 list-decimal space-y-1 pl-5; }
+  .prose-content a { @apply text-kogi-700 underline; }
+  .prose-content table { @apply mb-3 w-full border-collapse text-sm; }
+  .prose-content th, .prose-content td { @apply border border-slate-200 px-2 py-1.5; }
+}
+
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; }
+}

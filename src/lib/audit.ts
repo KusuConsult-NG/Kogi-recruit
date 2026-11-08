@@ -1,0 +1,122 @@
+/** Module 8 - Audit trail and activity monitoring. */
+import 'server-only';
+import { headers } from 'next/headers';
+import { prisma } from './db';
+import type { SessionUser } from './auth';
+
+export const AUDIT_ACTIONS = {
+  LOGIN: 'LOGIN',
+  LOGOUT: 'LOGOUT',
+  LOGIN_FAILED: 'LOGIN_FAILED',
+  PASSWORD_CHANGED: 'PASSWORD_CHANGED',
+  PASSWORD_RESET_REQUESTED: 'PASSWORD_RESET_REQUESTED',
+  USER_CREATED: 'USER_CREATED',
+  USER_UPDATED: 'USER_UPDATED',
+  USER_DEACTIVATED: 'USER_DEACTIVATED',
+  USER_ACTIVATED: 'USER_ACTIVATED',
+  ROLE_CHANGED: 'ROLE_CHANGED',
+  PERMISSIONS_CHANGED: 'PERMISSIONS_CHANGED',
+  CONTENT_CREATED: 'CONTENT_CREATED',
+  CONTENT_UPDATED: 'CONTENT_UPDATED',
+  CONTENT_PUBLISHED: 'CONTENT_PUBLISHED',
+  CONTENT_DELETED: 'CONTENT_DELETED',
+  EXERCISE_CREATED: 'EXERCISE_CREATED',
+  EXERCISE_UPDATED: 'EXERCISE_UPDATED',
+  EXERCISE_SUBMITTED: 'EXERCISE_SUBMITTED',
+  EXERCISE_APPROVED: 'EXERCISE_APPROVED',
+  EXERCISE_REJECTED: 'EXERCISE_REJECTED',
+  EXERCISE_PUBLISHED: 'EXERCISE_PUBLISHED',
+  EXERCISE_SUSPENDED: 'EXERCISE_SUSPENDED',
+  EXERCISE_CLOSED: 'EXERCISE_CLOSED',
+  EXERCISE_ARCHIVED: 'EXERCISE_ARCHIVED',
+  APPLICATION_CREATED: 'APPLICATION_CREATED',
+  APPLICATION_UPDATED: 'APPLICATION_UPDATED',
+  APPLICATION_SUBMITTED: 'APPLICATION_SUBMITTED',
+  APPLICATION_WITHDRAWN: 'APPLICATION_WITHDRAWN',
+  APPLICATION_STATUS_CHANGED: 'APPLICATION_STATUS_CHANGED',
+  DOCUMENT_UPLOADED: 'DOCUMENT_UPLOADED',
+  DOCUMENT_REVIEWED: 'DOCUMENT_REVIEWED',
+  DOCUMENT_DELETED: 'DOCUMENT_DELETED',
+  SCREENING_ASSIGNED: 'SCREENING_ASSIGNED',
+  SCREENING_RECORDED: 'SCREENING_RECORDED',
+  SHORTLIST_CREATED: 'SHORTLIST_CREATED',
+  SHORTLIST_SUBMITTED: 'SHORTLIST_SUBMITTED',
+  SHORTLIST_APPROVED: 'SHORTLIST_APPROVED',
+  SHORTLIST_REJECTED: 'SHORTLIST_REJECTED',
+  EXAM_CREATED: 'EXAM_CREATED',
+  EXAM_UPDATED: 'EXAM_UPDATED',
+  EXAM_CANDIDATES_ASSIGNED: 'EXAM_CANDIDATES_ASSIGNED',
+  EXAM_SCORE_RECORDED: 'EXAM_SCORE_RECORDED',
+  EXAM_SCORES_VALIDATED: 'EXAM_SCORES_VALIDATED',
+  INTERVIEW_CREATED: 'INTERVIEW_CREATED',
+  INTERVIEW_PANEL_ASSIGNED: 'INTERVIEW_PANEL_ASSIGNED',
+  INTERVIEW_SCORE_RECORDED: 'INTERVIEW_SCORE_RECORDED',
+  SELECTION_PREPARED: 'SELECTION_PREPARED',
+  SELECTION_SUBMITTED: 'SELECTION_SUBMITTED',
+  SELECTION_APPROVED: 'SELECTION_APPROVED',
+  SELECTION_REJECTED: 'SELECTION_REJECTED',
+  NOTIFICATION_SENT: 'NOTIFICATION_SENT',
+  NOTIFICATION_BATCH_APPROVED: 'NOTIFICATION_BATCH_APPROVED',
+  REPORT_GENERATED: 'REPORT_GENERATED',
+  REPORT_EXPORTED: 'REPORT_EXPORTED',
+  SETTINGS_UPDATED: 'SETTINGS_UPDATED',
+  ENQUIRY_RECEIVED: 'ENQUIRY_RECEIVED',
+  ENQUIRY_RESPONDED: 'ENQUIRY_RESPONDED',
+  RECORD_CREATED: 'RECORD_CREATED',
+  RECORD_UPDATED: 'RECORD_UPDATED',
+  ACCESS_REFUSED: 'ACCESS_REFUSED',
+} as const;
+
+export type AuditAction = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];
+
+const SENSITIVE_ACTIONS = new Set<string>([
+  AUDIT_ACTIONS.PASSWORD_CHANGED,
+  AUDIT_ACTIONS.PASSWORD_RESET_REQUESTED,
+  AUDIT_ACTIONS.ROLE_CHANGED,
+  AUDIT_ACTIONS.PERMISSIONS_CHANGED,
+  AUDIT_ACTIONS.USER_DEACTIVATED,
+  AUDIT_ACTIONS.SELECTION_APPROVED,
+  AUDIT_ACTIONS.SHORTLIST_APPROVED,
+  AUDIT_ACTIONS.EXAM_SCORE_RECORDED,
+  AUDIT_ACTIONS.INTERVIEW_SCORE_RECORDED,
+  AUDIT_ACTIONS.ACCESS_REFUSED,
+]);
+
+export interface AuditInput {
+  action: AuditAction | string;
+  actor?: Pick<SessionUser, 'id' | 'fullName' | 'role'> | null;
+  entityType?: string;
+  entityId?: string;
+  summary?: string;
+  metadata?: Record<string, unknown>;
+  sensitive?: boolean;
+}
+
+/** Record an auditable activity. Never throws — auditing must not break a request. */
+export async function recordAudit(input: AuditInput): Promise<void> {
+  try {
+    let ip: string | null = null;
+    try {
+      const h = await headers();
+      ip = h.get('x-forwarded-for') ?? h.get('x-real-ip') ?? null;
+    } catch {
+      /* outside a request scope */
+    }
+    await prisma.auditLog.create({
+      data: {
+        userId: input.actor?.id ?? null,
+        actorName: input.actor?.fullName ?? null,
+        actorRole: input.actor?.role ?? null,
+        action: input.action,
+        entityType: input.entityType ?? null,
+        entityId: input.entityId ?? null,
+        summary: input.summary ?? null,
+        metadata: input.metadata ? JSON.stringify(input.metadata) : null,
+        ipAddress: ip,
+        sensitive: input.sensitive ?? SENSITIVE_ACTIONS.has(input.action),
+      },
+    });
+  } catch (error) {
+    console.error('[audit] failed to record', input.action, error);
+  }
+}
