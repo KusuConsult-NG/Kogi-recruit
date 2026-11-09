@@ -8,6 +8,7 @@ export default function ContactPage() {
   return (
     <div className="container-page py-10">
       <PageHeading
+        eyebrow="Information"
         title="Contact and Enquiries"
         description="Submit an enquiry to the Commission. Every enquiry is logged with a reference number and routed to the responsible officer."
         breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Contact' }]}

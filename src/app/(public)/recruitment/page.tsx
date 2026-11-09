@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { EXERCISE_STATUS, EXERCISE_STATUS_LABELS, MDA_KIND_LABELS } from '@/lib/constants';
 import { formatDate } from '@/lib/format';
 import { Card, CardBody, EmptyState, PageHeading, StatusBadge, Tabs } from '@/components/ui';
+import { RichText } from '@/components/rich-text';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Recruitment Exercises' };
@@ -67,6 +68,7 @@ export default async function RecruitmentPage({
   return (
     <div className="container-page py-10">
       <PageHeading
+        eyebrow="Advertisements"
         title="Recruitment Exercises"
         description="Approved recruitment exercises, vacancies and application guidelines published by the Commission."
         breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Recruitment' }]}
@@ -143,15 +145,27 @@ export default async function RecruitmentPage({
                     {isOpen ? 'View and apply' : 'View details'}
                   </Link>
                 </div>
-                <CardBody>
-                  <p className="text-sm text-ink-700">{ex.description}</p>
-                  <dl className="mt-4 grid grid-cols-2 gap-4 text-xs sm:grid-cols-5">
-                    <div><dt className="text-ink-500">Vacancies</dt><dd className="mt-0.5 font-semibold text-ink-950">{ex.vacancies.length}</dd></div>
-                    <div><dt className="text-ink-500">Positions</dt><dd className="mt-0.5 font-semibold text-ink-950">{positions}</dd></div>
-                    <div><dt className="text-ink-500">Opens</dt><dd className="mt-0.5 font-semibold text-ink-950">{formatDate(ex.opensAt)}</dd></div>
-                    <div><dt className="text-ink-500">Closes</dt><dd className="mt-0.5 font-semibold text-ink-950">{formatDate(ex.closesAt)}</dd></div>
-                    <div><dt className="text-ink-500">Applications</dt><dd className="mt-0.5 font-semibold text-ink-950">{ex._count.applications.toLocaleString('en-NG')}</dd></div>
+                <CardBody className="grid grid-cols-1 gap-x-10 gap-y-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+                  <div className="max-w-measure">
+                    <RichText body={ex.description} />
+                  </div>
+                  <dl className="divide-y divide-ink-150 border-t-2 border-gold-500 lg:row-span-2">
+                    {[
+                      { label: 'Vacancies', value: ex.vacancies.length },
+                      { label: 'Approved posts', value: positions },
+                      { label: 'Opens', value: formatDate(ex.opensAt) },
+                      { label: 'Closes', value: formatDate(ex.closesAt) },
+                      { label: 'Applications received', value: ex._count.applications.toLocaleString('en-NG') },
+                    ].map((cell) => (
+                      <div key={cell.label} className="flex items-baseline justify-between gap-4 py-2">
+                        <dt className="text-xs text-ink-600">{cell.label}</dt>
+                        <dd className="font-serif text-base font-semibold text-ink-950" data-numeric>
+                          {cell.value}
+                        </dd>
+                      </div>
+                    ))}
                   </dl>
+                  <div className="lg:col-start-1 lg:row-start-2">
                   {notYetOpen ? (
                     <p className="mt-3 rounded bg-gold-50 px-3 py-2 text-xs font-medium text-gold-800">
                       Applications open on {formatDate(ex.opensAt)}.
@@ -166,19 +180,22 @@ export default async function RecruitmentPage({
                   {ex.vacancies.length > 0 ? (
                     <div className="mt-4 border-t border-ink-100 pt-3">
                       <p className="micro-label">Advertised positions</p>
-                      <ul className="mt-2.5 divide-y divide-ink-150 border-y border-ink-150">
+                      <ul className="mt-2.5 grid grid-cols-1 gap-x-10 md:grid-cols-2">
                         {ex.vacancies.slice(0, 8).map((v) => (
-                          <li key={v.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-2">
+                          <li
+                            key={v.id}
+                            className="flex items-baseline justify-between gap-4 border-b border-ink-150 py-2"
+                          >
                             <span className="min-w-0">
                               <span className="block text-[0.8125rem] font-semibold text-ink-950">{v.jobTitle}</span>
-                              <span className="block text-xs text-ink-600">
+                              <span className="block truncate text-xs text-ink-600">
                                 {v.ministry ? (v.ministry.shortName ?? v.ministry.name) : 'MDA not stated'}
                                 {v.ministryDept ? ` · ${v.ministryDept.name}` : ''}
                               </span>
                             </span>
-                            <span className="flex shrink-0 items-center gap-3 text-xs text-ink-700">
+                            <span className="flex shrink-0 items-baseline gap-3 text-xs text-ink-700">
                               <span className="ref">{v.gradeLevel}</span>
-                              <span data-numeric>
+                              <span className="font-semibold" data-numeric>
                                 {v.positions} post{v.positions === 1 ? '' : 's'}
                               </span>
                             </span>
@@ -192,6 +209,7 @@ export default async function RecruitmentPage({
                       ) : null}
                     </div>
                   ) : null}
+                  </div>
                 </CardBody>
               </Card>
             );

@@ -48,6 +48,7 @@ export default async function ExercisePublicPage({ params }: { params: Promise<{
   return (
     <div className="container-page py-10">
       <PageHeading
+        eyebrow="Recruitment exercise"
         title={exercise.title}
         description={exercise.reference}
         breadcrumb={[
@@ -74,6 +75,75 @@ export default async function ExercisePublicPage({ params }: { params: Promise<{
             </Card>
           ) : null}
 
+        </div>
+
+        {/* Key dates and the apply panel travel with the reader. */}
+        <div className="space-y-6 lg:sticky lg:top-28 lg:self-start">
+          <Card>
+            <div className="card-header"><h2 className="card-title">Key dates</h2></div>
+            <CardBody>
+              <DescriptionList
+                columns={1}
+                items={[
+                  { label: 'Opens', value: formatDateTime(exercise.opensAt) },
+                  { label: 'Closes', value: formatDateTime(exercise.closesAt) },
+                  { label: 'Reference', value: exercise.reference },
+                  { label: 'Applications received', value: exercise._count.applications.toLocaleString('en-NG') },
+                  { label: 'Written examination', value: exercise.requireExam ? 'Applicable' : 'Not applicable' },
+                  { label: 'Interview', value: exercise.requireInterview ? 'Applicable' : 'Not applicable' },
+                  { label: 'Applications per applicant', value: exercise.maxApplications },
+                ]}
+              />
+            </CardBody>
+          </Card>
+
+          <Card>
+            <div className="card-header"><h2 className="card-title">Apply</h2></div>
+            <CardBody className="space-y-3">
+              {!isOpen ? (
+                <Alert tone="warning">
+                  {exercise.status === EXERCISE_STATUS.PUBLISHED && exercise.opensAt > now
+                    ? `Applications open on ${formatDate(exercise.opensAt)}.`
+                    : exercise.status === EXERCISE_STATUS.SUSPENDED
+                      ? 'This exercise is temporarily suspended and is not accepting applications.'
+                      : 'This exercise is no longer accepting applications.'}
+                </Alert>
+              ) : existing ? (
+                <>
+                  <Alert tone="success" title="You have already applied">
+                    Reference {existing.reference}
+                  </Alert>
+                  <Link href={`/portal/applications/${existing.id}`} className="btn-primary w-full">
+                    Open my application
+                  </Link>
+                </>
+              ) : user && user.role === ROLES.APPLICANT ? (
+                <Link href={`/portal/applications/new?exercise=${exercise.id}`} className="btn-primary w-full">
+                  Start my application
+                </Link>
+              ) : user ? (
+                <Alert tone="info">
+                  You are signed in as a Commission officer. Applications are submitted from an
+                  applicant account.
+                </Alert>
+              ) : (
+                <>
+                  <p className="text-sm text-ink-600">
+                    You need an applicant account to apply. Registration takes about two minutes.
+                  </p>
+                  <Link href="/register" className="btn-primary w-full">Create an applicant account</Link>
+                  <Link href={`/login?next=/recruitment/${exercise.id}`} className="btn-secondary w-full">
+                    I already have an account
+                  </Link>
+                </>
+              )}
+            </CardBody>
+          </Card>
+        </div>
+      </div>
+
+      {/* Long-form matter runs the full width of the page. */}
+      <div className="mt-6 space-y-6">
           {exercise.guidelines ? (
             <Card>
               <div className="card-header"><h2 className="card-title">Application guidelines</h2></div>
@@ -158,71 +228,8 @@ export default async function ExercisePublicPage({ params }: { params: Promise<{
               </CardBody>
             </Card>
           ) : null}
-        </div>
-
-        <div className="space-y-6">
-          <Card>
-            <div className="card-header"><h2 className="card-title">Key dates</h2></div>
-            <CardBody>
-              <DescriptionList
-                columns={1}
-                items={[
-                  { label: 'Opens', value: formatDateTime(exercise.opensAt) },
-                  { label: 'Closes', value: formatDateTime(exercise.closesAt) },
-                  { label: 'Reference', value: exercise.reference },
-                  { label: 'Applications received', value: exercise._count.applications.toLocaleString('en-NG') },
-                  { label: 'Written examination', value: exercise.requireExam ? 'Applicable' : 'Not applicable' },
-                  { label: 'Interview', value: exercise.requireInterview ? 'Applicable' : 'Not applicable' },
-                  { label: 'Applications per applicant', value: exercise.maxApplications },
-                ]}
-              />
-            </CardBody>
-          </Card>
-
-          <Card>
-            <div className="card-header"><h2 className="card-title">Apply</h2></div>
-            <CardBody className="space-y-3">
-              {!isOpen ? (
-                <Alert tone="warning">
-                  {exercise.status === EXERCISE_STATUS.PUBLISHED && exercise.opensAt > now
-                    ? `Applications open on ${formatDate(exercise.opensAt)}.`
-                    : exercise.status === EXERCISE_STATUS.SUSPENDED
-                      ? 'This exercise is temporarily suspended and is not accepting applications.'
-                      : 'This exercise is no longer accepting applications.'}
-                </Alert>
-              ) : existing ? (
-                <>
-                  <Alert tone="success" title="You have already applied">
-                    Reference {existing.reference}
-                  </Alert>
-                  <Link href={`/portal/applications/${existing.id}`} className="btn-primary w-full">
-                    Open my application
-                  </Link>
-                </>
-              ) : user && user.role === ROLES.APPLICANT ? (
-                <Link href={`/portal/applications/new?exercise=${exercise.id}`} className="btn-primary w-full">
-                  Start my application
-                </Link>
-              ) : user ? (
-                <Alert tone="info">
-                  You are signed in as a Commission officer. Applications are submitted from an
-                  applicant account.
-                </Alert>
-              ) : (
-                <>
-                  <p className="text-sm text-ink-600">
-                    You need an applicant account to apply. Registration takes about two minutes.
-                  </p>
-                  <Link href="/register" className="btn-primary w-full">Create an applicant account</Link>
-                  <Link href={`/login?next=/recruitment/${exercise.id}`} className="btn-secondary w-full">
-                    I already have an account
-                  </Link>
-                </>
-              )}
-            </CardBody>
-          </Card>
-        </div>
       </div>
     </div>
   );
 }
+

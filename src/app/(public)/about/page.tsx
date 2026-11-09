@@ -19,6 +19,7 @@ export default async function AboutPage() {
   return (
     <div className="container-page py-10">
       <PageHeading
+        eyebrow="The Commission"
         title={about?.title ?? 'The Commission'}
         description={about?.subtitle ?? `Profile, mandate, functions and responsibilities of the ${COMMISSION.name}.`}
         breadcrumb={[{ label: 'Home', href: '/' }, { label: 'The Commission' }]}

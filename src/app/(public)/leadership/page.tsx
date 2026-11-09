@@ -15,6 +15,7 @@ export default async function LeadershipPage() {
   return (
     <div className="container-page py-10">
       <PageHeading
+        eyebrow="The Commission"
         title="Commission Leadership"
         description="Approved leadership profiles of the Kogi State Civil Service Commission."
         breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Leadership' }]}

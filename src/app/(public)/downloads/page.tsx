@@ -27,6 +27,7 @@ export default async function DownloadsPage() {
   return (
     <div className="container-page py-10">
       <PageHeading
+        eyebrow="Information"
         title="Forms, Guidelines and Publications"
         description="Download approved forms, guidelines and publications issued by the Commission."
         breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Downloads' }]}

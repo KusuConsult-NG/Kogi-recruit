@@ -16,6 +16,7 @@ export default async function FaqPage() {
   return (
     <div className="container-page py-10">
       <PageHeading
+        eyebrow="Information"
         title="Frequently Asked Questions"
         description="Answers to common questions about the Commission and its recruitment exercises."
         breadcrumb={[{ label: 'Home', href: '/' }, { label: 'FAQs' }]}

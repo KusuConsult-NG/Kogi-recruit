@@ -18,6 +18,7 @@ export default async function NoticesPage() {
   return (
     <div className="container-page py-10">
       <PageHeading
+        eyebrow="From the Commission"
         title="Circulars and Public Notices"
         description="Approved circulars, public notices and recruitment notices issued by the Commission."
         breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Circulars & Notices' }]}

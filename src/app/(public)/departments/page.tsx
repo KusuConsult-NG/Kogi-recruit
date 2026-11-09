@@ -16,6 +16,7 @@ export default async function DepartmentsPage() {
   return (
     <div className="container-page py-10">
       <PageHeading
+        eyebrow="The Commission"
         title="Departments and Units"
         description="Directory of the Commission's departments, units and their responsibilities."
         breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Departments' }]}

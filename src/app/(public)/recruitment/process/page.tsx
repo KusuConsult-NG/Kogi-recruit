@@ -13,6 +13,7 @@ export default async function ProcessPage() {
   return (
     <div className="container-page py-10">
       <PageHeading
+        eyebrow="Procedure"
         title="The Recruitment Process"
         description="Every approved recruitment exercise follows the same ten documented stages, from planning through to closure and archiving."
         breadcrumb={[

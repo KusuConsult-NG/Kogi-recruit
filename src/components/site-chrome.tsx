@@ -23,7 +23,6 @@ export function CommissionCrest({ size = 44, tone = 'dark' }: { size?: number; t
   const ring = tone === 'dark' ? '#cfa84f' : '#21503e';
   const field = tone === 'dark' ? '#16342a' : '#ffffff';
   const mark = tone === 'dark' ? '#eadcab' : '#21503e';
-  const water = tone === 'dark' ? '#8fbda4' : '#3e7d61';
   return (
     <svg
       role="img"
@@ -34,33 +33,31 @@ export function CommissionCrest({ size = 44, tone = 'dark' }: { size?: number; t
       className="shrink-0"
     >
       <circle cx="32" cy="32" r="31" fill={field} stroke={ring} strokeWidth="2.5" />
-      <circle cx="32" cy="32" r="26.5" fill="none" stroke={ring} strokeWidth="1" opacity="0.55" />
+      <circle cx="32" cy="32" r="27" fill="none" stroke={ring} strokeWidth="0.9" opacity="0.5" />
 
       {/*
-        The device: the Niger and the Benue meeting at Lokoja and running on as
-        one river, over the beam of the scales under which appointments are made.
+        The confluence: the Niger from the west and the Benue from the east
+        meeting at Lokoja and running south as one river. Drawn with weight so
+        the device still reads at the size it is used in the masthead.
       */}
       <path
-        d="M16 15c2.5 7.5 7 12.5 16 16.5"
+        d="M13 16c1 11 8 19 19 23"
         fill="none"
-        stroke={water}
-        strokeWidth="3.4"
+        stroke={mark}
+        strokeWidth="3.6"
         strokeLinecap="round"
       />
       <path
-        d="M48 15c-2.5 7.5-7 12.5-16 16.5"
+        d="M51 16c-1 11-8 19-19 23"
         fill="none"
-        stroke={water}
-        strokeWidth="3.4"
+        stroke={mark}
+        strokeWidth="3.6"
         strokeLinecap="round"
+        opacity="0.72"
       />
-      <path d="M32 31.5v9" fill="none" stroke={mark} strokeWidth="3.6" strokeLinecap="round" />
-
-      {/* The beam and pans of the scales. */}
-      <path d="M18 43.5h28" fill="none" stroke={mark} strokeWidth="3.2" strokeLinecap="round" />
-      <path d="M22 43.5l-3.5 6h7z" fill={mark} />
-      <path d="M42 43.5l-3.5 6h7z" fill={mark} />
-      <path d="M32 46.5v4.5" fill="none" stroke={mark} strokeWidth="2.6" strokeLinecap="round" />
+      {/* The single river running south from the confluence. */}
+      <path d="M32 39v9" fill="none" stroke={mark} strokeWidth="3.6" strokeLinecap="round" />
+      <path d="M23 51.5h18" fill="none" stroke={ring} strokeWidth="2.2" strokeLinecap="round" />
     </svg>
   );
 }

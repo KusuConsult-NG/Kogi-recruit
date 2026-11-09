@@ -41,6 +41,7 @@ export default async function NewsPage({
   return (
     <div className="container-page py-10">
       <PageHeading
+        eyebrow="From the Commission"
         title="News, Announcements and Notices"
         description="Official information published by the Kogi State Civil Service Commission."
         breadcrumb={[{ label: 'Home', href: '/' }, { label: 'News & Notices' }]}

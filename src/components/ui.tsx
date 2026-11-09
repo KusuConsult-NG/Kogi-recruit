@@ -101,7 +101,12 @@ export function PageHeading({
       ) : null}
       <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3 border-b border-ink-200 pb-4">
         <div className="min-w-0">
-          {eyebrow ? <p className="micro-label mb-1">{eyebrow}</p> : null}
+          {eyebrow ? (
+            <>
+              <span aria-hidden className="mb-2.5 block h-0.5 w-10 bg-gold-500" />
+              <p className="micro-label mb-1.5 text-gold-700">{eyebrow}</p>
+            </>
+          ) : null}
           <h1 className="font-serif text-[1.5rem] font-semibold leading-tight tracking-tight text-ink-950 sm:text-[1.75rem]">
             {title}
           </h1>
