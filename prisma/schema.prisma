@@ -1,0 +1,986 @@
+// Kogi State Civil Service Commission Portal
+// Integrated Civil Service Recruitment Management System
+// Datasource is SQLite for development; switch provider to "postgresql" for production.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// MODULE 5 - USER, ROLE AND ACCESS MANAGEMENT
+// ---------------------------------------------------------------------------
+
+model User {
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  phone              String?
+  passwordHash       String
+  fullName           String
+  role               String // see src/lib/rbac.ts ROLES
+  staffNumber        String?
+  title              String?
+  departmentId       String?
+  active             Boolean   @default(true)
+  mustChangePassword Boolean   @default(false)
+  lastLoginAt        DateTime?
+  failedAttempts     Int       @default(0)
+  lockedUntil        DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  createdById        String?
+
+  department           Department?            @relation(fields: [departmentId], references: [id])
+  permissions          UserPermission[]
+  loginHistory         LoginHistory[]
+  auditLogs            AuditLog[]
+  resetTokens          PasswordResetToken[]
+  applicantProfile     ApplicantProfile?
+  applications         Application[]
+  notifications        Notification[]
+  screeningAssignments ScreeningAssignment[]  @relation("ScreeningOfficer")
+  screeningRecords     ScreeningRecord[]
+  documentReviews      DocumentReview[]
+  panelMemberships     InterviewPanelMember[]
+  interviewScores      InterviewScore[]
+  authoredArticles     Article[]
+  tasksAssigned        StaffTask[]            @relation("TaskAssignee")
+  tasksCreated         StaffTask[]            @relation("TaskCreator")
+  correspondence       Correspondence[]
+  repositoryUploads    RepositoryDocument[]
+
+  @@index([role])
+  @@index([active])
+}
+
+model UserPermission {
+  id         String @id @default(cuid())
+  userId     String
+  permission String
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, permission])
+}
+
+model LoginHistory {
+  id        String   @id @default(cuid())
+  userId    String?
+  email     String
+  success   Boolean
+  ipAddress String?
+  userAgent String?
+  reason    String?
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Session {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// MODULE 8 - AUDIT TRAIL AND ACTIVITY MONITORING
+// ---------------------------------------------------------------------------
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  actorName  String?
+  actorRole  String?
+  action     String
+  entityType String?
+  entityId   String?
+  summary    String?
+  metadata   String? // JSON string
+  ipAddress  String?
+  sensitive  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// MODULE 1 - PUBLIC INFORMATION AND CONTENT MANAGEMENT
+// ---------------------------------------------------------------------------
+
+model PageContent {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  subtitle    String?
+  body        String
+  published   Boolean  @default(true)
+  updatedById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Department {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  code        String?
+  kind        String   @default("DEPARTMENT") // DEPARTMENT | UNIT
+  parentId    String?
+  description String?
+  headName    String?
+  headTitle   String?
+  email       String?
+  phone       String?
+  position    Int      @default(0)
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  parent    Department?  @relation("DeptTree", fields: [parentId], references: [id])
+  children  Department[] @relation("DeptTree")
+  users     User[]
+  vacancies Vacancy[]
+  tasks     StaffTask[]
+}
+
+model LeadershipProfile {
+  id        String   @id @default(cuid())
+  name      String
+  position  String
+  bio       String?
+  photoPath String?
+  email     String?
+  position_ Int      @default(0)
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Article {
+  id            String    @id @default(cuid())
+  type          String // NEWS | ANNOUNCEMENT | CIRCULAR | NOTICE | RECRUITMENT_NOTICE
+  title         String
+  slug          String    @unique
+  summary       String?
+  body          String
+  status        String    @default("DRAFT") // DRAFT | PENDING_APPROVAL | PUBLISHED | REJECTED | ARCHIVED
+  publishedAt   DateTime?
+  authorId      String?
+  publishedById String?
+  approvalNote  String?
+  viewCount     Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  author      User?               @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  attachments ArticleAttachment[]
+
+  @@index([type, status])
+  @@index([publishedAt])
+}
+
+model ArticleAttachment {
+  id           String  @id @default(cuid())
+  articleId    String
+  label        String
+  storedName   String
+  originalName String
+  mimeType     String
+  sizeBytes    Int
+  article      Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+}
+
+model DownloadItem {
+  id           String   @id @default(cuid())
+  title        String
+  description  String?
+  category     String   @default("FORM") // FORM | GUIDELINE | PUBLICATION | CIRCULAR
+  storedName   String
+  originalName String
+  mimeType     String
+  sizeBytes    Int
+  downloads    Int      @default(0)
+  published    Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Faq {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String
+  category  String   @default("GENERAL")
+  position  Int      @default(0)
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Enquiry {
+  id            String    @id @default(cuid())
+  reference     String    @unique
+  name          String
+  email         String
+  phone         String?
+  subject       String
+  message       String
+  status        String    @default("NEW") // NEW | IN_PROGRESS | RESPONDED | CLOSED
+  response      String?
+  respondedById String?
+  respondedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// MODULE 2.1 - RECRUITMENT EXERCISE AND VACANCY MANAGEMENT
+// ---------------------------------------------------------------------------
+
+model RecruitmentExercise {
+  id               String    @id @default(cuid())
+  title            String
+  reference        String    @unique
+  description      String
+  guidelines       String?
+  eligibility      String?
+  status           String    @default("DRAFT") // DRAFT|PENDING_APPROVAL|APPROVED|PUBLISHED|SUSPENDED|CLOSED|ARCHIVED
+  opensAt          DateTime
+  closesAt         DateTime
+  maxApplications  Int       @default(1)
+  requireExam      Boolean   @default(true)
+  requireInterview Boolean   @default(true)
+  createdById      String?
+  approvedById     String?
+  approvedAt       DateTime?
+  publishedAt      DateTime?
+  closedAt         DateTime?
+  archivedAt       DateTime?
+  suspendedReason  String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  vacancies          Vacancy[]
+  requirements       DocumentRequirement[]
+  formFields         FormField[]
+  applications       Application[]
+  shortlists         Shortlist[]
+  examSchedules      ExamSchedule[]
+  interviewSchedules InterviewSchedule[]
+  selectionLists     SelectionList[]
+  approvals          ApprovalRequest[]
+
+  @@index([status])
+}
+
+model Vacancy {
+  id             String   @id @default(cuid())
+  exerciseId     String
+  jobTitle       String
+  gradeLevel     String
+  departmentId   String?
+  agency         String?
+  positions      Int      @default(1)
+  description    String?
+  qualifications String
+  experience     String?
+  minAge         Int?
+  maxAge         Int?
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  exercise     RecruitmentExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  department   Department?         @relation(fields: [departmentId], references: [id])
+  applications Application[]
+
+  @@index([exerciseId])
+}
+
+model DocumentRequirement {
+  id          String  @id @default(cuid())
+  exerciseId  String
+  code        String // see DOCUMENT_TYPES
+  label       String
+  required    Boolean @default(true)
+  description String?
+  maxSizeMb   Int     @default(5)
+  acceptTypes String  @default("application/pdf,image/jpeg,image/png")
+  position    Int     @default(0)
+
+  exercise  RecruitmentExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  documents ApplicantDocument[]
+
+  @@unique([exerciseId, code])
+}
+
+// MODULE 2.3 - configurable application form
+model FormField {
+  id         String  @id @default(cuid())
+  exerciseId String
+  section    String // PERSONAL|CONTACT|ORIGIN|EDUCATION|EMPLOYMENT|OTHER|DECLARATION
+  key        String
+  label      String
+  inputType  String  @default("text") // text|textarea|select|date|number|email|tel|checkbox
+  options    String? // JSON array of strings
+  required   Boolean @default(false)
+  helpText   String?
+  position   Int     @default(0)
+  enabled    Boolean @default(true)
+
+  exercise RecruitmentExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@unique([exerciseId, key])
+}
+
+// ---------------------------------------------------------------------------
+// MODULE 2.2 - APPLICANT REGISTRATION AND PROFILE
+// ---------------------------------------------------------------------------
+
+model ApplicantProfile {
+  id                 String    @id @default(cuid())
+  userId             String    @unique
+  applicantRef       String    @unique
+  surname            String
+  firstName          String
+  middleName         String?
+  gender             String?
+  dateOfBirth        DateTime?
+  maritalStatus      String?
+  nin                String?
+  phone              String?
+  altPhone           String?
+  residentialAddress String?
+  city               String?
+  stateOfResidence   String?
+  stateOfOrigin      String?
+  lga                String?
+  nationality        String    @default("Nigerian")
+  disability         String?
+  photoPath          String?
+  profileComplete    Boolean   @default(false)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ---------------------------------------------------------------------------
+// MODULE 2.3 - ONLINE APPLICATION
+// ---------------------------------------------------------------------------
+
+model Application {
+  id               String    @id @default(cuid())
+  reference        String    @unique
+  applicantId      String
+  exerciseId       String
+  vacancyId        String?
+  status           String    @default("DRAFT") // see APPLICATION_STATUS
+  stage            String    @default("APPLICATION") // APPLICATION|SCREENING|SHORTLIST|EXAMINATION|INTERVIEW|SELECTION|CLOSED
+  completeness     Int       @default(0)
+  submittedAt      DateTime?
+  withdrawnAt      DateTime?
+  declaration      Boolean   @default(false)
+  consent          Boolean   @default(false)
+  extraData        String? // JSON for configurable form fields
+  skills           String?
+  // screening summary (denormalised for fast reporting)
+  screeningOutcome String? // PASSED | FAILED | PENDING | RESUBMISSION_REQUIRED
+  screeningAt      DateTime?
+  shortlisted      Boolean   @default(false)
+  examScore        Float?
+  interviewScore   Float?
+  finalScore       Float?
+  selected         Boolean?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  applicant User                @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+  exercise  RecruitmentExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  vacancy   Vacancy?            @relation(fields: [vacancyId], references: [id])
+
+  education           ApplicationEducation[]
+  employment          ApplicationEmployment[]
+  referees            ApplicationReferee[]
+  nextOfKin           NextOfKin?
+  documents           ApplicantDocument[]
+  screenings          ScreeningRecord[]
+  assignments         ScreeningAssignment[]
+  shortlistEntries    ShortlistEntry[]
+  examCandidates      ExamCandidate[]
+  interviewCandidates InterviewCandidate[]
+  selectionEntries    SelectionEntry[]
+  statusHistory       ApplicationStatusHistory[]
+
+  @@unique([applicantId, exerciseId, vacancyId])
+  @@index([exerciseId, status])
+  @@index([status])
+  @@index([stage])
+}
+
+model ApplicationStatusHistory {
+  id            String   @id @default(cuid())
+  applicationId String
+  fromStatus    String?
+  toStatus      String
+  stage         String?
+  changedById   String?
+  changedByName String?
+  remarks       String?
+  createdAt     DateTime @default(now())
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId])
+}
+
+model ApplicationEducation {
+  id            String  @id @default(cuid())
+  applicationId String
+  institution   String
+  qualification String // see QUALIFICATIONS
+  course        String?
+  grade         String?
+  startYear     Int?
+  endYear       Int?
+  certificateNo String?
+  position      Int     @default(0)
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+}
+
+model ApplicationEmployment {
+  id               String    @id @default(cuid())
+  applicationId    String
+  employer         String
+  jobTitle         String
+  responsibilities String?
+  startDate        DateTime?
+  endDate          DateTime?
+  current          Boolean   @default(false)
+  position         Int       @default(0)
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+}
+
+model ApplicationReferee {
+  id            String  @id @default(cuid())
+  applicationId String
+  name          String
+  occupation    String?
+  organisation  String?
+  email         String?
+  phone         String?
+  address       String?
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+}
+
+model NextOfKin {
+  id            String  @id @default(cuid())
+  applicationId String  @unique
+  name          String
+  relationship  String
+  phone         String
+  email         String?
+  address       String?
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+}
+
+// ---------------------------------------------------------------------------
+// MODULE 2.4 - DOCUMENT UPLOAD AND MANAGEMENT
+// ---------------------------------------------------------------------------
+
+model ApplicantDocument {
+  id             String    @id @default(cuid())
+  applicationId  String
+  requirementId  String?
+  docType        String
+  label          String
+  storedName     String
+  originalName   String
+  mimeType       String
+  sizeBytes      Int
+  checksum       String?
+  reviewStatus   String    @default("PENDING") // PENDING|VERIFIED|REJECTED|RESUBMISSION_REQUIRED
+  reviewNotes    String?
+  reviewedById   String?
+  reviewedAt     DateTime?
+  version        Int       @default(1)
+  supersededById String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  application Application          @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  requirement DocumentRequirement? @relation(fields: [requirementId], references: [id])
+  reviews     DocumentReview[]
+
+  @@index([applicationId])
+  @@index([reviewStatus])
+}
+
+model DocumentReview {
+  id         String   @id @default(cuid())
+  documentId String
+  officerId  String?
+  outcome    String
+  notes      String?
+  createdAt  DateTime @default(now())
+
+  document ApplicantDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  officer  User?             @relation(fields: [officerId], references: [id], onDelete: SetNull)
+
+  @@index([documentId])
+}
+
+// ---------------------------------------------------------------------------
+// MODULE 2.5 - SCREENING AND SHORTLISTING
+// ---------------------------------------------------------------------------
+
+model ScreeningAssignment {
+  id            String    @id @default(cuid())
+  applicationId String
+  officerId     String
+  assignedById  String?
+  assignedAt    DateTime  @default(now())
+  completedAt   DateTime?
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  officer     User        @relation("ScreeningOfficer", fields: [officerId], references: [id], onDelete: Cascade)
+
+  @@unique([applicationId, officerId])
+  @@index([officerId])
+}
+
+model ScreeningRecord {
+  id                String   @id @default(cuid())
+  applicationId     String
+  officerId         String?
+  completenessPass  Boolean  @default(false)
+  eligibilityPass   Boolean  @default(false)
+  qualificationPass Boolean  @default(false)
+  experiencePass    Boolean  @default(false)
+  documentsPass     Boolean  @default(false)
+  outcome           String // PASSED|FAILED|RESUBMISSION_REQUIRED
+  classification    String? // QUALIFIED|UNDER_QUALIFIED|INCOMPLETE|DISQUALIFIED
+  remarks           String?
+  autoChecks        String? // JSON result of configurable rules
+  createdAt         DateTime @default(now())
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  officer     User?       @relation(fields: [officerId], references: [id], onDelete: SetNull)
+
+  @@index([applicationId])
+}
+
+model Shortlist {
+  id            String    @id @default(cuid())
+  exerciseId    String
+  title         String
+  status        String    @default("DRAFT") // DRAFT|PENDING_APPROVAL|APPROVED|REJECTED|PUBLISHED
+  preparedById  String?
+  approvedById  String?
+  approvedAt    DateTime?
+  rejectionNote String?
+  notifiedAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  exercise RecruitmentExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  entries  ShortlistEntry[]
+
+  @@index([exerciseId])
+}
+
+model ShortlistEntry {
+  id            String  @id @default(cuid())
+  shortlistId   String
+  applicationId String
+  rank          Int?
+  remarks       String?
+
+  shortlist   Shortlist   @relation(fields: [shortlistId], references: [id], onDelete: Cascade)
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@unique([shortlistId, applicationId])
+}
+
+// ---------------------------------------------------------------------------
+// MODULE 2.6 - EXAMINATION AND ASSESSMENT
+// ---------------------------------------------------------------------------
+
+model ExamSchedule {
+  id                 String    @id @default(cuid())
+  exerciseId         String
+  title              String
+  examDate           DateTime
+  startTime          String
+  endTime            String?
+  totalMarks         Float     @default(100)
+  passMark           Float     @default(50)
+  instructions       String?
+  status             String    @default("SCHEDULED") // SCHEDULED|ONGOING|COMPLETED|CANCELLED
+  resultsPublishedAt DateTime?
+  createdById        String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  exercise   RecruitmentExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  centres    ExamCentre[]
+  candidates ExamCandidate[]
+
+  @@index([exerciseId])
+}
+
+model ExamCentre {
+  id         String  @id @default(cuid())
+  scheduleId String
+  name       String
+  address    String?
+  lga        String?
+  capacity   Int     @default(100)
+  supervisor String?
+
+  schedule   ExamSchedule    @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  candidates ExamCandidate[]
+}
+
+model ExamCandidate {
+  id               String    @id @default(cuid())
+  scheduleId       String
+  applicationId    String
+  centreId         String?
+  examNumber       String    @unique
+  seatNumber       String?
+  attendance       String    @default("PENDING") // PENDING|PRESENT|ABSENT
+  score            Float?
+  scoreEnteredById String?
+  scoreEnteredAt   DateTime?
+  validated        Boolean   @default(false)
+  remarks          String?
+  notifiedAt       DateTime?
+  createdAt        DateTime  @default(now())
+
+  schedule    ExamSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  application Application  @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  centre      ExamCentre?  @relation(fields: [centreId], references: [id])
+
+  @@unique([scheduleId, applicationId])
+  @@index([centreId])
+}
+
+// ---------------------------------------------------------------------------
+// MODULE 2.7 - INTERVIEW MANAGEMENT
+// ---------------------------------------------------------------------------
+
+model InterviewSchedule {
+  id            String   @id @default(cuid())
+  exerciseId    String
+  title         String
+  interviewDate DateTime
+  startTime     String
+  endTime       String?
+  venue         String
+  slotMinutes   Int      @default(20)
+  totalMarks    Float    @default(100)
+  passMark      Float    @default(50)
+  criteria      String? // JSON array of {key,label,maxScore}
+  status        String   @default("SCHEDULED") // SCHEDULED|ONGOING|COMPLETED|CANCELLED
+  createdById   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  exercise   RecruitmentExercise  @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  panels     InterviewPanel[]
+  candidates InterviewCandidate[]
+
+  @@index([exerciseId])
+}
+
+model InterviewPanel {
+  id         String  @id @default(cuid())
+  scheduleId String
+  name       String
+  roomVenue  String?
+
+  schedule   InterviewSchedule      @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  members    InterviewPanelMember[]
+  candidates InterviewCandidate[]
+}
+
+model InterviewPanelMember {
+  id      String  @id @default(cuid())
+  panelId String
+  userId  String
+  isChair Boolean @default(false)
+
+  panel InterviewPanel @relation(fields: [panelId], references: [id], onDelete: Cascade)
+  user  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([panelId, userId])
+}
+
+model InterviewCandidate {
+  id                String    @id @default(cuid())
+  scheduleId        String
+  applicationId     String
+  panelId           String?
+  slotTime          String?
+  attendance        String    @default("PENDING") // PENDING|PRESENT|ABSENT
+  consolidatedScore Float?
+  remarks           String?
+  notifiedAt        DateTime?
+  createdAt         DateTime  @default(now())
+
+  schedule    InterviewSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  application Application       @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  panel       InterviewPanel?   @relation(fields: [panelId], references: [id])
+  scores      InterviewScore[]
+
+  @@unique([scheduleId, applicationId])
+}
+
+model InterviewScore {
+  id          String   @id @default(cuid())
+  candidateId String
+  memberId    String
+  scores      String // JSON {criterionKey: score}
+  total       Float
+  remarks     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  candidate InterviewCandidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  member    User               @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([candidateId, memberId])
+}
+
+// ---------------------------------------------------------------------------
+// MODULE 2.8 - FINAL SELECTION AND OUTCOME
+// ---------------------------------------------------------------------------
+
+model SelectionList {
+  id              String    @id @default(cuid())
+  exerciseId      String
+  title           String
+  status          String    @default("DRAFT") // DRAFT|PENDING_APPROVAL|APPROVED|REJECTED|PUBLISHED|ARCHIVED
+  examWeight      Float     @default(50)
+  interviewWeight Float     @default(50)
+  preparedById    String?
+  approvedById    String?
+  approvedAt      DateTime?
+  rejectionNote   String?
+  notifiedAt      DateTime?
+  archivedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  exercise RecruitmentExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  entries  SelectionEntry[]
+
+  @@index([exerciseId])
+}
+
+model SelectionEntry {
+  id              String  @id @default(cuid())
+  selectionListId String
+  applicationId   String
+  examScore       Float?
+  interviewScore  Float?
+  finalScore      Float?
+  rank            Int?
+  outcome         String  @default("PENDING") // SELECTED|NOT_SELECTED|RESERVE|PENDING
+  remarks         String?
+
+  selectionList SelectionList @relation(fields: [selectionListId], references: [id], onDelete: Cascade)
+  application   Application   @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@unique([selectionListId, applicationId])
+}
+
+// ---------------------------------------------------------------------------
+// GENERIC APPROVAL WORKFLOW
+// ---------------------------------------------------------------------------
+
+model ApprovalRequest {
+  id              String    @id @default(cuid())
+  entityType      String // EXERCISE|ARTICLE|SHORTLIST|SELECTION|NOTIFICATION_BATCH
+  entityId        String
+  exerciseId      String?
+  action          String
+  requestedById   String?
+  requestedByName String?
+  status          String    @default("PENDING") // PENDING|APPROVED|REJECTED
+  decidedById     String?
+  decidedByName   String?
+  decidedAt       DateTime?
+  note            String?
+  createdAt       DateTime  @default(now())
+
+  exercise RecruitmentExercise? @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@index([entityType, entityId])
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// MODULE 7 - NOTIFICATION AND COMMUNICATION
+// ---------------------------------------------------------------------------
+
+model NotificationTemplate {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  channel   String   @default("EMAIL") // EMAIL|SMS|BOTH
+  subject   String
+  body      String
+  variables String? // JSON array
+  active    Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+}
+
+model NotificationBatch {
+  id           String    @id @default(cuid())
+  title        String
+  channel      String    @default("EMAIL")
+  subject      String
+  body         String
+  audience     String // JSON descriptor
+  status       String    @default("DRAFT") // DRAFT|PENDING_APPROVAL|APPROVED|SENDING|SENT|REJECTED
+  totalCount   Int       @default(0)
+  sentCount    Int       @default(0)
+  failedCount  Int       @default(0)
+  createdById  String?
+  approvedById String?
+  approvedAt   DateTime?
+  sentAt       DateTime?
+  createdAt    DateTime  @default(now())
+
+  notifications Notification[]
+}
+
+model Notification {
+  id           String    @id @default(cuid())
+  userId       String?
+  batchId      String?
+  channel      String    @default("EMAIL") // EMAIL|SMS|IN_APP
+  toAddress    String?
+  subject      String
+  body         String
+  templateCode String?
+  status       String    @default("QUEUED") // QUEUED|SENT|FAILED|READ
+  providerRef  String?
+  error        String?
+  sentAt       DateTime?
+  readAt       DateTime?
+  createdAt    DateTime  @default(now())
+
+  user  User?              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  batch NotificationBatch? @relation(fields: [batchId], references: [id], onDelete: SetNull)
+
+  @@index([userId, status])
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// MODULE 4 - COMMISSION ADMINISTRATIVE MANAGEMENT
+// ---------------------------------------------------------------------------
+
+model StaffTask {
+  id           String    @id @default(cuid())
+  title        String
+  description  String?
+  assigneeId   String?
+  createdById  String?
+  departmentId String?
+  priority     String    @default("NORMAL") // LOW|NORMAL|HIGH|URGENT
+  status       String    @default("OPEN") // OPEN|IN_PROGRESS|DONE|CANCELLED
+  dueDate      DateTime?
+  completedAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  assignee   User?       @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  creator    User?       @relation("TaskCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  department Department? @relation(fields: [departmentId], references: [id])
+
+  @@index([status])
+}
+
+model Correspondence {
+  id             String   @id @default(cuid())
+  reference      String   @unique
+  direction      String   @default("INCOMING") // INCOMING|OUTGOING
+  subject        String
+  body           String?
+  party          String
+  classification String   @default("GENERAL") // GENERAL|CONFIDENTIAL|RESTRICTED
+  status         String   @default("OPEN") // OPEN|ACTIONED|FILED|CLOSED
+  receivedAt     DateTime @default(now())
+  handledById    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  handledBy User? @relation(fields: [handledById], references: [id], onDelete: SetNull)
+
+  @@index([status])
+}
+
+model RepositoryDocument {
+  id             String   @id @default(cuid())
+  title          String
+  description    String?
+  classification String   @default("GENERAL") // GENERAL|CONFIDENTIAL|RESTRICTED
+  category       String   @default("RECORD")
+  tags           String?
+  storedName     String
+  originalName   String
+  mimeType       String
+  sizeBytes      Int
+  uploadedById   String?
+  createdAt      DateTime @default(now())
+
+  uploadedBy User? @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  @@index([classification])
+}
+
+// ---------------------------------------------------------------------------
+// SYSTEM CONFIGURATION
+// ---------------------------------------------------------------------------
+
+model SystemSetting {
+  key       String   @id
+  value     String
+  group     String   @default("GENERAL")
+  label     String?
+  updatedAt DateTime @updatedAt
+}
