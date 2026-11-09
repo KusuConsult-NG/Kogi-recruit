@@ -42,13 +42,13 @@ export default async function DownloadsPage() {
                 <span className="badge-slate">{group.length} item(s)</span>
               </div>
               <CardBody>
-                <ul className="divide-y divide-slate-100">
+                <ul className="divide-y divide-ink-100">
                   {group.map((item) => (
                     <li key={item.id} className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
                       <div>
-                        <p className="text-sm font-semibold text-slate-900">{item.title}</p>
-                        {item.description ? <p className="mt-0.5 text-xs text-slate-600">{item.description}</p> : null}
-                        <p className="mt-1 text-[11px] text-slate-400">
+                        <p className="text-sm font-semibold text-ink-950">{item.title}</p>
+                        {item.description ? <p className="mt-0.5 text-xs text-ink-600">{item.description}</p> : null}
+                        <p className="mt-1 text-2xs text-ink-400">
                           {formatBytes(item.sizeBytes)} · published {formatDate(item.createdAt)} · {item.downloads} download(s)
                         </p>
                       </div>

@@ -38,6 +38,42 @@ export async function createExamSchedule(_prev: ActionState, formData: FormData)
   const exercise = await prisma.recruitmentExercise.findUnique({ where: { id: exerciseId } });
   if (!exercise) return { ok: false, message: 'Recruitment exercise not found.' };
 
+  // An online test must have a published paper attached, otherwise candidates
+  // would be invited to sit an examination that does not exist.
+  const online = d.mode === 'CBT' || d.mode === 'HYBRID';
+  let durationMinutes = d.durationMinutes ?? null;
+  if (online) {
+    if (!d.paperId) {
+      return {
+        ok: false,
+        errors: { paperId: 'Choose the examination paper candidates will sit.' },
+        message: 'An online test needs a paper.',
+      };
+    }
+    const paper = await prisma.examPaper.findUnique({
+      where: { id: d.paperId },
+      select: { id: true, status: true, durationMinutes: true, title: true },
+    });
+    if (!paper) {
+      return { ok: false, errors: { paperId: 'That paper could not be found.' }, message: 'Paper not found.' };
+    }
+    if (paper.status !== 'PUBLISHED') {
+      return {
+        ok: false,
+        errors: { paperId: 'Only a published paper can be set for an examination.' },
+        message: 'That paper is not published.',
+      };
+    }
+    durationMinutes = durationMinutes ?? paper.durationMinutes;
+  }
+  if (online && d.opensAt && d.closesAt && d.closesAt <= d.opensAt) {
+    return {
+      ok: false,
+      errors: { closesAt: 'The test must close after it opens.' },
+      message: 'Check the test window.',
+    };
+  }
+
   const schedule = await prisma.examSchedule.create({
     data: {
       exerciseId,
@@ -48,6 +84,11 @@ export async function createExamSchedule(_prev: ActionState, formData: FormData)
       totalMarks: d.totalMarks,
       passMark: d.passMark,
       instructions: d.instructions || null,
+      mode: d.mode,
+      paperId: online ? d.paperId! : null,
+      durationMinutes,
+      opensAt: online ? (d.opensAt ?? null) : null,
+      closesAt: online ? (d.closesAt ?? null) : null,
       createdById: user.id,
     },
   });
@@ -147,7 +188,11 @@ export async function assignExamCandidates(_prev: ActionState, formData: FormDat
     },
   });
   if (!schedule) return { ok: false, message: 'Examination schedule not found.' };
-  if (schedule.centres.length === 0) {
+
+  // A purely online test is sat in the applicant portal, so it has no centres
+  // and no seats. A centre-based or supervised examination still needs one.
+  const online = schedule.mode === 'CBT';
+  if (!online && schedule.centres.length === 0) {
     return { ok: false, message: 'Add at least one examination centre before assigning candidates.' };
   }
 
@@ -181,14 +226,18 @@ export async function assignExamCandidates(_prev: ActionState, formData: FormDat
     const lga = app.applicant.applicantProfile?.lga;
     const preferred = schedule.centres.find((c) => c.lga && lga && c.lga === lga && (capacity.get(c.id) ?? 0) > 0);
     const centre = preferred ?? schedule.centres.find((c) => (capacity.get(c.id) ?? 0) > 0);
-    if (!centre) {
+    if (!centre && !online) {
       overflow.push(app.reference);
       continue;
     }
-    capacity.set(centre.id, (capacity.get(centre.id) ?? 0) - 1);
+    if (centre) {
+      capacity.set(centre.id, (capacity.get(centre.id) ?? 0) - 1);
+    }
     seq += 1;
 
-    const seatNumber = `${centre.name.slice(0, 3).toUpperCase()}-${String((centre.capacity - (capacity.get(centre.id) ?? 0))).padStart(3, '0')}`;
+    const seatNumber = centre
+      ? `${centre.name.slice(0, 3).toUpperCase()}-${String(centre.capacity - (capacity.get(centre.id) ?? 0)).padStart(3, '0')}`
+      : null;
 
     // Retry on the remote chance that two officers allocate at the same moment.
     let candidate: Awaited<ReturnType<typeof prisma.examCandidate.create>> | null = null;
@@ -198,7 +247,7 @@ export async function assignExamCandidates(_prev: ActionState, formData: FormDat
           data: {
             scheduleId,
             applicationId: app.id,
-            centreId: centre.id,
+            centreId: centre?.id ?? null,
             examNumber: examNumber(seq, schedule.examDate),
             seatNumber,
           },
@@ -225,7 +274,9 @@ export async function assignExamCandidates(_prev: ActionState, formData: FormDat
         applicationId: app.id,
         toStatus: APPLICATION_STATUS.EXAM_SCHEDULED,
         actor: user,
-        remarks: `Scheduled for ${schedule.title} at ${centre.name}`,
+        remarks: centre
+          ? `Scheduled for ${schedule.title} at ${centre.name}`
+          : `Scheduled for ${schedule.title}, to be sat online in the applicant portal`,
       });
     } catch {
       /* already at or past this stage */
@@ -243,8 +294,10 @@ export async function assignExamCandidates(_prev: ActionState, formData: FormDat
           exercise: schedule.exercise.title,
           date: formatDate(schedule.examDate),
           time: schedule.startTime,
-          centre: centre.name,
-          address: centre.address ?? 'See the Commission notice board',
+          centre: centre?.name ?? 'Online, in the applicant portal',
+          address:
+            centre?.address
+            ?? 'Sign in to the applicant portal and open "Tests and Examinations" to sit this test.',
         },
       );
       await prisma.examCandidate.update({ where: { id: candidate.id }, data: { notifiedAt: new Date() } });

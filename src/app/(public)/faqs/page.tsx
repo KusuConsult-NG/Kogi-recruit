@@ -31,11 +31,11 @@ export default async function FaqPage() {
               </div>
               <CardBody className="space-y-2">
                 {group.map((f) => (
-                  <details key={f.id} className="group rounded-md border border-slate-200 px-4 py-3 open:bg-slate-50">
-                    <summary className="cursor-pointer text-sm font-semibold text-slate-900 marker:text-kogi-600">
+                  <details key={f.id} className="group rounded-md border border-ink-200 px-4 py-3 open:bg-ink-50">
+                    <summary className="cursor-pointer text-sm font-semibold text-ink-950 marker:text-kogi-600">
                       {f.question}
                     </summary>
-                    <div className="mt-2 border-t border-slate-200 pt-2">
+                    <div className="mt-2 border-t border-ink-200 pt-2">
                       <RichText body={f.answer} />
                     </div>
                   </details>

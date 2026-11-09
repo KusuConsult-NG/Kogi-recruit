@@ -3,15 +3,17 @@ import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/db';
 import { requirePageAnyPermission } from '@/lib/page-guards';
 import { hasAnyPermission, hasPermission, PERMISSIONS } from '@/lib/rbac';
-import { APPLICATION_STATUS } from '@/lib/constants';
+import { APPLICATION_STATUS, EXAM_MODE_LABELS, SITTING_STATUS_LABELS } from '@/lib/constants';
 import { formatDate, formatDateTime } from '@/lib/format';
 import { passFail } from '@/lib/scoring';
 import {
   Alert, Card, CardBody, DescriptionList, PageHeading, StatCard, StatusBadge,
 } from '@/components/ui';
 import { deleteExamCentre } from '@/actions/assessment';
+import { forceSubmitSitting } from '@/actions/cbt';
 import {
-  AssignCandidatesForm, BulkScoreForm, ExamCentreForm, ExamScoreRow, ValidateExamForm,
+  AssignCandidatesForm, BulkScoreForm, ExamCentreForm, ExamScoreRow,
+  ReleaseOnlineTestForm, ValidateExamForm,
 } from '../forms';
 
 export const dynamic = 'force-dynamic';
@@ -26,6 +28,12 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
     where: { id },
     include: {
       exercise: { select: { id: true, title: true, reference: true } },
+      paper: {
+        select: {
+          id: true, title: true, code: true, status: true, durationMinutes: true,
+          passMark: true, showResultToCandidate: true,
+        },
+      },
       centres: {
         orderBy: { name: 'asc' },
         include: { _count: { select: { candidates: true } } },
@@ -34,6 +42,12 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
         orderBy: { examNumber: 'asc' },
         include: {
           centre: { select: { name: true } },
+          sitting: {
+            select: {
+              id: true, status: true, startedAt: true, submittedAt: true, submittedBy: true,
+              rawScore: true, totalMarks: true, percentage: true, answeredCount: true,
+            },
+          },
           application: {
             select: {
               id: true, reference: true,
@@ -68,10 +82,19 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
   const passed = scored.filter((c) => (c.score ?? 0) >= schedule.passMark);
   const totalCapacity = schedule.centres.reduce((s, c) => s + c.capacity, 0);
 
+  // Online testing
+  const online = schedule.mode === 'CBT' || schedule.mode === 'HYBRID';
+  const sittings = schedule.candidates.map((c) => c.sitting).filter(Boolean);
+  const notReleased = schedule.candidates.filter((c) => !c.sitting).length;
+  const inProgress = sittings.filter((s) => s!.status === 'IN_PROGRESS');
+  const submittedSittings = sittings.filter((s) => s!.submittedAt);
+  const notStarted = sittings.filter((s) => s!.status === 'NOT_STARTED').length;
+
   return (
     <>
       <PageHeading
         title={schedule.title}
+        eyebrow={`Stage 7 · ${EXAM_MODE_LABELS[schedule.mode] ?? schedule.mode}`}
         description={`${schedule.exercise.title} (${schedule.exercise.reference}) · ${formatDate(schedule.examDate)} at ${schedule.startTime}`}
         breadcrumb={[{ label: 'Examinations', href: '/admin/examinations' }, { label: schedule.title.slice(0, 40) }]}
         actions={
@@ -117,7 +140,7 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
                         <Link href={`/admin/applications/${c.application.id}`} className="text-xs font-medium text-kogi-700 hover:underline">
                           {c.application.applicant.fullName}
                         </Link>
-                        <p className="font-mono text-[11px] text-slate-500">{c.application.reference}</p>
+                        <p className="font-mono text-2xs text-ink-500">{c.application.reference}</p>
                       </td>
                       <td className="text-xs">{c.application.vacancy?.jobTitle ?? '—'}</td>
                       <td className="text-xs">{c.centre?.name ?? '—'}</td>
@@ -141,7 +164,7 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
                     </tr>
                   ))}
                   {schedule.candidates.length === 0 ? (
-                    <tr><td colSpan={9} className="py-6 text-center text-sm text-slate-500">
+                    <tr><td colSpan={9} className="py-6 text-center text-sm text-ink-500">
                       No candidates allocated yet. Add centres, then assign shortlisted candidates.
                     </td></tr>
                   ) : null}
@@ -150,6 +173,136 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
             </div>
           </Card>
 
+          {online ? (
+            <Card>
+              <div className="card-header">
+                <h2 className="card-title">Online test</h2>
+                <StatusBadge status={schedule.mode} label={EXAM_MODE_LABELS[schedule.mode] ?? schedule.mode} />
+              </div>
+              <CardBody className="space-y-4">
+                {!schedule.paper ? (
+                  <Alert tone="error" title="No paper attached">
+                    This examination is set to be sat online but no paper is attached, so candidates
+                    cannot sit it. Attach a published paper when creating the examination.
+                  </Alert>
+                ) : (
+                  <>
+                    <DescriptionList
+                      columns={2}
+                      items={[
+                        {
+                          label: 'Paper',
+                          value: (
+                            <Link href={`/admin/exams/papers/${schedule.paper.id}`} className="link">
+                              {schedule.paper.title} ({schedule.paper.code})
+                            </Link>
+                          ),
+                        },
+                        { label: 'Duration allowed', value: `${schedule.durationMinutes ?? schedule.paper.durationMinutes} minutes` },
+                        { label: 'Test opens', value: schedule.opensAt ? formatDateTime(schedule.opensAt) : 'As soon as released' },
+                        { label: 'Test closes', value: schedule.closesAt ? formatDateTime(schedule.closesAt) : 'No closing time set' },
+                        { label: 'Score shown to candidate', value: schedule.paper.showResultToCandidate ? 'Immediately on submission' : 'Withheld until released' },
+                        { label: 'Marking', value: 'Automatic; scaled onto this examination’s total marks' },
+                      ]}
+                    />
+
+                    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                      <StatCard label="Tests released" value={sittings.length} />
+                      <StatCard label="Not yet started" value={notStarted} tone={notStarted ? 'amber' : 'default'} />
+                      <StatCard label="In progress" value={inProgress.length} tone="blue" />
+                      <StatCard label="Submitted" value={submittedSittings.length} tone="green" />
+                    </div>
+
+                    {canManage ? (
+                      notReleased > 0 ? (
+                        <div className="panel-inset">
+                          <p className="mb-3 text-sm text-ink-700">
+                            <strong className="font-semibold">{notReleased}</strong> allocated candidate(s)
+                            do not yet have a sitting. Releasing the test lets them start it from their
+                            portal once the opening time is reached.
+                          </p>
+                          <ReleaseOnlineTestForm scheduleId={schedule.id} count={notReleased} />
+                        </div>
+                      ) : (
+                        <Alert tone="success">
+                          Every allocated candidate has a sitting for this test.
+                        </Alert>
+                      )
+                    ) : null}
+
+                    {sittings.length > 0 ? (
+                      <div className="table-wrap">
+                        <table className="table">
+                          <thead>
+                            <tr>
+                              <th>Exam no.</th><th>Status</th><th>Started</th>
+                              <th className="num">Answered</th><th className="num">Raw score</th>
+                              <th className="num">Percentage</th><th>Submitted</th>
+                              {canManage ? <th /> : null}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {schedule.candidates
+                              .filter((c) => c.sitting)
+                              .map((c) => (
+                                <tr key={c.sitting!.id}>
+                                  <td><span className="ref">{c.examNumber}</span></td>
+                                  <td>
+                                    <StatusBadge
+                                      status={c.sitting!.status}
+                                      label={SITTING_STATUS_LABELS[c.sitting!.status]}
+                                    />
+                                  </td>
+                                  <td className="text-xs">
+                                    {c.sitting!.startedAt ? formatDateTime(c.sitting!.startedAt) : '—'}
+                                  </td>
+                                  <td className="num">{c.sitting!.answeredCount}</td>
+                                  <td className="num">
+                                    {c.sitting!.submittedAt ? `${c.sitting!.rawScore}/${c.sitting!.totalMarks}` : '—'}
+                                  </td>
+                                  <td className="num font-semibold">
+                                    {c.sitting!.percentage === null ? '—' : `${c.sitting!.percentage}%`}
+                                  </td>
+                                  <td className="text-xs">
+                                    {c.sitting!.submittedAt ? (
+                                      <>
+                                        {formatDateTime(c.sitting!.submittedAt)}
+                                        <span className="block text-ink-500">
+                                          {c.sitting!.submittedBy === 'TIMER'
+                                            ? 'time ran out'
+                                            : c.sitting!.submittedBy === 'OFFICER'
+                                              ? 'closed by officer'
+                                              : 'by candidate'}
+                                        </span>
+                                      </>
+                                    ) : (
+                                      '—'
+                                    )}
+                                  </td>
+                                  {canManage ? (
+                                    <td>
+                                      {c.sitting!.status === 'IN_PROGRESS' ? (
+                                        <form action={forceSubmitSitting}>
+                                          <input type="hidden" name="id" value={c.sitting!.id} />
+                                          <button type="submit" className="btn-ghost btn-sm">
+                                            Close sitting
+                                          </button>
+                                        </form>
+                                      ) : null}
+                                    </td>
+                                  ) : null}
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : null}
+                  </>
+                )}
+              </CardBody>
+            </Card>
+          ) : null}
+
           {canManage ? (
             <Card>
               <div className="card-header">
@@ -157,7 +310,7 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
                 <span className="badge-slate">{eligible.length} eligible</span>
               </div>
               <CardBody>
-                {schedule.centres.length === 0 ? (
+                {schedule.centres.length === 0 && schedule.mode !== 'CBT' ? (
                   <Alert tone="warning">Add at least one examination centre before allocating candidates.</Alert>
                 ) : (
                   <AssignCandidatesForm
@@ -193,6 +346,7 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
                 columns={1}
                 items={[
                   { label: 'Status', value: <StatusBadge status={schedule.status} /> },
+                  { label: 'Mode', value: <StatusBadge status={schedule.mode} label={EXAM_MODE_LABELS[schedule.mode] ?? schedule.mode} /> },
                   { label: 'Date', value: formatDate(schedule.examDate) },
                   { label: 'Reporting time', value: schedule.startTime },
                   { label: 'End time', value: schedule.endTime ?? '—' },
@@ -202,9 +356,9 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
                 ]}
               />
               {schedule.instructions ? (
-                <div className="mt-3 border-t border-slate-100 pt-3">
-                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Instructions</p>
-                  <p className="mt-1 whitespace-pre-line text-xs text-slate-700">{schedule.instructions}</p>
+                <div className="mt-3 border-t border-ink-100 pt-3">
+                  <p className="text-xs font-medium uppercase tracking-wide text-ink-500">Instructions</p>
+                  <p className="mt-1 whitespace-pre-line text-xs text-ink-700">{schedule.instructions}</p>
                 </div>
               ) : null}
             </CardBody>
@@ -217,23 +371,23 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
             </div>
             <CardBody className="space-y-4">
               {schedule.centres.length === 0 ? (
-                <p className="text-sm text-slate-600">No centres configured.</p>
+                <p className="text-sm text-ink-600">No centres configured.</p>
               ) : (
-                <ul className="divide-y divide-slate-100">
+                <ul className="divide-y divide-ink-100">
                   {schedule.centres.map((c) => (
                     <li key={c.id} className="flex flex-wrap items-start justify-between gap-2 py-2.5 first:pt-0 last:pb-0">
                       <div>
-                        <p className="text-sm font-medium text-slate-900">{c.name}</p>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-sm font-medium text-ink-950">{c.name}</p>
+                        <p className="text-xs text-ink-500">
                           {c.lga ? `${c.lga} · ` : ''}{c._count.candidates}/{c.capacity} allocated
                           {c.supervisor ? ` · supervisor ${c.supervisor}` : ''}
                         </p>
-                        {c.address ? <p className="text-xs text-slate-500">{c.address}</p> : null}
+                        {c.address ? <p className="text-xs text-ink-500">{c.address}</p> : null}
                       </div>
                       {canManage && c._count.candidates === 0 ? (
                         <form action={deleteExamCentre}>
                           <input type="hidden" name="id" value={c.id} />
-                          <button type="submit" className="btn-ghost btn-sm text-red-700">Remove</button>
+                          <button type="submit" className="btn-ghost btn-sm text-[#9a2c20]">Remove</button>
                         </form>
                       ) : null}
                     </li>

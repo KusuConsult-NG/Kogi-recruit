@@ -1,7 +1,9 @@
 import { prisma } from '@/lib/db';
 import { requirePagePermission } from '@/lib/page-guards';
 import { PERMISSIONS } from '@/lib/rbac';
-import { Card, CardBody, PageHeading, StatCard } from '@/components/ui';
+import {
+  Card, CardBody, PageHeading, StatCard, readable,
+} from '@/components/ui';
 import { deleteDepartment } from '@/actions/content';
 import { DepartmentForm } from '../forms';
 
@@ -47,10 +49,10 @@ export default async function DepartmentsAdmin() {
                   {departments.map((d) => (
                     <tr key={d.id}>
                       <td>
-                        <p className="font-medium text-slate-900">{d.name}</p>
-                        {d.code ? <p className="text-xs text-slate-500">{d.code}</p> : null}
+                        <p className="font-medium text-ink-950">{d.name}</p>
+                        {d.code ? <p className="text-xs text-ink-500">{d.code}</p> : null}
                       </td>
-                      <td><span className="badge-slate">{d.kind.toLowerCase()}</span></td>
+                      <td><span className="badge-slate">{readable(d.kind)}</span></td>
                       <td className="text-xs">{d.parent?.name ?? '—'}</td>
                       <td className="text-xs">{d.headName ?? '—'}</td>
                       <td>{d._count.users}</td>
@@ -59,13 +61,13 @@ export default async function DepartmentsAdmin() {
                       <td>
                         <form action={deleteDepartment}>
                           <input type="hidden" name="id" value={d.id} />
-                          <button type="submit" className="btn-ghost btn-sm text-red-700">Remove</button>
+                          <button type="submit" className="btn-ghost btn-sm text-[#9a2c20]">Remove</button>
                         </form>
                       </td>
                     </tr>
                   ))}
                   {departments.length === 0 ? (
-                    <tr><td colSpan={8} className="py-6 text-center text-sm text-slate-500">No departments configured.</td></tr>
+                    <tr><td colSpan={8} className="py-6 text-center text-sm text-ink-500">No departments configured.</td></tr>
                   ) : null}
                 </tbody>
               </table>

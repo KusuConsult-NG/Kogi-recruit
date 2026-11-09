@@ -33,10 +33,10 @@ export function ErrorScreen({
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
       <div className="max-w-lg">
-        <h1 className="text-xl font-bold text-slate-900">{title}</h1>
-        <p className="mt-2 text-sm text-slate-600">{detail}</p>
+        <h1 className="text-xl font-bold text-ink-950">{title}</h1>
+        <p className="mt-2 text-sm text-ink-600">{detail}</p>
         {!isAuth && !isForbidden && message ? (
-          <p className="mt-3 rounded border border-slate-200 bg-slate-50 px-3 py-2 text-left font-mono text-xs text-slate-600">
+          <p className="mt-3 rounded border border-ink-200 bg-ink-50 px-3 py-2 text-left font-mono text-xs text-ink-600">
             {message}
           </p>
         ) : null}

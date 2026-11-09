@@ -7,9 +7,20 @@ import {
 } from '@/actions/assessment';
 import { ActionForm, SubmitButton } from '@/components/forms';
 import { Field } from '@/components/ui';
-import { KOGI_LGAS } from '@/lib/constants';
+import { EXAM_MODES, KOGI_LGAS } from '@/lib/constants';
+import { releaseOnlineTest } from '@/actions/cbt';
 
-export function ExamScheduleForm({ exercises }: { exercises: Array<{ id: string; label: string }> }) {
+export function ExamScheduleForm({
+  exercises,
+  papers,
+}: {
+  exercises: Array<{ id: string; label: string }>;
+  papers: Array<{ id: string; label: string; durationMinutes: number }>;
+}) {
+  const [mode, setMode] = useState('CENTRE');
+  const [paperId, setPaperId] = useState('');
+  const online = mode === 'CBT' || mode === 'HYBRID';
+  const paper = papers.find((p) => p.id === paperId);
   return (
     <ActionForm action={createExamSchedule}>
       {(state) => (
@@ -42,6 +53,86 @@ export function ExamScheduleForm({ exercises }: { exercises: Array<{ id: string;
               <input id="passMark" name="passMark" type="number" min={0} defaultValue={50} required className="input" />
             </Field>
           </div>
+          <fieldset className="space-y-4 rounded-md border border-ink-200 bg-ink-50/70 p-4">
+            <legend className="micro-label">How the examination is conducted</legend>
+            <Field label="Mode" name="mode" required error={state.errors?.mode}>
+              <select
+                id="mode"
+                name="mode"
+                required
+                className="select"
+                value={mode}
+                onChange={(e) => setMode(e.target.value)}
+              >
+                {EXAM_MODES.map((m) => <option key={m.code} value={m.code}>{m.label}</option>)}
+              </select>
+              <p className="hint">{EXAM_MODES.find((m) => m.code === mode)?.description}</p>
+            </Field>
+
+            {online ? (
+              <>
+                <Field
+                  label="Examination paper"
+                  name="paperId"
+                  required
+                  error={state.errors?.paperId}
+                  hint={
+                    papers.length === 0
+                      ? 'No published papers are available. Set and publish a paper first.'
+                      : 'Only published papers can be set for an examination.'
+                  }
+                >
+                  <select
+                    id="paperId"
+                    name="paperId"
+                    required
+                    className="select"
+                    value={paperId}
+                    onChange={(e) => setPaperId(e.target.value)}
+                    disabled={papers.length === 0}
+                  >
+                    <option value="">Select a published paper…</option>
+                    {papers.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
+                  </select>
+                </Field>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  <Field
+                    label="Duration (minutes)"
+                    name="durationMinutes"
+                    error={state.errors?.durationMinutes}
+                    hint={paper ? `The paper itself allows ${paper.durationMinutes} minutes.` : 'Leave blank to use the paper\u2019s own duration.'}
+                  >
+                    <input
+                      id="durationMinutes"
+                      name="durationMinutes"
+                      type="number"
+                      min={5}
+                      max={480}
+                      placeholder={paper ? String(paper.durationMinutes) : ''}
+                      className="input"
+                    />
+                  </Field>
+                  <Field
+                    label="Test opens"
+                    name="opensAt"
+                    error={state.errors?.opensAt}
+                    hint="Candidates cannot start before this time."
+                  >
+                    <input id="opensAt" name="opensAt" type="datetime-local" className="input" />
+                  </Field>
+                  <Field
+                    label="Test closes"
+                    name="closesAt"
+                    error={state.errors?.closesAt}
+                    hint="No new sitting may be started after this time."
+                  >
+                    <input id="closesAt" name="closesAt" type="datetime-local" className="input" />
+                  </Field>
+                </div>
+              </>
+            ) : null}
+          </fieldset>
+
           <Field label="Instructions to candidates" name="instructions" error={state.errors?.instructions}>
             <textarea id="instructions" name="instructions" rows={3} className="textarea" />
           </Field>
@@ -54,11 +145,11 @@ export function ExamScheduleForm({ exercises }: { exercises: Array<{ id: string;
 
 export function ExamCentreForm({ scheduleId }: { scheduleId: string }) {
   return (
-    <ActionForm action={addExamCentre} resetOnSuccess className="space-y-3 rounded-md border border-slate-200 bg-slate-50/60 p-4">
+    <ActionForm action={addExamCentre} resetOnSuccess className="space-y-3 rounded-md border border-ink-200 bg-ink-50/60 p-4">
       {(state) => (
         <>
           <input type="hidden" name="scheduleId" value={scheduleId} />
-          <p className="text-sm font-semibold text-slate-900">Add an examination centre</p>
+          <p className="text-sm font-semibold text-ink-950">Add an examination centre</p>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Field label="Centre name" name="name" required error={state.errors?.name}>
               <input id="name" name="name" required className="input" />
@@ -119,13 +210,13 @@ export function AssignCandidatesForm({
           {selected.map((id) => <input key={id} type="hidden" name="applicationIds" value={id} />)}
 
           {candidates.length === 0 ? (
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-ink-600">
               No candidates are currently eligible to be scheduled. Candidates become available once the
               previous stage has been approved.
             </p>
           ) : (
             <>
-              <div className="max-h-80 overflow-y-auto rounded-md border border-slate-200">
+              <div className="max-h-80 overflow-y-auto rounded-md border border-ink-200">
                 <table className="table">
                   <thead className="sticky top-0">
                     <tr>
@@ -145,7 +236,7 @@ export function AssignCandidatesForm({
                             onChange={() => setSelected((p) => p.includes(c.id) ? p.filter((x) => x !== c.id) : [...p, c.id])} />
                         </td>
                         <td className="whitespace-nowrap font-mono text-xs">{c.reference}</td>
-                        <td className="text-xs font-medium text-slate-900">{c.name}</td>
+                        <td className="text-xs font-medium text-ink-950">{c.name}</td>
                         <td className="text-xs">{c.position}</td>
                         <td className="text-xs">{c.lga}</td>
                       </tr>
@@ -153,7 +244,7 @@ export function AssignCandidatesForm({
                   </tbody>
                 </table>
               </div>
-              <label className="flex items-center gap-2.5 text-sm text-slate-700">
+              <label className="flex items-center gap-2.5 text-sm text-ink-700">
                 <input type="checkbox" name="notify" value="true" defaultChecked className="checkbox" />
                 Notify each candidate by email and SMS
               </label>
@@ -202,7 +293,7 @@ export function ExamScoreRow({
             className="input w-36 text-xs" />
           <SubmitButton className="btn-secondary btn-sm" pendingLabel="…">Save</SubmitButton>
           {!state.ok && (state.errors?.score || state.message) ? (
-            <span className="text-[11px] font-medium text-red-700">
+            <span className="text-2xs font-medium text-[#9a2c20]">
               {state.errors?.score ?? state.message}
             </span>
           ) : null}
@@ -221,7 +312,7 @@ export function BulkScoreForm({ scheduleId }: { scheduleId: string }) {
           <Field label="Attach a CSV score sheet" name="file"
             hint="Columns: examination number, score, optional remarks. A header row is detected automatically.">
             <input id="file" name="file" type="file" accept=".csv,text/csv,text/plain"
-              className="block w-full cursor-pointer rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs file:mr-2 file:rounded file:border-0 file:bg-kogi-700 file:px-2.5 file:py-1 file:text-xs file:font-semibold file:text-white" />
+              className="block w-full cursor-pointer rounded-md border border-ink-300 bg-white px-2 py-1.5 text-xs file:mr-2 file:rounded file:border-0 file:bg-kogi-700 file:px-2.5 file:py-1 file:text-xs file:font-semibold file:text-white" />
           </Field>
           <Field label="Or paste the scores" name="csv">
             <textarea id="csv" name="csv" rows={5} className="textarea font-mono text-xs"
@@ -240,16 +331,44 @@ export function ValidateExamForm({ scheduleId }: { scheduleId: string }) {
       {() => (
         <>
           <input type="hidden" name="scheduleId" value={scheduleId} />
-          <label className="flex items-start gap-2.5 text-sm text-slate-700">
+          <label className="flex items-start gap-2.5 text-sm text-ink-700">
             <input type="checkbox" name="publishResults" value="true" className="checkbox mt-0.5" />
             <span>Release scores to candidates in their applicant dashboard</span>
           </label>
           <SubmitButton className="btn-primary btn-sm" pendingLabel="Validating…">
             Validate scores and advance candidates
           </SubmitButton>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-ink-500">
             Validation requires attendance for every candidate and a score for everyone marked present.
           </p>
+        </>
+      )}
+    </ActionForm>
+  );
+}
+
+/** Release the online test to every allocated candidate who has no sitting yet. */
+export function ReleaseOnlineTestForm({
+  scheduleId,
+  count,
+}: {
+  scheduleId: string;
+  count: number;
+}) {
+  return (
+    <ActionForm
+      action={releaseOnlineTest}
+      className="space-y-2"
+      onSubmit={(e) => {
+        if (!window.confirm(`Release the online test to ${count} candidate(s)?`)) e.preventDefault();
+      }}
+    >
+      {() => (
+        <>
+          <input type="hidden" name="scheduleId" value={scheduleId} />
+          <SubmitButton className="btn-primary btn-sm" pendingLabel="Releasing…">
+            Release the test to {count} candidate{count === 1 ? '' : 's'}
+          </SubmitButton>
         </>
       )}
     </ActionForm>

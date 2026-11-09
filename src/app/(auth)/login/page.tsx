@@ -19,8 +19,8 @@ export default async function LoginPage({
   return (
     <Card>
       <CardBody className="p-6 sm:p-8">
-        <h1 className="text-xl font-bold text-slate-900">Sign in to the portal</h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <h1 className="text-xl font-bold text-ink-950">Sign in to the portal</h1>
+        <p className="mt-1 text-sm text-ink-600">
           Applicants and authorised Commission officers sign in here. You will only see the functions
           assigned to your role.
         </p>
@@ -35,11 +35,11 @@ export default async function LoginPage({
           <LoginForm next={sp.next} />
         </div>
 
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 pt-4 text-sm">
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-2 border-t border-ink-200 pt-4 text-sm">
           <Link href="/forgot-password" className="text-kogi-700 hover:underline">
             Forgotten your password?
           </Link>
-          <p className="text-slate-600">
+          <p className="text-ink-600">
             New applicant?{' '}
             <Link href="/register" className="font-semibold text-kogi-700 hover:underline">
               Create an account

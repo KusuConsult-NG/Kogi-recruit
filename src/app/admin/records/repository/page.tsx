@@ -4,7 +4,9 @@ import { hasPermission, PERMISSIONS } from '@/lib/rbac';
 import { ROLES } from '@/lib/constants';
 import { formatDateTime } from '@/lib/format';
 import { formatBytes } from '@/lib/storage';
-import { Alert, Card, CardBody, PageHeading, StatCard, StatusBadge } from '@/components/ui';
+import {
+  Alert, Card, CardBody, PageHeading, StatCard, StatusBadge, readable,
+} from '@/components/ui';
 import { deleteRepositoryDocument } from '@/actions/records';
 import { RepositoryForm } from '../forms';
 
@@ -97,10 +99,10 @@ export default async function RepositoryPage({
                   {documents.map((d) => (
                     <tr key={d.id}>
                       <td>
-                        <p className="font-medium text-slate-900">{d.title}</p>
-                        {d.description ? <p className="max-w-sm text-xs text-slate-500">{d.description}</p> : null}
+                        <p className="font-medium text-ink-950">{d.title}</p>
+                        {d.description ? <p className="max-w-sm text-xs text-ink-500">{d.description}</p> : null}
                       </td>
-                      <td><span className="badge-slate">{d.category.toLowerCase()}</span></td>
+                      <td><span className="badge-slate">{readable(d.category)}</span></td>
                       <td><StatusBadge status={d.classification} /></td>
                       <td className="max-w-[10rem] text-xs">{d.tags ?? '—'}</td>
                       <td className="whitespace-nowrap text-xs">{formatBytes(d.sizeBytes)}</td>
@@ -112,13 +114,13 @@ export default async function RepositoryPage({
                         </a>
                         <form action={deleteRepositoryDocument} className="inline">
                           <input type="hidden" name="id" value={d.id} />
-                          <button type="submit" className="btn-ghost btn-sm text-red-700">Delete</button>
+                          <button type="submit" className="btn-ghost btn-sm text-[#9a2c20]">Delete</button>
                         </form>
                       </td>
                     </tr>
                   ))}
                   {documents.length === 0 ? (
-                    <tr><td colSpan={8} className="py-6 text-center text-sm text-slate-500">No documents filed.</td></tr>
+                    <tr><td colSpan={8} className="py-6 text-center text-sm text-ink-500">No documents filed.</td></tr>
                   ) : null}
                 </tbody>
               </table>

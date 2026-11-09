@@ -154,7 +154,7 @@ export function TemplateForm({
             hint={`Available variables: ${variables.map((v) => `{{${v}}}`).join(', ')}`}>
             <textarea name="body" rows={9} required defaultValue={body} className="textarea font-mono text-xs" />
           </Field>
-          <label className="flex items-center gap-2.5 text-sm text-slate-700">
+          <label className="flex items-center gap-2.5 text-sm text-ink-700">
             <input type="checkbox" name="active" value="true" defaultChecked={active} className="checkbox" />
             Template is active
           </label>

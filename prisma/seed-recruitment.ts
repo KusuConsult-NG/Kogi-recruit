@@ -18,6 +18,13 @@ interface SeedContext {
   extraPanel: string[];
   hash: string;
   applicantHash: string;
+  establishment: {
+    ministries: Record<string, string>;
+    ministryDepartments: Record<string, string>;
+    unitId: string;
+    paperId: string;
+    bankIds: Record<string, string>;
+  };
 }
 
 const A = APPLICATION_STATUS;
@@ -51,7 +58,7 @@ const COURSES = ['Public Administration', 'Accounting', 'Economics', 'Business A
 const EMPLOYERS = ['Kogi State Ministry of Education', 'Lokoja Local Government Council', 'Zenith Bank Plc', 'National Youth Service Corps', 'Dekina Local Government Council', 'Confluence Microfinance Bank', 'Kogi State Universal Basic Education Board', 'Private practice'];
 
 export async function seedRecruitment(prisma: PrismaClient, ctx: SeedContext): Promise<void> {
-  const { staff, departments } = ctx;
+  const { staff, departments, establishment } = ctx;
   const rand = rng(20260211);
 
   // -------------------------------------------------------------------------
@@ -296,7 +303,9 @@ export async function seedRecruitment(prisma: PrismaClient, ctx: SeedContext): P
   await prisma.vacancy.create({
     data: {
       exerciseId: closedExercise.id, jobTitle: 'Administrative Officer II', gradeLevel: 'GL 08',
-      departmentId: departments.DAS, positions: 20,
+      departmentId: departments.DAS,
+      ministryId: establishment.ministries.HOS,
+      positions: 20,
       qualifications: 'A degree (B.Sc, B.A) from a recognised university in any discipline, plus NYSC discharge or exemption certificate.',
       experience: 'No previous experience required.', minAge: 18, maxAge: 35,
     },
@@ -306,19 +315,31 @@ export async function seedRecruitment(prisma: PrismaClient, ctx: SeedContext): P
   // Vacancies for the live exercise
   // -------------------------------------------------------------------------
   const vacancySpecs = [
-    { jobTitle: 'Administrative Officer II', gradeLevel: 'GL 08', dept: 'DAS', positions: 35, qualifications: 'A degree (B.Sc, B.A) from a recognised university in any discipline, plus NYSC discharge or exemption certificate.', experience: 'No previous experience required.', minAge: 18, maxAge: 35, description: 'Provides general administrative support, handles correspondence, maintains records and services committee meetings.' },
-    { jobTitle: 'Accountant II', gradeLevel: 'GL 08', dept: 'DFA', positions: 18, qualifications: 'A degree (B.Sc) in Accounting or Accountancy from a recognised university, plus NYSC discharge or exemption certificate. Part qualification of ICAN or ANAN is an added advantage.', experience: 'Minimum of 1 year post-qualification experience is an advantage but not required.', minAge: 18, maxAge: 35, description: 'Maintains accounting records, processes payments, prepares financial returns and assists with budget preparation.' },
-    { jobTitle: 'Statistician II', gradeLevel: 'GL 08', dept: 'DPRS', positions: 12, qualifications: 'A degree (B.Sc) in Statistics, Mathematics, Economics or a related discipline, plus NYSC discharge or exemption certificate.', experience: 'Minimum of 2 years relevant experience.', minAge: 20, maxAge: 40, description: 'Collects, analyses and reports workforce and operational statistics; maintains the Commission management information.' },
-    { jobTitle: 'ICT Officer II', gradeLevel: 'GL 08', dept: 'ICT', positions: 10, qualifications: 'A degree (B.Sc) in Computer Science, Information Technology, Computer Engineering or a related discipline, plus NYSC discharge or exemption certificate.', experience: 'Minimum of 2 years relevant experience in systems or network support.', minAge: 20, maxAge: 40, description: 'Supports the Commission portal, systems, networks and digital records; provides user support and maintains data backups.' },
-    { jobTitle: 'Confidential Secretary II', gradeLevel: 'GL 07', dept: 'DAS', positions: 28, qualifications: 'HND or OND in Secretarial Studies or Office Technology and Management from a recognised institution, with proficiency in shorthand and word processing.', experience: 'No previous experience required.', minAge: 18, maxAge: 35, description: 'Provides secretarial and confidential support to directors and senior officers.' },
-    { jobTitle: 'Clerical Officer', gradeLevel: 'GL 06', dept: 'RDU', positions: 45, qualifications: 'SSCE, WASSCE or NECO with credit passes in at least five subjects including English Language and Mathematics.', experience: 'No previous experience required.', minAge: 18, maxAge: 30, description: 'Handles filing, record keeping, document retrieval and general clerical duties.' },
+    { jobTitle: 'Administrative Officer II', gradeLevel: 'GL 08', dept: 'DAS', mda: 'HOS', mdaDept: 'Establishment and Records', positions: 35, qualifications: 'A degree (B.Sc, B.A) from a recognised university in any discipline, plus NYSC discharge or exemption certificate.', experience: 'No previous experience required.', minAge: 18, maxAge: 35, description: 'Provides general administrative support, handles correspondence, maintains records and services committee meetings.' },
+    { jobTitle: 'Accountant II', gradeLevel: 'GL 08', dept: 'DFA', mda: 'MOF', mdaDept: 'Treasury', positions: 18, qualifications: 'A degree (B.Sc) in Accounting or Accountancy from a recognised university, plus NYSC discharge or exemption certificate. Part qualification of ICAN or ANAN is an added advantage.', experience: 'Minimum of 1 year post-qualification experience is an advantage but not required.', minAge: 18, maxAge: 35, description: 'Maintains accounting records, processes payments, prepares financial returns and assists with budget preparation.' },
+    { jobTitle: 'Statistician II', gradeLevel: 'GL 08', dept: 'DPRS', mda: 'MOE', mdaDept: 'Planning, Research and Statistics', positions: 12, qualifications: 'A degree (B.Sc) in Statistics, Mathematics, Economics or a related discipline, plus NYSC discharge or exemption certificate.', experience: 'Minimum of 2 years relevant experience.', minAge: 20, maxAge: 40, description: 'Collects, analyses and reports workforce and operational statistics; maintains the Commission management information.' },
+    { jobTitle: 'ICT Officer II', gradeLevel: 'GL 08', dept: 'ICT', mda: 'BIR', mdaDept: 'Taxpayer Services', positions: 10, qualifications: 'A degree (B.Sc) in Computer Science, Information Technology, Computer Engineering or a related discipline, plus NYSC discharge or exemption certificate.', experience: 'Minimum of 2 years relevant experience in systems or network support.', minAge: 20, maxAge: 40, description: 'Supports the Commission portal, systems, networks and digital records; provides user support and maintains data backups.' },
+    { jobTitle: 'Confidential Secretary II', gradeLevel: 'GL 07', dept: 'DAS', mda: 'MOH', mdaDept: 'Administration and Supplies', positions: 28, qualifications: 'HND or OND in Secretarial Studies or Office Technology and Management from a recognised institution, with proficiency in shorthand and word processing.', experience: 'No previous experience required.', minAge: 18, maxAge: 35, description: 'Provides secretarial and confidential support to directors and senior officers.' },
+    { jobTitle: 'Clerical Officer', gradeLevel: 'GL 06', dept: 'RDU', mda: 'MLG', mdaDept: 'Local Government Administration', positions: 45, qualifications: 'SSCE, WASSCE or NECO with credit passes in at least five subjects including English Language and Mathematics.', experience: 'No previous experience required.', minAge: 18, maxAge: 30, description: 'Handles filing, record keeping, document retrieval and general clerical duties.' },
   ];
+  await prisma.recruitmentExercise.update({
+    where: { id: exercise.id },
+    data: { unitId: establishment.unitId },
+  });
+  await prisma.recruitmentExercise.update({
+    where: { id: closedExercise.id },
+    data: { unitId: establishment.unitId },
+  });
+
   const vacancies: Array<{ id: string; jobTitle: string; gradeLevel: string; positions: number }> = [];
   for (const v of vacancySpecs) {
     const rec = await prisma.vacancy.create({
       data: {
         exerciseId: exercise.id, jobTitle: v.jobTitle, gradeLevel: v.gradeLevel,
-        departmentId: departments[v.dept], positions: v.positions,
+        departmentId: departments[v.dept],
+        ministryId: establishment.ministries[v.mda],
+        ministryDeptId: establishment.ministryDepartments[`${v.mda}:${v.mdaDept}`] ?? null,
+        positions: v.positions,
         qualifications: v.qualifications, experience: v.experience,
         minAge: v.minAge, maxAge: v.maxAge, description: v.description, active: true,
       },
@@ -881,7 +902,196 @@ export async function seedRecruitment(prisma: PrismaClient, ctx: SeedContext): P
       },
     },
   });
-  console.log(`  ✓ 2 examinations (1 completed with ${examCandidates.length} candidates across ${examSchedule.centres.length} centres)`);
+  console.log(`  ✓ 2 centre-based examinations (1 completed with ${examCandidates.length} candidates across ${examSchedule.centres.length} centres)`);
+
+  // -------------------------------------------------------------------------
+  // MODULE 2.6 (online) - A computer-based aptitude test open in the portal
+  // -------------------------------------------------------------------------
+  const cbtSchedule = await prisma.examSchedule.create({
+    data: {
+      exerciseId: exercise.id,
+      title: 'Computer-Based Aptitude Test — Batch 2',
+      examDate: days(0),
+      startTime: '08:00',
+      endTime: '18:00',
+      totalMarks: 100,
+      passMark: 50,
+      mode: 'CBT',
+      paperId: establishment.paperId,
+      durationMinutes: 45,
+      opensAt: days(-1),
+      closesAt: days(6),
+      instructions:
+        'This test is sat online in your applicant portal. You may begin at any time while the test is open. Once you begin, the clock runs for forty-five minutes without stopping, and the test is submitted automatically when the time is up. Ensure you have a steady internet connection and a quiet place before you begin.',
+      status: 'ONGOING',
+      createdById: staff[ROLES.EXAMINATION_OFFICER],
+      createdAt: days(-3),
+    },
+  });
+
+  /** Draw a candidate's paper the same way the live engine does. */
+  async function buildSittingItems(sittingId: string): Promise<Array<{ id: string; marks: number; correctOptionIds: string[] }>> {
+    const sections = await prisma.examPaperSection.findMany({
+      where: { paperId: establishment.paperId },
+      orderBy: { position: 'asc' },
+    });
+    const used: string[] = [];
+    const created: Array<{ id: string; marks: number; correctOptionIds: string[] }> = [];
+    let position = 0;
+
+    for (const section of sections) {
+      if (!section.bankId || !section.drawCount) continue;
+      const pool = await prisma.question.findMany({
+        where: { bankId: section.bankId, active: true, id: { notIn: used } },
+        include: { options: { orderBy: { position: 'asc' } } },
+        take: section.drawCount,
+      });
+      for (const q of pool) {
+        used.push(q.id);
+        position += 1;
+        const item = await prisma.examSittingQuestion.create({
+          data: {
+            sittingId,
+            questionId: q.id,
+            sectionTitle: section.title,
+            position,
+            marks: section.marksPerQuestion,
+            optionOrder: q.options.map((o) => o.id).join(','),
+          },
+        });
+        created.push({
+          id: item.id,
+          marks: section.marksPerQuestion,
+          correctOptionIds: q.options.filter((o) => o.correct).map((o) => o.id),
+        });
+      }
+    }
+    return created;
+  }
+
+  // Shortlisted candidates first, then qualified candidates, so there are
+  // always sittings a reviewer can actually open and attempt.
+  const cbtPool = [
+    ...seeded.filter((s) => s.status === A.SHORTLISTED),
+    ...seeded.filter((s) => s.status === A.QUALIFIED),
+  ].slice(0, 12);
+  let cbtSeq = 500;
+  let cbtSubmitted = 0;
+
+  for (const [index, cand] of cbtPool.entries()) {
+    cbtSeq += 1;
+    const examNumber = `KGE/2026/${pad(cbtSeq)}`;
+    const candidate = await prisma.examCandidate.create({
+      data: {
+        scheduleId: cbtSchedule.id,
+        applicationId: cand.applicationId,
+        examNumber,
+        attendance: 'PENDING',
+        notifiedAt: days(-2),
+        createdAt: days(-2),
+      },
+    });
+
+    // The first three candidates have already sat and submitted the test; the
+    // rest have the test released but not yet started, so it can be sat here.
+    const alreadySat = index < 2;
+    const sitting = await prisma.examSitting.create({
+      data: {
+        candidateId: candidate.id,
+        paperId: establishment.paperId,
+        status: 'NOT_STARTED',
+      },
+    });
+
+    if (alreadySat) {
+      const items = await buildSittingItems(sitting.id);
+      const startedAt = days(-1);
+      const expiresAt = new Date(startedAt.getTime() + 45 * 60_000);
+      const submittedAt = new Date(startedAt.getTime() + (28 + index * 4) * 60_000);
+
+      // A plausible performance: most answers correct, a few wrong or blank.
+      let raw = 0;
+      let answered = 0;
+      for (const [i, item] of items.entries()) {
+        const leaveBlank = i % 11 === 10;
+        if (leaveBlank) continue;
+        const answerCorrectly = (i + index) % 4 !== 0;
+        const chosen = answerCorrectly
+          ? item.correctOptionIds[0]
+          : (await prisma.questionOption.findFirst({
+              where: { questionId: (await prisma.examSittingQuestion.findUniqueOrThrow({ where: { id: item.id }, select: { questionId: true } })).questionId, correct: false },
+              select: { id: true },
+            }))?.id;
+        if (!chosen) continue;
+        answered += 1;
+        const correct = item.correctOptionIds.includes(chosen);
+        if (correct) raw += item.marks;
+        await prisma.examSittingQuestion.update({
+          where: { id: item.id },
+          data: {
+            selected: chosen,
+            correct,
+            awarded: correct ? item.marks : 0,
+            answeredAt: new Date(startedAt.getTime() + (i + 1) * 45_000),
+          },
+        });
+      }
+
+      const total = items.reduce((t, i) => t + i.marks, 0);
+      const percentage = total > 0 ? Math.round((raw / total) * 1000) / 10 : 0;
+      const scaled = Math.round(percentage * 10) / 10; // the schedule is marked out of 100
+
+      await prisma.examSitting.update({
+        where: { id: sitting.id },
+        data: {
+          status: 'SUBMITTED',
+          startedAt,
+          expiresAt,
+          submittedAt,
+          submittedBy: 'CANDIDATE',
+          totalMarks: total,
+          rawScore: raw,
+          percentage,
+          answeredCount: answered,
+          autoMarkedAt: submittedAt,
+          ipAddress: '197.210.0.1',
+          userAgent: 'Mozilla/5.0 (seed data)',
+        },
+      });
+      await prisma.examCandidate.update({
+        where: { id: candidate.id },
+        data: {
+          attendance: 'PRESENT',
+          score: scaled,
+          scoreEnteredAt: submittedAt,
+          validated: false,
+          remarks: `Marked automatically: ${raw} of ${total} (${percentage}%)`,
+        },
+      });
+      await prisma.application.update({
+        where: { id: cand.applicationId },
+        data: { examScore: scaled },
+      });
+      cbtSubmitted += 1;
+    }
+
+    await prisma.notification.create({
+      data: {
+        userId: cand.userId,
+        channel: 'EMAIL',
+        toAddress: cand.email,
+        subject: `Online aptitude test — ${examNumber}`,
+        body: `Dear ${cand.name},\n\nYou are invited to sit the computer-based aptitude test for the 2026 Kogi State Civil Service Recruitment Exercise.\n\nExamination number: ${examNumber}\nThe test is open from ${days(-1).toDateString()} until ${days(6).toDateString()}.\nTime allowed once you begin: 45 minutes.\n\nSign in to the applicant portal and open "Tests and Examinations" to begin. Ensure you have a steady internet connection before you start; the clock does not stop once the test has begun.\n\nKogi State Civil Service Commission`,
+        templateCode: 'EXAM_INVITATION',
+        status: 'SENT',
+        providerRef: 'log-transport',
+        sentAt: days(-2),
+        createdAt: days(-2),
+      },
+    });
+  }
+  console.log(`  ✓ 1 computer-based aptitude test released to ${cbtPool.length} candidates (${cbtSubmitted} already submitted, ${cbtPool.length - cbtSubmitted} awaiting their sitting)`);
+
 
   // -------------------------------------------------------------------------
   // MODULE 2.7 - Interview with panels and panel scores

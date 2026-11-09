@@ -247,7 +247,11 @@ describe('seeded recruitment exercise (Modules 2.1 – 2.8)', () => {
       expect(c.examNumber).toMatch(/^KGE\/\d{4}\/\d{6}$/);
       expect(numbers.has(c.examNumber)).toBe(false);
       numbers.add(c.examNumber);
-      expect(c.centre, `${c.examNumber} has no centre`).toBeTruthy();
+      // A centre is allocated for centre-based and hybrid examinations; a
+      // purely online test is sat in the applicant portal and has no centre.
+      if (c.schedule.mode === 'CENTRE') {
+        expect(c.centre, `${c.examNumber} has no centre`).toBeTruthy();
+      }
       if (c.attendance === 'PRESENT') {
         expect(c.score, `${c.examNumber} is present with no score`).not.toBeNull();
         expect(c.score!).toBeGreaterThanOrEqual(0);
@@ -544,5 +548,277 @@ describe('examination numbers are unique across the portal (regression)', () => 
         data: { scheduleId: other.id, applicationId: application.id, examNumber: taken },
       }),
     ).rejects.toThrow();
+  });
+});
+
+describe('establishment register (ministries, departments and agencies)', () => {
+  it('seeds a register of MDAs, every one with a code and a classification', async () => {
+    const ministries = await prisma.ministry.findMany();
+    expect(ministries.length).toBeGreaterThanOrEqual(10);
+    const codes = new Set<string>();
+    for (const m of ministries) {
+      expect(m.code.length).toBeGreaterThanOrEqual(2);
+      expect(codes.has(m.code), `${m.code} is duplicated`).toBe(false);
+      codes.add(m.code);
+      expect(['MINISTRY', 'EXTRA_MINISTERIAL', 'AGENCY', 'PARASTATAL', 'BOARD', 'COMMISSION'])
+        .toContain(m.kind);
+      expect(m.mandate, `${m.code} has no mandate`).toBeTruthy();
+      expect(m.headName, `${m.code} has no accounting officer`).toBeTruthy();
+    }
+  });
+
+  it('records departments inside each MDA', async () => {
+    const withDepartments = await prisma.ministry.findMany({
+      include: { _count: { select: { departments: true } } },
+    });
+    expect(withDepartments.every((m) => m._count.departments > 0)).toBe(true);
+  });
+
+  it('raises every active vacancy against an employing MDA', async () => {
+    const vacancies = await prisma.vacancy.findMany({
+      where: { active: true },
+      include: { ministry: true, ministryDept: true },
+    });
+    expect(vacancies.length).toBeGreaterThan(0);
+    for (const v of vacancies) {
+      expect(v.ministryId, `${v.jobTitle} has no employing MDA`).toBeTruthy();
+      expect(v.ministry).toBeTruthy();
+      // Where a department is named it must belong to the same MDA.
+      if (v.ministryDeptId) {
+        const dept = await prisma.ministryDepartment.findUniqueOrThrow({ where: { id: v.ministryDeptId } });
+        expect(dept.ministryId).toBe(v.ministryId);
+      }
+    }
+  });
+
+  it('can group the advertised posts by ministry', async () => {
+    const grouped = await prisma.vacancy.groupBy({
+      by: ['ministryId'],
+      where: { active: true },
+      _sum: { positions: true },
+    });
+    expect(grouped.length).toBeGreaterThan(1);
+    const total = grouped.reduce((s, g) => s + (g._sum.positions ?? 0), 0);
+    const all = await prisma.vacancy.aggregate({ where: { active: true }, _sum: { positions: true } });
+    expect(total).toBe(all._sum.positions);
+  });
+
+  it('refuses a second MDA with the same code', async () => {
+    const existing = await prisma.ministry.findFirstOrThrow();
+    await expect(
+      prisma.ministry.create({ data: { name: 'A different name entirely', code: existing.code } }),
+    ).rejects.toThrow();
+  });
+});
+
+describe('the recruitment unit', () => {
+  it('seeds a unit with a coordinator and members', async () => {
+    const unit = await prisma.recruitmentUnit.findFirstOrThrow({
+      include: { members: { include: { user: true } }, exercises: true },
+    });
+    expect(unit.active).toBe(true);
+    expect(unit.mandate).toBeTruthy();
+    expect(unit.members.length).toBeGreaterThanOrEqual(4);
+    expect(unit.members.some((m) => m.unitRole === 'COORDINATOR')).toBe(true);
+    expect(unit.members.some((m) => m.unitRole === 'EXAMINATION_LEAD')).toBe(true);
+    // No applicant may be a member of the unit.
+    expect(unit.members.every((m) => m.user.role !== ROLES.APPLICANT)).toBe(true);
+  });
+
+  it('places the live recruitment exercise under the unit', async () => {
+    const unit = await prisma.recruitmentUnit.findFirstOrThrow({ include: { exercises: true } });
+    expect(unit.exercises.length).toBeGreaterThan(0);
+    const published = unit.exercises.find((e) => e.status === EXERCISE_STATUS.PUBLISHED);
+    expect(published, 'the published exercise is not assigned to a unit').toBeTruthy();
+  });
+
+  it('refuses the same officer twice on one unit', async () => {
+    const member = await prisma.recruitmentUnitMember.findFirstOrThrow();
+    await expect(
+      prisma.recruitmentUnitMember.create({
+        data: { unitId: member.unitId, userId: member.userId, unitRole: 'MEMBER' },
+      }),
+    ).rejects.toThrow();
+  });
+});
+
+describe('question banks and examination papers', () => {
+  it('seeds banks whose every question has exactly one correct option', async () => {
+    const banks = await prisma.questionBank.findMany({
+      include: { questions: { include: { options: true } } },
+    });
+    expect(banks.length).toBeGreaterThanOrEqual(3);
+    for (const bank of banks) {
+      expect(bank.questions.length, `${bank.code} is empty`).toBeGreaterThan(0);
+      for (const q of bank.questions) {
+        expect(q.options.length, `a question in ${bank.code} has too few options`).toBeGreaterThanOrEqual(2);
+        const correct = q.options.filter((o) => o.correct);
+        expect(correct.length, `"${q.stem.slice(0, 40)}" has ${correct.length} correct options`).toBe(1);
+        expect(q.options.every((o) => o.text.trim().length > 0)).toBe(true);
+        expect(q.marks).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('publishes a paper whose sections can all be filled from their banks', async () => {
+    const paper = await prisma.examPaper.findFirstOrThrow({
+      where: { status: 'PUBLISHED' },
+      include: { sections: { include: { bank: { include: { _count: { select: { questions: true } } } } } } },
+    });
+    expect(paper.durationMinutes).toBeGreaterThanOrEqual(5);
+    expect(paper.passMark).toBeGreaterThan(0);
+    expect(paper.sections.length).toBeGreaterThan(0);
+    for (const section of paper.sections) {
+      if (section.drawCount) {
+        expect(section.bank, `${section.title} draws at random but has no bank`).toBeTruthy();
+        expect(
+          section.bank!._count.questions,
+          `${section.title} draws ${section.drawCount} from a bank of ${section.bank!._count.questions}`,
+        ).toBeGreaterThanOrEqual(section.drawCount);
+      }
+    }
+  });
+
+  it('refuses a second paper with the same code', async () => {
+    const existing = await prisma.examPaper.findFirstOrThrow();
+    await expect(
+      prisma.examPaper.create({ data: { title: 'Another paper', code: existing.code } }),
+    ).rejects.toThrow();
+  });
+});
+
+describe('the computer-based aptitude test', () => {
+  it('attaches a published paper to the online examination', async () => {
+    const schedule = await prisma.examSchedule.findFirstOrThrow({
+      where: { mode: 'CBT' },
+      include: { paper: true },
+    });
+    expect(schedule.paper).toBeTruthy();
+    expect(schedule.paper!.status).toBe('PUBLISHED');
+    expect(schedule.durationMinutes).toBeGreaterThan(0);
+    expect(schedule.opensAt).toBeTruthy();
+    expect(schedule.closesAt).toBeTruthy();
+    expect(schedule.closesAt!.getTime()).toBeGreaterThan(schedule.opensAt!.getTime());
+  });
+
+  it('releases a sitting to every allocated candidate on the online test', async () => {
+    const schedule = await prisma.examSchedule.findFirstOrThrow({
+      where: { mode: 'CBT' },
+      include: { candidates: { include: { sitting: true } } },
+    });
+    expect(schedule.candidates.length).toBeGreaterThan(0);
+    for (const candidate of schedule.candidates) {
+      expect(candidate.sitting, `${candidate.examNumber} has no sitting`).toBeTruthy();
+      expect(candidate.sitting!.paperId).toBe(schedule.paperId);
+    }
+  });
+
+  it('leaves some sittings unstarted so the test can actually be sat', async () => {
+    const waiting = await prisma.examSitting.count({ where: { status: 'NOT_STARTED' } });
+    expect(waiting).toBeGreaterThan(0);
+  });
+
+  it('marks a submitted sitting consistently with its answers', async () => {
+    const sittings = await prisma.examSitting.findMany({
+      where: { status: 'SUBMITTED' },
+      include: { items: true, candidate: true },
+    });
+    expect(sittings.length).toBeGreaterThan(0);
+
+    for (const sitting of sittings) {
+      expect(sitting.items.length).toBeGreaterThan(0);
+      const awarded = sitting.items.reduce((s, i) => s + i.awarded, 0);
+      const total = sitting.items.reduce((s, i) => s + i.marks, 0);
+      const answered = sitting.items.filter((i) => (i.selected ?? '').length > 0).length;
+
+      expect(sitting.rawScore).toBeCloseTo(awarded, 5);
+      expect(sitting.totalMarks).toBeCloseTo(total, 5);
+      expect(sitting.answeredCount).toBe(answered);
+      expect(sitting.percentage).toBeCloseTo((awarded / total) * 100, 1);
+      expect(sitting.submittedAt).toBeTruthy();
+      expect(sitting.startedAt!.getTime()).toBeLessThan(sitting.submittedAt!.getTime());
+
+      // Every awarded mark must be justified by a correct answer.
+      for (const item of sitting.items) {
+        if (item.awarded > 0) expect(item.correct).toBe(true);
+        if (item.correct === false) expect(item.awarded).toBe(0);
+        if (!item.selected) expect(item.awarded).toBe(0);
+      }
+    }
+  });
+
+  it('only shows a candidate options that were put in front of them', async () => {
+    const items = await prisma.examSittingQuestion.findMany({
+      where: { NOT: { selected: null } },
+      include: { question: { include: { options: true } } },
+      take: 50,
+    });
+    expect(items.length).toBeGreaterThan(0);
+    for (const item of items) {
+      const shown = item.optionOrder.split(',');
+      const ownOptionIds = item.question.options.map((o) => o.id);
+      expect(shown.length).toBe(ownOptionIds.length);
+      expect(shown.every((id) => ownOptionIds.includes(id))).toBe(true);
+      for (const chosen of (item.selected ?? '').split(',')) {
+        expect(shown, 'a candidate selected an option not shown to them').toContain(chosen);
+      }
+    }
+  });
+
+  it('writes the marked score back to the candidate and the application', async () => {
+    const sitting = await prisma.examSitting.findFirstOrThrow({
+      where: { status: 'SUBMITTED' },
+      include: { candidate: { include: { application: true, schedule: true } } },
+    });
+    const candidate = sitting.candidate;
+    expect(candidate.attendance).toBe('PRESENT');
+    expect(candidate.score).not.toBeNull();
+    expect(candidate.score!).toBeGreaterThanOrEqual(0);
+    expect(candidate.score!).toBeLessThanOrEqual(candidate.schedule.totalMarks);
+    expect(candidate.application.examScore).toBeCloseTo(candidate.score!, 5);
+    expect(candidate.remarks).toMatch(/Marked automatically/);
+  });
+
+  it('issues each sitting’s questions once only', async () => {
+    const sittings = await prisma.examSitting.findMany({ include: { items: true } });
+    for (const sitting of sittings) {
+      const ids = sitting.items.map((i) => i.questionId);
+      expect(new Set(ids).size, 'a question was repeated on one paper').toBe(ids.length);
+      const positions = sitting.items.map((i) => i.position).sort((a, b) => a - b);
+      if (positions.length > 0) {
+        expect(positions[0]).toBe(1);
+        expect(positions[positions.length - 1]).toBe(positions.length);
+      }
+    }
+  });
+
+  it('refuses a second sitting for the same candidate', async () => {
+    const sitting = await prisma.examSitting.findFirstOrThrow();
+    await expect(
+      prisma.examSitting.create({ data: { candidateId: sitting.candidateId, paperId: sitting.paperId } }),
+    ).rejects.toThrow();
+  });
+});
+
+describe('allocation to a purely online examination', () => {
+  it('allocates candidates to a computer-based test without a centre', async () => {
+    const schedule = await prisma.examSchedule.findFirstOrThrow({
+      where: { mode: 'CBT' },
+      include: { centres: true, candidates: true },
+    });
+    // A test sat in the applicant portal has no centres and no seats, so
+    // allocation must not depend on one.
+    expect(schedule.centres).toHaveLength(0);
+    expect(schedule.candidates.length).toBeGreaterThan(0);
+    for (const candidate of schedule.candidates) {
+      expect(candidate.centreId).toBeNull();
+      expect(candidate.seatNumber).toBeNull();
+      expect(candidate.examNumber).toMatch(/^KGE\/\d{4}\/\d{6}$/);
+    }
+  });
+
+  it('keeps examination numbers unique across centre-based and online tests', async () => {
+    const candidates = await prisma.examCandidate.findMany({ select: { examNumber: true } });
+    expect(new Set(candidates.map((c) => c.examNumber)).size).toBe(candidates.length);
   });
 });

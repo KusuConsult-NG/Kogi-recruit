@@ -284,3 +284,96 @@ enquiry is logged with a reference number and routed to the responsible officer.
 ---
 
 Kogi State Civil Service Commission · Civil Service Commission Secretariat, Lokoja, Kogi State
+
+---
+
+## Finding vacancies by ministry
+
+Every advertised post belongs to a ministry, extra-ministerial department,
+agency, parastatal, board or commission of the Kogi State Public Service. The
+Commission conducts the recruitment; the MDA is your prospective employer.
+
+Two routes are available:
+
+- **Ministries & Agencies** in the main menu lists every MDA, with its mandate,
+  its accounting officer, its departments and the number of posts it currently
+  has advertised. Each entry links straight to its vacancies.
+- On **Recruitment**, the filter at the top of the page narrows the exercises
+  and the posts shown to a single MDA.
+
+Each advertised position states the employing MDA and, where it has been
+recorded, the department inside it where the post sits.
+
+## Sitting an aptitude test or examination online
+
+Where the Commission requires a test, you may be invited to sit it online in
+this portal. **Tests and Examinations** in your portal menu lists everything you
+have been invited to.
+
+### Before you begin
+
+The page states, for each test: your examination number, the time allowed, when
+the test opens and when it closes. Read any instructions shown.
+
+Make sure before you begin that you have:
+
+- a steady internet connection;
+- a quiet place where you will not be interrupted;
+- enough battery or a power supply for the full duration.
+
+**The clock does not stop once you begin.** It runs for the stated number of
+minutes whether or not your browser is open, and the test is submitted
+automatically when the time is up.
+
+### While you are sitting the test
+
+- One question is shown at a time. Select your answer and choose **Save and
+  continue**. Where a question says *choose all that apply*, select every option
+  you consider correct.
+- Your answer is saved on the Commission's server each time you move to another
+  question. You will not lose answered questions if your connection drops.
+- The **question navigator** on the right shows every question: filled where you
+  have answered, plain where you have not, with a gold dot where you have
+  flagged it. Select any number to jump to that question.
+- **Flag this question for review** marks a question you want to come back to.
+  Flagging does not affect your answer or your score.
+- **Save and go back** returns to the previous question. You may revisit and
+  change any answer until you submit.
+- The countdown is always on screen. It turns amber with five minutes left and
+  red with one minute left.
+
+### Submitting
+
+Choose **Submit my test** when you are satisfied. You are warned if you have
+left questions unanswered, and you cannot return to the paper once it is
+submitted.
+
+If the time runs out first, your test is submitted automatically and everything
+you had answered is marked.
+
+### After you submit
+
+You are shown a record of your sitting: the number of questions on your paper,
+how many you answered, how many you left blank, when you started and when you
+submitted.
+
+Your score is shown immediately only where the Commission has set the paper to
+do so. Otherwise it is withheld, and you will be notified through the portal and
+by email when the results of the examination are published. Officers validate
+the scores for the whole examination before any result is treated as final.
+
+Keep your examination number for any correspondence about the sitting.
+
+### If something goes wrong
+
+- **Your connection drops** — sign in again and open **Tests and Examinations**.
+  If the clock has not run out, choose **Resume my test**; your saved answers
+  are intact.
+- **The clock ran out while you were disconnected** — the test is submitted and
+  marked automatically from what you had answered.
+- **The test will not open** — check the opening and closing times shown on the
+  page. If the window is open and you still cannot begin, contact the Commission
+  quoting your examination number.
+
+No payment of any kind is ever required to sit a test. Report any demand for
+payment to the Commission immediately.

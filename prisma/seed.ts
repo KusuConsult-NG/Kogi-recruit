@@ -280,6 +280,10 @@ async function main() {
     { category: 'DOCUMENTS', question: 'What file formats and sizes are accepted?', answer: 'PDF, JPEG and PNG are accepted for most documents. Each requirement states its own maximum size, commonly between 2MB and 8MB. Scan documents clearly — unreadable documents are returned for correction.' },
     { category: 'DOCUMENTS', question: 'One of my documents was rejected. What now?', answer: 'Open the application on your dashboard. The officer\'s remarks state what is wrong. Upload a corrected copy of the affected document and submit the application again before the closing date.' },
     { category: 'SCREENING', question: 'How are applications screened?', answer: 'Officers check completeness, eligibility, qualifications, experience and documents against the approved criteria for the vacancy. The system performs preliminary checks to assist officers, but **every final decision is recorded by an authorised Commission officer**.' },
+    { category: 'EXAMINATION', question: 'Is the test sat online or at a centre?', answer: 'Both are used. Your invitation states which applies. A **computer-based test** is sat in this portal, under **Tests and Examinations** in your dashboard: it opens for a stated window, and once you begin, the clock runs for the stated number of minutes without stopping. A **centre-based examination** is sat at the centre named on your invitation.' },
+    { category: 'EXAMINATION', question: 'What happens if my internet connection drops during an online test?', answer: 'Your answers are saved on the Commission\u2019s server each time you move to another question, so nothing already answered is lost. Sign in again and choose **Resume my test**. The clock does not stop, so reconnect as quickly as you can. If the time runs out while you are disconnected, the test is submitted automatically and whatever you had answered is marked.' },
+    { category: 'EXAMINATION', question: 'Can I go back and change an answer during an online test?', answer: 'Yes. Use the question navigator to move to any question, and **Save and go back** to return to the previous one. You may flag a question for review and return to it. Once you submit, the paper is closed and cannot be reopened.' },
+    { category: 'EXAMINATION', question: 'Will I see my score as soon as I submit?', answer: 'Only where the Commission has set the paper to show it. Otherwise your score is withheld until the results of the examination are released, and you are notified through the portal and by email. Scores are validated by an examination officer before any result is treated as final.' },
     { category: 'EXAMINATION', question: 'How will I know about the examination?', answer: 'Shortlisted candidates are notified by email and SMS with an examination number, date, reporting time and centre. The same details appear on your dashboard. Bring a valid means of identification and a printed copy of the invitation.' },
     { category: 'INTERVIEW', question: 'What should I bring to the interview?', answer: 'Bring the originals of every document you uploaded with your application, together with a valid means of identification. Arrive at the venue before your allocated reporting time.' },
     { category: 'OUTCOME', question: 'How are successful candidates decided?', answer: 'Examination and interview scores are combined using the weighting approved for the exercise, candidates are ranked, and the approved number of posts for each vacancy is filled by rank. The resulting selection list requires Commission approval before any candidate is notified.' },
@@ -342,8 +346,10 @@ async function main() {
 
 main()
   .then(async (ctx) => {
+    const { seedEstablishment } = await import('./seed-establishment');
+    const establishment = await seedEstablishment(prisma, ctx.staff);
     const { seedRecruitment } = await import('./seed-recruitment');
-    await seedRecruitment(prisma, ctx);
+    await seedRecruitment(prisma, { ...ctx, establishment });
     console.log('\nSeed complete.\n');
     console.log('Sign-in details (development only — change before deployment):');
     console.log(`  Super Administrator        superadmin@kogicsc.kg.gov.ng            ${DEFAULT_PASSWORD}`);

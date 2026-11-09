@@ -1,5 +1,7 @@
 import { prisma } from '@/lib/db';
-import { Card, CardBody, EmptyState, PageHeading } from '@/components/ui';
+import {
+  Card, CardBody, EmptyState, PageHeading, readable,
+} from '@/components/ui';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Departments and Units' };
@@ -27,37 +29,37 @@ export default async function DepartmentsPage() {
               <div className="card-header">
                 <div>
                   <h2 className="card-title">{d.name}</h2>
-                  {d.code ? <p className="mt-0.5 text-xs text-slate-500">Code: {d.code}</p> : null}
+                  {d.code ? <p className="mt-0.5 text-xs text-ink-500">Code: {d.code}</p> : null}
                 </div>
-                <span className="badge-slate">{d.kind.toLowerCase()}</span>
+                <span className="badge-slate">{readable(d.kind)}</span>
               </div>
               <CardBody>
-                {d.description ? <p className="text-sm text-slate-700">{d.description}</p> : null}
+                {d.description ? <p className="text-sm text-ink-700">{d.description}</p> : null}
                 <dl className="mt-3 grid grid-cols-1 gap-2 text-xs sm:grid-cols-2">
                   {d.headName ? (
                     <div>
-                      <dt className="text-slate-500">Head of department</dt>
-                      <dd className="font-medium text-slate-800">
+                      <dt className="text-ink-500">Head of department</dt>
+                      <dd className="font-medium text-ink-800">
                         {d.headName}{d.headTitle ? `, ${d.headTitle}` : ''}
                       </dd>
                     </div>
                   ) : null}
                   {d.email ? (
                     <div>
-                      <dt className="text-slate-500">Email</dt>
-                      <dd className="font-medium text-slate-800">{d.email}</dd>
+                      <dt className="text-ink-500">Email</dt>
+                      <dd className="font-medium text-ink-800">{d.email}</dd>
                     </div>
                   ) : null}
                   {d.phone ? (
                     <div>
-                      <dt className="text-slate-500">Telephone</dt>
-                      <dd className="font-medium text-slate-800">{d.phone}</dd>
+                      <dt className="text-ink-500">Telephone</dt>
+                      <dd className="font-medium text-ink-800">{d.phone}</dd>
                     </div>
                   ) : null}
                 </dl>
                 {d.children.length > 0 ? (
-                  <div className="mt-4 border-t border-slate-100 pt-3">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Units</p>
+                  <div className="mt-4 border-t border-ink-100 pt-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-ink-500">Units</p>
                     <ul className="mt-1.5 flex flex-wrap gap-1.5">
                       {d.children.map((c) => (
                         <li key={c.id} className="badge-green">{c.name}</li>

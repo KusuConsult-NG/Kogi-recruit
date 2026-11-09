@@ -2,7 +2,9 @@ import { prisma } from '@/lib/db';
 import { requirePagePermission } from '@/lib/page-guards';
 import { PERMISSIONS } from '@/lib/rbac';
 import { formatDate, formatDateInput } from '@/lib/format';
-import { Card, CardBody, PageHeading, StatCard, StatusBadge, Tabs } from '@/components/ui';
+import {
+  Card, CardBody, PageHeading, StatCard, StatusBadge, Tabs, readable,
+} from '@/components/ui';
 import { deleteCorrespondence } from '@/actions/records';
 import { CorrespondenceForm } from '../forms';
 
@@ -87,11 +89,11 @@ export default async function CorrespondencePage({
                     <tr key={r.id}>
                       <td className="whitespace-nowrap font-mono text-xs">{r.reference}</td>
                       <td>
-                        <p className="font-medium text-slate-900">{r.subject}</p>
-                        {r.body ? <p className="max-w-sm text-xs text-slate-500">{r.body.slice(0, 120)}</p> : null}
+                        <p className="font-medium text-ink-950">{r.subject}</p>
+                        {r.body ? <p className="max-w-sm text-xs text-ink-500">{r.body.slice(0, 120)}</p> : null}
                       </td>
                       <td className="text-xs">{r.party}</td>
-                      <td><span className="badge-slate">{r.direction.toLowerCase()}</span></td>
+                      <td><span className="badge-slate">{readable(r.direction)}</span></td>
                       <td><StatusBadge status={r.classification} /></td>
                       <td><StatusBadge status={r.status} /></td>
                       <td className="whitespace-nowrap text-xs">{formatDate(r.receivedAt)}</td>
@@ -99,13 +101,13 @@ export default async function CorrespondencePage({
                       <td>
                         <form action={deleteCorrespondence}>
                           <input type="hidden" name="id" value={r.id} />
-                          <button type="submit" className="btn-ghost btn-sm text-red-700">Delete</button>
+                          <button type="submit" className="btn-ghost btn-sm text-[#9a2c20]">Delete</button>
                         </form>
                       </td>
                     </tr>
                   ))}
                   {records.length === 0 ? (
-                    <tr><td colSpan={9} className="py-6 text-center text-sm text-slate-500">No correspondence records.</td></tr>
+                    <tr><td colSpan={9} className="py-6 text-center text-sm text-ink-500">No correspondence records.</td></tr>
                   ) : null}
                 </tbody>
               </table>

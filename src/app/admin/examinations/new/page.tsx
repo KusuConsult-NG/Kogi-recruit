@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/db';
 import { requirePagePermission } from '@/lib/page-guards';
 import { PERMISSIONS } from '@/lib/rbac';
-import { EXERCISE_STATUS } from '@/lib/constants';
+import { EXERCISE_STATUS, PAPER_KIND_LABELS, PAPER_STATUS } from '@/lib/constants';
 import { Alert, Card, CardBody, PageHeading } from '@/components/ui';
 import { ExamScheduleForm } from '../forms';
 
@@ -10,17 +10,25 @@ export const metadata = { title: 'New Examination' };
 
 export default async function NewExamPage() {
   await requirePagePermission(PERMISSIONS.EXAM_MANAGE);
-  const exercises = await prisma.recruitmentExercise.findMany({
-    where: { status: { in: [EXERCISE_STATUS.PUBLISHED, EXERCISE_STATUS.CLOSED, EXERCISE_STATUS.SUSPENDED] } },
-    orderBy: { createdAt: 'desc' },
-    select: { id: true, reference: true, title: true, requireExam: true },
-  });
+  const [exercises, papers] = await Promise.all([
+    prisma.recruitmentExercise.findMany({
+      where: { status: { in: [EXERCISE_STATUS.PUBLISHED, EXERCISE_STATUS.CLOSED, EXERCISE_STATUS.SUSPENDED] } },
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, reference: true, title: true, requireExam: true },
+    }),
+    prisma.examPaper.findMany({
+      where: { status: PAPER_STATUS.PUBLISHED },
+      orderBy: { title: 'asc' },
+      select: { id: true, title: true, code: true, durationMinutes: true, kind: true },
+    }),
+  ]);
 
   return (
     <>
       <PageHeading
         title="New Examination"
-        description="Stage 7 — configure the examination schedule. Centres and candidates are added next."
+        eyebrow="Stage 7 · Examination and assessment"
+        description="Configure the examination. A centre-based examination takes scores entered by officers; a computer-based test is sat online in the applicant portal and marked automatically."
         breadcrumb={[{ label: 'Examinations', href: '/admin/examinations' }, { label: 'New' }]}
       />
       {exercises.length === 0 ? (
@@ -35,6 +43,11 @@ export default async function NewExamPage() {
               exercises={exercises.map((e) => ({
                 id: e.id,
                 label: `${e.reference} — ${e.title}${e.requireExam ? '' : ' (examination not flagged for this exercise)'}`,
+              }))}
+              papers={papers.map((p) => ({
+                id: p.id,
+                label: `${p.title} (${p.code}) — ${PAPER_KIND_LABELS[p.kind] ?? p.kind}`,
+                durationMinutes: p.durationMinutes,
               }))}
             />
           </CardBody>

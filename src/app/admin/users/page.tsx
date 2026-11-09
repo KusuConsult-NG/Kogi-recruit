@@ -112,16 +112,16 @@ export default async function UsersAdmin({
                   return (
                     <tr key={u.id} className={u.active ? '' : 'opacity-60'}>
                       <td>
-                        <p className="font-medium text-slate-900">{u.fullName}</p>
-                        {u.title ? <p className="text-xs text-slate-500">{u.title}</p> : null}
-                        {u.staffNumber ? <p className="text-xs text-slate-500">{u.staffNumber}</p> : null}
+                        <p className="font-medium text-ink-950">{u.fullName}</p>
+                        {u.title ? <p className="text-xs text-ink-500">{u.title}</p> : null}
+                        {u.staffNumber ? <p className="text-xs text-ink-500">{u.staffNumber}</p> : null}
                       </td>
                       <td className="text-xs">{u.email}</td>
                       <td className="text-xs">{ROLE_LABELS[u.role as Role] ?? u.role}</td>
                       {view === 'staff' ? (
                         <>
                           <td className="text-xs">{u.department?.name ?? '—'}</td>
-                          <td>{u.permissions.length > 0 ? <span className="badge-blue">{u.permissions.length}</span> : <span className="text-xs text-slate-400">none</span>}</td>
+                          <td>{u.permissions.length > 0 ? <span className="badge-blue">{u.permissions.length}</span> : <span className="text-xs text-ink-400">none</span>}</td>
                           <td className="text-xs">{u._count.screeningAssignments} screening</td>
                         </>
                       ) : (

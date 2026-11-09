@@ -3,7 +3,9 @@ import { prisma } from '@/lib/db';
 import { requirePagePermission } from '@/lib/page-guards';
 import { hasPermission, PERMISSIONS } from '@/lib/rbac';
 import { formatDateTime } from '@/lib/format';
-import { Card, CardBody, PageHeading, StatCard, StatusBadge } from '@/components/ui';
+import {
+  Card, CardBody, PageHeading, StatCard, StatusBadge, readable,
+} from '@/components/ui';
 import { BatchActionForm, BatchForm, DirectForm } from './forms';
 
 export const dynamic = 'force-dynamic';
@@ -77,13 +79,13 @@ export default async function NotificationsAdmin() {
                   {batches.map((b) => (
                     <tr key={b.id}>
                       <td>
-                        <p className="font-medium text-slate-900">{b.title}</p>
-                        <p className="text-xs text-slate-500">{b.subject}</p>
+                        <p className="font-medium text-ink-950">{b.title}</p>
+                        <p className="text-xs text-ink-500">{b.subject}</p>
                       </td>
-                      <td><span className="badge-slate">{b.channel.toLowerCase()}</span></td>
+                      <td><span className="badge-slate">{readable(b.channel)}</span></td>
                       <td>{b.totalCount}</td>
                       <td>{b.sentCount}</td>
-                      <td className={b.failedCount ? 'font-semibold text-red-700' : ''}>{b.failedCount}</td>
+                      <td className={b.failedCount ? 'font-semibold text-[#9a2c20]' : ''}>{b.failedCount}</td>
                       <td><StatusBadge status={b.status} /></td>
                       <td className="whitespace-nowrap text-xs">{formatDateTime(b.createdAt)}</td>
                       <td className="whitespace-nowrap">
@@ -100,7 +102,7 @@ export default async function NotificationsAdmin() {
                             ) : null}
                           </>
                         ) : (
-                          <span className="text-xs text-slate-400">
+                          <span className="text-xs text-ink-400">
                             {b.sentAt ? formatDateTime(b.sentAt) : '—'}
                           </span>
                         )}
@@ -108,7 +110,7 @@ export default async function NotificationsAdmin() {
                     </tr>
                   ))}
                   {batches.length === 0 ? (
-                    <tr><td colSpan={8} className="py-6 text-center text-sm text-slate-500">
+                    <tr><td colSpan={8} className="py-6 text-center text-sm text-ink-500">
                       No batches prepared yet.
                     </td></tr>
                   ) : null}
@@ -131,18 +133,18 @@ export default async function NotificationsAdmin() {
                   {recent.map((n) => (
                     <tr key={n.id}>
                       <td className="text-xs">
-                        <p className="font-medium text-slate-900">{n.user?.fullName ?? n.toAddress ?? '—'}</p>
-                        <p className="text-slate-500">{n.toAddress}</p>
+                        <p className="font-medium text-ink-950">{n.user?.fullName ?? n.toAddress ?? '—'}</p>
+                        <p className="text-ink-500">{n.toAddress}</p>
                       </td>
-                      <td><span className="badge-slate">{n.channel.toLowerCase()}</span></td>
+                      <td><span className="badge-slate">{readable(n.channel)}</span></td>
                       <td className="max-w-xs truncate text-xs">{n.subject}</td>
                       <td><StatusBadge status={n.status} /></td>
                       <td className="whitespace-nowrap text-xs">{n.sentAt ? formatDateTime(n.sentAt) : '—'}</td>
-                      <td className="max-w-[12rem] truncate text-xs text-red-700">{n.error ?? ''}</td>
+                      <td className="max-w-[12rem] truncate text-xs text-[#9a2c20]">{n.error ?? ''}</td>
                     </tr>
                   ))}
                   {recent.length === 0 ? (
-                    <tr><td colSpan={6} className="py-6 text-center text-sm text-slate-500">No messages recorded.</td></tr>
+                    <tr><td colSpan={6} className="py-6 text-center text-sm text-ink-500">No messages recorded.</td></tr>
                   ) : null}
                 </tbody>
               </table>
@@ -172,7 +174,7 @@ export default async function NotificationsAdmin() {
 
           <Card>
             <div className="card-header"><h2 className="card-title">About SMS</h2></div>
-            <CardBody className="text-xs leading-relaxed text-slate-600">
+            <CardBody className="text-xs leading-relaxed text-ink-600">
               SMS is delivered through an approved gateway configured in the environment. SMS
               transaction charges are separate from the product cost unless expressly included in the
               final contract. Delivery records are retained wherever the gateway supports them.

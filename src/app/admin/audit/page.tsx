@@ -156,11 +156,11 @@ export default async function AuditPage({
               </thead>
               <tbody>
                 {logs.map((l) => (
-                  <tr key={l.id} className={l.sensitive ? 'bg-amber-50/40' : ''}>
+                  <tr key={l.id} className={l.sensitive ? 'bg-gold-50/40' : ''}>
                     <td className="whitespace-nowrap text-xs">{formatDateTime(l.createdAt)}</td>
                     <td className="text-xs">
-                      <p className="font-medium text-slate-900">{l.actorName ?? 'System'}</p>
-                      {l.actorRole ? <p className="text-slate-500">{l.actorRole.replace(/_/g, ' ').toLowerCase()}</p> : null}
+                      <p className="font-medium text-ink-950">{l.actorName ?? 'System'}</p>
+                      {l.actorRole ? <p className="text-ink-500">{l.actorRole.replace(/_/g, ' ').toLowerCase()}</p> : null}
                     </td>
                     <td>
                       <span className={l.sensitive ? 'badge-amber' : 'badge-slate'}>
@@ -169,10 +169,10 @@ export default async function AuditPage({
                     </td>
                     <td className="text-xs">
                       {l.entityType ?? '—'}
-                      {l.entityId ? <p className="font-mono text-[10px] text-slate-400">{l.entityId.slice(0, 12)}…</p> : null}
+                      {l.entityId ? <p className="font-mono text-2xs text-ink-400">{l.entityId.slice(0, 12)}…</p> : null}
                     </td>
                     <td className="max-w-lg text-xs">{l.summary ?? '—'}</td>
-                    <td className="whitespace-nowrap font-mono text-[11px]">{l.ipAddress ?? '—'}</td>
+                    <td className="whitespace-nowrap font-mono text-2xs">{l.ipAddress ?? '—'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -182,7 +182,7 @@ export default async function AuditPage({
             params={{ action: sp.action, user: sp.user, entity: sp.entity, from: sp.from, to: sp.to }} />
         </Card>
       )}
-      <p className="mt-3 text-xs text-slate-500">
+      <p className="mt-3 text-xs text-ink-500">
         {total.toLocaleString('en-NG')} record(s) match the current filters. Audit records cannot be
         edited or deleted from the portal.
       </p>

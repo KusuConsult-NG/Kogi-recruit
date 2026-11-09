@@ -126,7 +126,7 @@ export default async function InterviewDetailPage({ params }: { params: Promise<
             </div>
             <CardBody>
               {visibleCandidates.length === 0 ? (
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-ink-600">
                   {canManage
                     ? 'No candidates scheduled yet. Create a panel, then schedule candidates below.'
                     : 'No candidates have been assigned to your panel yet.'}
@@ -141,18 +141,18 @@ export default async function InterviewDetailPage({ params }: { params: Promise<
                       hasPermission(user, PERMISSIONS.INTERVIEW_SCORE) &&
                       Boolean(c.panelId && myPanelIds.has(c.panelId));
                     return (
-                      <li key={c.id} className="rounded-lg border border-slate-200 p-4">
+                      <li key={c.id} className="rounded-lg border border-ink-200 p-4">
                         <div className="flex flex-wrap items-start justify-between gap-3">
                           <div>
                             <Link href={`/admin/applications/${c.application.id}`} className="text-sm font-semibold text-kogi-700 hover:underline">
                               {c.application.applicant.fullName}
                             </Link>
-                            <p className="mt-0.5 text-xs text-slate-500">
+                            <p className="mt-0.5 text-xs text-ink-500">
                               <span className="font-mono">{c.application.reference}</span> ·{' '}
                               {c.application.vacancy ? `${c.application.vacancy.jobTitle} (${c.application.vacancy.gradeLevel})` : '—'} ·{' '}
                               {c.application.applicant.applicantProfile?.lga ?? '—'}
                             </p>
-                            <p className="mt-0.5 text-xs text-slate-500">
+                            <p className="mt-0.5 text-xs text-ink-500">
                               {c.panel?.name ?? 'No panel'} · slot {c.slotTime ?? '—'}
                               {c.application.examScore !== null ? ` · examination score ${c.application.examScore}` : ''}
                             </p>
@@ -179,14 +179,14 @@ export default async function InterviewDetailPage({ params }: { params: Promise<
                             ))}
                           </ul>
                         ) : null}
-                        {c.remarks ? <p className="mt-2 text-xs text-slate-600">Remarks: {c.remarks}</p> : null}
+                        {c.remarks ? <p className="mt-2 text-xs text-ink-600">Remarks: {c.remarks}</p> : null}
 
                         {canScoreThis ? (
                           <details className="mt-3" open={!myScore}>
                             <summary className="cursor-pointer text-sm font-medium text-kogi-700">
                               {myScore ? 'Update my assessment' : 'Record my assessment'}
                             </summary>
-                            <div className="mt-3 rounded-md border border-slate-200 bg-slate-50 p-3">
+                            <div className="mt-3 rounded-md border border-ink-200 bg-ink-50 p-3">
                               <InterviewScoreForm
                                 candidateId={c.id}
                                 criteria={criteria}
@@ -259,13 +259,13 @@ export default async function InterviewDetailPage({ params }: { params: Promise<
                   { label: 'Pass mark', value: schedule.passMark },
                 ]}
               />
-              <div className="mt-3 border-t border-slate-100 pt-3">
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Assessment criteria</p>
+              <div className="mt-3 border-t border-ink-100 pt-3">
+                <p className="text-xs font-medium uppercase tracking-wide text-ink-500">Assessment criteria</p>
                 <ul className="mt-1.5 space-y-1">
                   {criteria.map((c) => (
                     <li key={c.key} className="flex justify-between text-xs">
-                      <span className="text-slate-700">{c.label}</span>
-                      <span className="font-semibold text-slate-900">{c.maxScore}</span>
+                      <span className="text-ink-700">{c.label}</span>
+                      <span className="font-semibold text-ink-950">{c.maxScore}</span>
                     </li>
                   ))}
                 </ul>
@@ -280,15 +280,15 @@ export default async function InterviewDetailPage({ params }: { params: Promise<
             </div>
             <CardBody className="space-y-4">
               {schedule.panels.length === 0 ? (
-                <p className="text-sm text-slate-600">No panels configured.</p>
+                <p className="text-sm text-ink-600">No panels configured.</p>
               ) : (
-                <ul className="divide-y divide-slate-100">
+                <ul className="divide-y divide-ink-100">
                   {schedule.panels.map((p) => (
                     <li key={p.id} className="py-3 first:pt-0 last:pb-0">
                       <div className="flex flex-wrap items-start justify-between gap-2">
                         <div>
-                          <p className="text-sm font-medium text-slate-900">{p.name}</p>
-                          <p className="text-xs text-slate-500">
+                          <p className="text-sm font-medium text-ink-950">{p.name}</p>
+                          <p className="text-xs text-ink-500">
                             {p.roomVenue ? `${p.roomVenue} · ` : ''}{p._count.candidates} candidate(s)
                           </p>
                           <ul className="mt-1 flex flex-wrap gap-1">
@@ -302,7 +302,7 @@ export default async function InterviewDetailPage({ params }: { params: Promise<
                         {canManage && p._count.candidates === 0 ? (
                           <form action={deletePanel}>
                             <input type="hidden" name="id" value={p.id} />
-                            <button type="submit" className="btn-ghost btn-sm text-red-700">Remove</button>
+                            <button type="submit" className="btn-ghost btn-sm text-[#9a2c20]">Remove</button>
                           </form>
                         ) : null}
                       </div>
@@ -325,7 +325,7 @@ export default async function InterviewDetailPage({ params }: { params: Promise<
             <Card>
               <div className="card-header"><h2 className="card-title">Next step</h2></div>
               <CardBody>
-                <p className="text-sm text-slate-700">
+                <p className="text-sm text-ink-700">
                   Interview assessments have been consolidated. Prepare the final selection list to
                   combine examination and interview results.
                 </p>

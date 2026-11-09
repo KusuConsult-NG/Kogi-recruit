@@ -3,7 +3,9 @@ import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/db';
 import { formatDateTime } from '@/lib/format';
 import { formatBytes } from '@/lib/storage';
-import { Card, CardBody, PageHeading } from '@/components/ui';
+import {
+  Card, CardBody, PageHeading, readable,
+} from '@/components/ui';
 import { RichText } from '@/components/rich-text';
 
 export const dynamic = 'force-dynamic';
@@ -44,8 +46,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         <div className="lg:col-span-2">
           <Card>
             <CardBody>
-              <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 pb-4 text-xs text-slate-500">
-                <span className="badge-green">{article.type.replace(/_/g, ' ').toLowerCase()}</span>
+              <div className="flex flex-wrap items-center gap-2 border-b border-ink-100 pb-4 text-xs text-ink-500">
+                <span className="badge-green">{readable(article.type)}</span>
                 <span>Published {formatDateTime(article.publishedAt)}</span>
                 {article.author ? <span>· by {article.author.fullName}</span> : null}
               </div>
@@ -59,17 +61,17 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
               </div>
 
               {article.attachments.length > 0 ? (
-                <div className="mt-6 border-t border-slate-200 pt-4">
-                  <h2 className="text-sm font-semibold text-slate-900">Attachments</h2>
+                <div className="mt-6 border-t border-ink-200 pt-4">
+                  <h2 className="text-sm font-semibold text-ink-950">Attachments</h2>
                   <ul className="mt-2 space-y-2">
                     {article.attachments.map((att) => (
                       <li key={att.id}>
                         <a
                           href={`/api/files/article/${att.id}`}
-                          className="flex items-center justify-between gap-3 rounded-md border border-slate-200 px-3 py-2 text-sm hover:border-kogi-400 hover:bg-kogi-50"
+                          className="flex items-center justify-between gap-3 rounded-md border border-ink-200 px-3 py-2 text-sm hover:border-kogi-400 hover:bg-kogi-50"
                         >
-                          <span className="font-medium text-slate-800">{att.label}</span>
-                          <span className="text-xs text-slate-500">{formatBytes(att.sizeBytes)}</span>
+                          <span className="font-medium text-ink-800">{att.label}</span>
+                          <span className="text-xs text-ink-500">{formatBytes(att.sizeBytes)}</span>
                         </a>
                       </li>
                     ))}
@@ -87,8 +89,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
               <CardBody>
                 <ul className="space-y-3">
                   {related.map((r) => (
-                    <li key={r.id} className="border-b border-slate-100 pb-3 last:border-0 last:pb-0">
-                      <Link href={`/news/${r.slug}`} className="text-sm font-medium text-slate-800 hover:text-kogi-700 hover:underline">
+                    <li key={r.id} className="border-b border-ink-100 pb-3 last:border-0 last:pb-0">
+                      <Link href={`/news/${r.slug}`} className="text-sm font-medium text-ink-800 hover:text-kogi-700 hover:underline">
                         {r.title}
                       </Link>
                     </li>

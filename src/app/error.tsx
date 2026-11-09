@@ -10,7 +10,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   return (
-    <div className="min-h-screen bg-slate-100 py-16">
+    <div className="min-h-screen bg-ink-100 py-16">
       <ErrorScreen error={error} reset={reset} />
     </div>
   );

@@ -5,7 +5,9 @@ import { requirePagePermission } from '@/lib/page-guards';
 import { hasPermission, PERMISSIONS } from '@/lib/rbac';
 import { formatDateTime } from '@/lib/format';
 import { formatBytes } from '@/lib/storage';
-import { Alert, Card, CardBody, DescriptionList, PageHeading, StatusBadge } from '@/components/ui';
+import {
+  Alert, Card, CardBody, DescriptionList, PageHeading, StatusBadge, readable,
+} from '@/components/ui';
 import { deleteArticle, deleteArticleAttachment } from '@/actions/content';
 import { ArticleForm, ArticleStatusForm } from '../forms';
 
@@ -27,7 +29,7 @@ export default async function EditArticlePage({ params }: { params: Promise<{ id
     <>
       <PageHeading
         title={article.title}
-        description={`${article.type.replace(/_/g, ' ').toLowerCase()} · last updated ${formatDateTime(article.updatedAt)}`}
+        description={`${readable(article.type)} · last updated ${formatDateTime(article.updatedAt)}`}
         breadcrumb={[{ label: 'News & Notices', href: '/admin/content' }, { label: article.title.slice(0, 40) }]}
         actions={
           <>
@@ -62,7 +64,7 @@ export default async function EditArticlePage({ params }: { params: Promise<{ id
                   }}
                 />
               ) : (
-                <pre className="whitespace-pre-wrap text-sm text-slate-700">{article.body}</pre>
+                <pre className="whitespace-pre-wrap text-sm text-ink-700">{article.body}</pre>
               )}
             </CardBody>
           </Card>
@@ -83,8 +85,8 @@ export default async function EditArticlePage({ params }: { params: Promise<{ id
                   { label: 'Views', value: article.viewCount },
                 ]}
               />
-              <div className="space-y-2 border-t border-slate-200 pt-3">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Actions</p>
+              <div className="space-y-2 border-t border-ink-200 pt-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-ink-500">Actions</p>
                 {article.status === 'DRAFT' && canManage && !canPublish ? (
                   <ArticleStatusForm id={article.id} to="PENDING_APPROVAL" label="Submit for approval" tone="btn-primary" />
                 ) : null}
@@ -122,9 +124,9 @@ export default async function EditArticlePage({ params }: { params: Promise<{ id
             </div>
             <CardBody>
               {article.attachments.length === 0 ? (
-                <p className="text-sm text-slate-600">No attachments. Add them from the form on the left.</p>
+                <p className="text-sm text-ink-600">No attachments. Add them from the form on the left.</p>
               ) : (
-                <ul className="divide-y divide-slate-100">
+                <ul className="divide-y divide-ink-100">
                   {article.attachments.map((att) => (
                     <li key={att.id} className="flex flex-wrap items-center justify-between gap-2 py-2.5 first:pt-0 last:pb-0">
                       <div>
@@ -132,12 +134,12 @@ export default async function EditArticlePage({ params }: { params: Promise<{ id
                           className="text-sm font-medium text-kogi-700 underline">
                           {att.label}
                         </a>
-                        <p className="text-xs text-slate-500">{formatBytes(att.sizeBytes)}</p>
+                        <p className="text-xs text-ink-500">{formatBytes(att.sizeBytes)}</p>
                       </div>
                       {canManage ? (
                         <form action={deleteArticleAttachment}>
                           <input type="hidden" name="id" value={att.id} />
-                          <button type="submit" className="btn-ghost btn-sm text-red-700">Remove</button>
+                          <button type="submit" className="btn-ghost btn-sm text-[#9a2c20]">Remove</button>
                         </form>
                       ) : null}
                     </li>

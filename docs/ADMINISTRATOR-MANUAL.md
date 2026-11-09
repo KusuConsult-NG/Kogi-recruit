@@ -490,3 +490,186 @@ record itself to approve or return it.
 ---
 
 Kogi State Civil Service Commission · restricted administrative area
+
+---
+
+## The establishment register: ministries, departments and agencies
+
+Every vacancy in the portal is raised for the ministry, extra-ministerial
+department, agency, parastatal, board or commission that carries the approved
+post. The register of those MDAs is maintained at **Establishment → Ministries &
+Agencies** and requires the `mda.manage` permission; officers with `mda.view`
+can read it.
+
+### Adding an MDA
+
+1. Open **Establishment → Ministries & Agencies** and choose **Add an MDA**.
+2. Give the full official name, a short code (used on vacancy references and
+   reports — for example `MOE`) and the classification.
+3. Record the accounting officer: ordinarily the Permanent Secretary of a
+   ministry, the Director-General of an extra-ministerial department, or the
+   Executive Secretary or Chairman of an agency, board or commission.
+4. Record the contact details, office address and Local Government Area. These
+   appear in the public MDA directory at `/ministries`.
+5. State the statutory mandate. This is public-facing text and should be the
+   MDA's own wording.
+6. Decide two things:
+   - **Show in the public directory** — whether the MDA appears at `/ministries`.
+   - **Available for new vacancies** — whether officers may raise vacancies
+     against it.
+
+### Departments inside an MDA
+
+On the MDA's own page, record the departments, divisions and units that carry
+posts. A vacancy may then name the department the post sits in, which appears on
+the public advertisement and on the applicant's record.
+
+A department that has vacancies against it cannot be removed; the control is
+withheld so the record stands.
+
+### Retiring an MDA
+
+Choosing **Retire this MDA** on an MDA that has vacancies marks it inactive and
+unlisted rather than deleting it, so historical vacancies and applications keep
+their employing MDA. An MDA with no vacancies is removed outright. Either way
+the action is written to the audit trail.
+
+### Reporting by MDA
+
+**Reports & Analytics** carries two establishment views:
+
+- *Applications by employing MDA* — where the applications went.
+- *Approved posts advertised by MDA* — where the establishment was spent.
+
+Both respect the exercise filter at the top of the page, and both are included
+in the PDF, Excel and CSV exports of the exercise report.
+
+## The recruitment unit
+
+Recruitment is managed by a standing unit rather than by individuals acting
+alone. **Establishment → Recruitment Unit** (permission `unit.manage`) holds the
+unit, its mandate and its membership.
+
+### Establishing the unit
+
+Give the unit a name, a short code and its mandate. The mandate should state what
+the unit is answerable for across an exercise — confirming approved vacancies
+with the MDAs, publishing advertisements, allocating applications for screening,
+setting and conducting tests, convening panels, preparing selection lists for
+approval, and closing and archiving the exercise.
+
+### Membership
+
+Officers are assigned to the unit in a named role: Unit Coordinator, Deputy
+Coordinator, Unit Secretary, Screening Lead, Examination Lead, Interview Lead,
+Records Officer or Unit Member. Applicants and deactivated accounts cannot be
+assigned.
+
+Removing an officer does not erase the record: the membership is closed with an
+end date and moves to **Past membership**, so it is always possible to say who
+was answerable for a stage at a given time.
+
+### Placing an exercise under the unit
+
+Open the exercise and use **Managing recruitment unit** to assign it. The unit's
+page then lists every exercise under its management, with the vacancies raised
+and the applications handled.
+
+## Setting examinations and aptitude tests
+
+Examinations are set in two steps: questions are collected into **banks**, and
+banks are drawn on by **papers**. Both require the `exam.set` permission, which
+the Recruitment Director, Recruitment Officer and Examination Officer hold.
+
+### Question banks
+
+Create one bank per subject — numerical reasoning, verbal reasoning and use of
+English, civil service rules and public administration, computer appreciation, or
+a professional subject. Each question carries its type, difficulty, marks, an
+optional topic and an explanation kept for moderation (never shown to a
+candidate during a test).
+
+Three question types are supported:
+
+- **Single answer** — one correct option.
+- **Multiple answers** — two or more correct options. Marking is all or nothing:
+  a candidate must select every correct option and no incorrect one.
+- **True or false** — exactly two options.
+
+A question that has been answered by a candidate cannot be deleted; it is
+withdrawn from use instead, so the sittings that used it keep their record.
+
+### Importing a batch of questions
+
+Rather than typing questions one at a time, paste them in the Commission's
+plain-text format:
+
+```
+In which Local Government Area is Lokoja situated?
+*Lokoja
+Okene
+Idah
+Ankpa
+
+The rivers Niger and Benue meet at which city?
+*Lokoja
+Ajaokuta
+```
+
+One blank line separates questions. The question comes first, then the options,
+each on its own line. An asterisk marks a correct option; two or more asterisks
+make it a multiple-answer question. A leading option letter (`A.`, `b)`) is
+stripped. Blocks that cannot be read are reported and skipped — the rest are
+imported.
+
+### Papers
+
+A paper sets the duration, the pass mark as a percentage, whether the question
+order and the answer options are shuffled for each candidate, and whether the
+candidate is shown their score on submission.
+
+A paper is built from **sections**. A section either:
+
+- **draws questions at random** from a bank — each candidate gets a different
+  selection, seeded on their own sitting so a reload is stable; or
+- **names its questions**, chosen by hand from a bank.
+
+A section cannot draw more questions than its bank holds, and the system refuses
+to publish a paper that has a section with neither drawn nor chosen questions.
+
+Publish the paper to make it available to an examination. Once candidates have
+sat it, the paper's settings and sections are locked so the record stands —
+**Copy paper** produces a revised draft for future examinations.
+
+### Creating an online examination
+
+At **Examinations → New examination**, choose the mode:
+
+| Mode | What happens |
+| --- | --- |
+| Centre-based (paper) | Candidates attend a physical centre; officers enter the scores. |
+| Computer-based test (online) | Candidates sit the paper in the applicant portal. It is marked automatically. No centre is required. |
+| Hybrid | Candidates are allocated to centres and sit the paper on a computer under supervision. |
+
+For an online or hybrid examination, attach a **published** paper and set the
+window — when the test opens and when it closes. Candidates cannot begin before
+the opening time and no new sitting may be started after the closing time.
+Leaving the duration blank uses the paper's own duration.
+
+### Releasing and conducting the test
+
+1. Allocate the shortlisted candidates as usual. Examination numbers are issued
+   in the same sequence as for a centre-based examination.
+2. On the examination's **Online test** panel, choose **Release the test**. Each
+   allocated candidate is given a sitting, and the test appears in their portal.
+3. The panel then shows each sitting live: not started, in progress, submitted
+   or auto-submitted when the time ran out, with the number of questions
+   answered, the raw score and the percentage.
+4. **Close sitting** ends an overdue sitting on the officer's instruction and
+   marks whatever was answered. The action is audited against the officer.
+
+Marking is automatic as each answer is saved. On submission the percentage is
+scaled onto the examination's total marks and written to the candidate's
+examination record and to the application's examination score, so the existing
+validation, shortlisting and selection workflow is unchanged. Scores still have
+to be **validated** by an officer before they are treated as final.

@@ -21,7 +21,7 @@ export default function TrackPage() {
         </div>
         <Card>
           <div className="card-header"><h2 className="card-title">Need more detail?</h2></div>
-          <CardBody className="text-sm text-slate-700">
+          <CardBody className="text-sm text-ink-700">
             <p>
               Signing in to your applicant dashboard shows your full application, document review
               status, notifications and complete application history.

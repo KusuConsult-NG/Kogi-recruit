@@ -196,3 +196,43 @@ Carried forward from proposal §14:
 Developed and deployed by **Edumanager Information System Ltd.**
 Miango Road, After INEC Office, Jos, Plateau State, Nigeria ·
 edumanagerinfosys@gmail.com · www.edumanagerinfo.com
+
+## Establishment, the recruitment unit and computer-based testing
+
+Three capabilities sit alongside the eight proposal modules.
+
+**The establishment register.** Vacancies are raised for the ministry,
+extra-ministerial department, agency, parastatal, board or commission that
+carries the approved post, not for the Commission itself. The register is at
+`/admin/establishment/ministries`, published publicly at `/ministries`, and
+drives the browse-by-ministry filter on `/recruitment` and the reporting
+breakdowns by MDA.
+
+**The recruitment unit.** A standing unit manages recruitment from planning to
+closure. Officers are assigned to it in named roles (coordinator, secretary,
+screening lead, examination lead, interview lead, records officer), and each
+recruitment exercise is placed under a unit so responsibility for every stage is
+on record. Membership history is kept, not overwritten.
+
+**Computer-based testing.** Officers set questions into banks
+(`/admin/exams/banks`), assemble them into papers with timed sections that
+either name their questions or draw a fresh random selection per candidate
+(`/admin/exams/papers`), publish a paper and attach it to an examination in
+online or hybrid mode. Candidates sit the paper in the portal under a countdown
+at `/portal/tests`, with answers saved as they work, a question navigator,
+flagging, and automatic submission when the time runs out. Marking is automatic
+and the score is scaled onto the examination's total marks, so the existing
+validation, shortlisting and selection workflow is unchanged.
+
+The interface is built on a documented design system — see
+[`docs/DESIGN-SYSTEM.md`](docs/DESIGN-SYSTEM.md).
+
+### Browser suites
+
+```bash
+npm run build && npm start          # the suites run against a production build
+node tests/browser/smoke.mjs        # 132 checks across the public, applicant and admin surfaces
+node tests/browser/lifecycle.mjs    # a full exercise driven through stages 1-10
+node tests/browser/cbt.mjs          # setting a paper and sitting it online, end to end
+npm run screenshots                 # capture every screen for a review pack
+```

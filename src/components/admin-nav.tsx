@@ -21,7 +21,18 @@ export const ADMIN_NAV: NavGroup[] = [
     items: [
       { label: 'Dashboard', href: '/admin', permissions: [] },
       { label: 'Reports & Analytics', href: '/admin/reports', permissions: [P.REPORT_VIEW] },
-      { label: 'Approvals', href: '/admin/approvals', permissions: [P.EXERCISE_APPROVE, P.SHORTLIST_APPROVE, P.SELECTION_APPROVE, P.CONTENT_PUBLISH, P.NOTIFICATION_APPROVE] },
+      {
+        label: 'Approvals',
+        href: '/admin/approvals',
+        permissions: [P.EXERCISE_APPROVE, P.SHORTLIST_APPROVE, P.SELECTION_APPROVE, P.CONTENT_PUBLISH, P.NOTIFICATION_APPROVE],
+      },
+    ],
+  },
+  {
+    label: 'Establishment',
+    items: [
+      { label: 'Ministries & Agencies', href: '/admin/establishment/ministries', permissions: [P.MDA_VIEW] },
+      { label: 'Recruitment Unit', href: '/admin/establishment/units', permissions: [P.UNIT_MANAGE] },
     ],
   },
   {
@@ -32,9 +43,16 @@ export const ADMIN_NAV: NavGroup[] = [
       { label: 'Screening', href: '/admin/screening', permissions: [P.SCREENING_PERFORM, P.SCREENING_ASSIGN] },
       { label: 'Document Verification', href: '/admin/documents', permissions: [P.DOCUMENT_REVIEW] },
       { label: 'Shortlists', href: '/admin/shortlists', permissions: [P.SHORTLIST_PREPARE, P.SHORTLIST_APPROVE] },
-      { label: 'Examinations', href: '/admin/examinations', permissions: [P.EXAM_MANAGE, P.EXAM_SCORE] },
       { label: 'Interviews', href: '/admin/interviews', permissions: [P.INTERVIEW_MANAGE, P.INTERVIEW_SCORE] },
       { label: 'Final Selection', href: '/admin/selection', permissions: [P.SELECTION_PREPARE, P.SELECTION_APPROVE] },
+    ],
+  },
+  {
+    label: 'Examinations & Tests',
+    items: [
+      { label: 'Examinations', href: '/admin/examinations', permissions: [P.EXAM_MANAGE, P.EXAM_SCORE] },
+      { label: 'Question Banks', href: '/admin/exams/banks', permissions: [P.EXAM_SET] },
+      { label: 'Examination Papers', href: '/admin/exams/papers', permissions: [P.EXAM_SET] },
     ],
   },
   {
@@ -87,13 +105,14 @@ export function visibleNav(user: SessionUser): NavGroup[] {
 export function AdminSidebar({ user, pathname }: { user: SessionUser; pathname?: string }) {
   const groups = visibleNav(user);
   return (
-    <nav aria-label="Administration navigation" className="space-y-5">
+    <nav aria-label="Administration navigation" className="space-y-6 pb-6">
       {groups.map((group) => (
         <div key={group.label}>
-          <p className="mb-1.5 px-3 text-[10px] font-bold uppercase tracking-wider text-kogi-300">
+          <p className="mb-2 flex items-center gap-2 px-3 text-2xs font-bold uppercase tracking-label text-gold-300/90">
             {group.label}
+            <span aria-hidden className="h-px flex-1 bg-kogi-700/70" />
           </p>
-          <ul className="space-y-0.5">
+          <ul className="space-y-px">
             {group.items.map((item) => {
               const active = pathname === item.href;
               return (
@@ -101,10 +120,10 @@ export function AdminSidebar({ user, pathname }: { user: SessionUser; pathname?:
                   <Link
                     href={item.href}
                     aria-current={active ? 'page' : undefined}
-                    className={`block rounded px-3 py-1.5 text-[13px] transition ${
+                    className={`block border-l-2 px-3 py-1.5 text-[0.8125rem] leading-snug transition ${
                       active
-                        ? 'bg-kogi-700 font-semibold text-white'
-                        : 'text-kogi-100 hover:bg-kogi-800 hover:text-white'
+                        ? 'border-gold-400 bg-kogi-700/80 font-semibold text-white'
+                        : 'border-transparent text-kogi-100 hover:border-kogi-500 hover:bg-kogi-800/70 hover:text-white'
                     }`}
                   >
                     {item.label}

@@ -66,12 +66,12 @@ export default async function ProfilePage({
             <div className="card-header"><h2 className="card-title">Account</h2></div>
             <CardBody className="space-y-3 text-sm">
               <div>
-                <p className="text-xs uppercase tracking-wide text-slate-500">Applicant reference</p>
-                <p className="font-mono font-semibold text-slate-900">{profile.applicantRef}</p>
+                <p className="text-xs uppercase tracking-wide text-ink-500">Applicant reference</p>
+                <p className="font-mono font-semibold text-ink-950">{profile.applicantRef}</p>
               </div>
               <div>
-                <p className="text-xs uppercase tracking-wide text-slate-500">Email address</p>
-                <p className="text-slate-800">{user.email}</p>
+                <p className="text-xs uppercase tracking-wide text-ink-500">Email address</p>
+                <p className="text-ink-800">{user.email}</p>
                 <p className="hint">Contact the Commission if your email address needs to change.</p>
               </div>
               <a href="/change-password" className="btn-secondary btn-sm w-full">Change password</a>
@@ -79,7 +79,7 @@ export default async function ProfilePage({
           </Card>
           <Card>
             <div className="card-header"><h2 className="card-title">Data protection</h2></div>
-            <CardBody className="text-xs leading-relaxed text-slate-600">
+            <CardBody className="text-xs leading-relaxed text-ink-600">
               Your personal information is processed by the Commission for recruitment administration in
               accordance with the Nigeria Data Protection Act 2023. It is not publicly accessible and is
               visible only to authorised officers acting within their roles. All access is logged.

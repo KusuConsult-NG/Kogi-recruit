@@ -74,15 +74,15 @@ export function ExerciseForm({
             </Field>
           </div>
 
-          <fieldset className="rounded-md border border-slate-200 bg-slate-50 p-4">
-            <legend className="px-1 text-sm font-semibold text-slate-900">Assessment stages</legend>
+          <fieldset className="rounded-md border border-ink-200 bg-ink-50 p-4">
+            <legend className="px-1 text-sm font-semibold text-ink-950">Assessment stages</legend>
             <div className="space-y-2">
-              <label className="flex items-center gap-2.5 text-sm text-slate-700">
+              <label className="flex items-center gap-2.5 text-sm text-ink-700">
                 <input type="checkbox" name="requireExam" value="true"
                   defaultChecked={initial?.requireExam ?? true} className="checkbox" />
                 This exercise includes a written examination
               </label>
-              <label className="flex items-center gap-2.5 text-sm text-slate-700">
+              <label className="flex items-center gap-2.5 text-sm text-ink-700">
                 <input type="checkbox" name="requireInterview" value="true"
                   defaultChecked={initial?.requireInterview ?? true} className="checkbox" />
                 This exercise includes an interview

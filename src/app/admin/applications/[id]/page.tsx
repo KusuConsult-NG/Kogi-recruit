@@ -33,7 +33,7 @@ export default async function AdminApplicationDetail({ params }: { params: Promi
     where: { id },
     include: {
       exercise: { include: { requirements: { orderBy: { position: 'asc' } }, formFields: { orderBy: { position: 'asc' } } } },
-      vacancy: { include: { department: { select: { name: true } } } },
+      vacancy: { include: { department: { select: { name: true } }, ministry: { select: { id: true, name: true, code: true, kind: true } }, ministryDept: { select: { name: true } } } },
       applicant: { include: { applicantProfile: true } },
       education: { orderBy: { position: 'asc' } },
       employment: { orderBy: { position: 'asc' } },
@@ -122,9 +122,9 @@ export default async function AdminApplicationDetail({ params }: { params: Promi
                   { label: 'Disability / special requirements', value: profile?.disability ?? 'None declared' },
                 ]}
               />
-              <div className="mt-4 border-t border-slate-100 pt-3">
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Residential address</p>
-                <p className="mt-0.5 text-sm text-slate-800">{profile?.residentialAddress ?? '—'}</p>
+              <div className="mt-4 border-t border-ink-100 pt-3">
+                <p className="text-xs font-medium uppercase tracking-wide text-ink-500">Residential address</p>
+                <p className="mt-0.5 text-sm text-ink-800">{profile?.residentialAddress ?? '—'}</p>
               </div>
             </CardBody>
           </Card>
@@ -142,7 +142,7 @@ export default async function AdminApplicationDetail({ params }: { params: Promi
                 <tbody>
                   {application.education.map((e) => (
                     <tr key={e.id}>
-                      <td className="font-medium text-slate-900">{e.institution}</td>
+                      <td className="font-medium text-ink-950">{e.institution}</td>
                       <td>{e.qualification}</td>
                       <td>{e.course ?? '—'}</td>
                       <td>{e.grade ?? '—'}</td>
@@ -151,7 +151,7 @@ export default async function AdminApplicationDetail({ params }: { params: Promi
                     </tr>
                   ))}
                   {application.education.length === 0 ? (
-                    <tr><td colSpan={6} className="py-4 text-center text-sm text-slate-500">No qualifications recorded.</td></tr>
+                    <tr><td colSpan={6} className="py-4 text-center text-sm text-ink-500">No qualifications recorded.</td></tr>
                   ) : null}
                 </tbody>
               </table>
@@ -169,7 +169,7 @@ export default async function AdminApplicationDetail({ params }: { params: Promi
                 <tbody>
                   {application.employment.map((e) => (
                     <tr key={e.id}>
-                      <td className="font-medium text-slate-900">{e.employer}</td>
+                      <td className="font-medium text-ink-950">{e.employer}</td>
                       <td>{e.jobTitle}</td>
                       <td className="whitespace-nowrap text-xs">
                         {formatDate(e.startDate)} – {e.current ? 'Present' : formatDate(e.endDate)}
@@ -178,7 +178,7 @@ export default async function AdminApplicationDetail({ params }: { params: Promi
                     </tr>
                   ))}
                   {application.employment.length === 0 ? (
-                    <tr><td colSpan={4} className="py-4 text-center text-sm text-slate-500">No employment history recorded.</td></tr>
+                    <tr><td colSpan={4} className="py-4 text-center text-sm text-ink-500">No employment history recorded.</td></tr>
                   ) : null}
                 </tbody>
               </table>
@@ -195,27 +195,27 @@ export default async function AdminApplicationDetail({ params }: { params: Promi
             </div>
             <CardBody>
               {application.documents.length === 0 ? (
-                <p className="text-sm text-slate-600">No documents uploaded.</p>
+                <p className="text-sm text-ink-600">No documents uploaded.</p>
               ) : (
-                <ul className="divide-y divide-slate-100">
+                <ul className="divide-y divide-ink-100">
                   {application.documents.map((d) => (
                     <li key={d.id} className="py-4 first:pt-0 last:pb-0">
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div>
-                          <p className="text-sm font-medium text-slate-900">
+                          <p className="text-sm font-medium text-ink-950">
                             {d.label}
                             {d.version > 1 ? <span className="ml-1.5 badge-slate">version {d.version}</span> : null}
                           </p>
-                          <p className="mt-0.5 text-xs text-slate-500">
+                          <p className="mt-0.5 text-xs text-ink-500">
                             {d.originalName} · {formatBytes(d.sizeBytes)} · uploaded {formatDateTime(d.createdAt)}
                           </p>
                           {d.reviewNotes ? (
-                            <p className="mt-1 text-xs text-amber-800">Remarks: {d.reviewNotes}</p>
+                            <p className="mt-1 text-xs text-gold-800">Remarks: {d.reviewNotes}</p>
                           ) : null}
                           {d.reviews.length > 0 ? (
                             <ul className="mt-1.5 space-y-0.5">
                               {d.reviews.slice(0, 3).map((r) => (
-                                <li key={r.id} className="text-[11px] text-slate-500">
+                                <li key={r.id} className="text-2xs text-ink-500">
                                   {r.outcome.replace(/_/g, ' ').toLowerCase()} by {r.officer?.fullName ?? 'officer'} · {formatDateTime(r.createdAt)}
                                 </li>
                               ))}
@@ -230,7 +230,7 @@ export default async function AdminApplicationDetail({ params }: { params: Promi
                         </div>
                       </div>
                       {canReviewDocs ? (
-                        <div className="mt-3 rounded-md border border-slate-200 bg-slate-50 p-3">
+                        <div className="mt-3 rounded-md border border-ink-200 bg-ink-50 p-3">
                           <DocumentReviewForm documentId={d.id} currentStatus={d.reviewStatus} />
                         </div>
                       ) : null}
@@ -240,8 +240,8 @@ export default async function AdminApplicationDetail({ params }: { params: Promi
               )}
 
               {required.length > 0 ? (
-                <div className="mt-4 border-t border-slate-200 pt-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Required documents check</p>
+                <div className="mt-4 border-t border-ink-200 pt-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-ink-500">Required documents check</p>
                   <ul className="mt-2 flex flex-wrap gap-1.5">
                     {required.map((r) => (
                       <li key={r.id} className={uploadedCodes.has(r.code) ? 'badge-green' : 'badge-red'}>
@@ -259,9 +259,9 @@ export default async function AdminApplicationDetail({ params }: { params: Promi
             <div className="card-header"><h2 className="card-title">Referees, next of kin and additional information</h2></div>
             <CardBody className="space-y-5">
               <div>
-                <p className="mb-2 text-sm font-semibold text-slate-900">Referees</p>
+                <p className="mb-2 text-sm font-semibold text-ink-950">Referees</p>
                 {application.referees.length === 0 ? (
-                  <p className="text-sm text-slate-600">None listed.</p>
+                  <p className="text-sm text-ink-600">None listed.</p>
                 ) : (
                   <div className="table-wrap">
                     <table className="table">
@@ -269,7 +269,7 @@ export default async function AdminApplicationDetail({ params }: { params: Promi
                       <tbody>
                         {application.referees.map((r) => (
                           <tr key={r.id}>
-                            <td className="font-medium text-slate-900">{r.name}</td>
+                            <td className="font-medium text-ink-950">{r.name}</td>
                             <td>{r.occupation ?? '—'}</td>
                             <td>{r.organisation ?? '—'}</td>
                             <td className="text-xs">{[r.phone, r.email].filter(Boolean).join(' · ') || '—'}</td>
@@ -281,8 +281,8 @@ export default async function AdminApplicationDetail({ params }: { params: Promi
                 )}
               </div>
 
-              <div className="border-t border-slate-100 pt-4">
-                <p className="mb-2 text-sm font-semibold text-slate-900">Next of kin</p>
+              <div className="border-t border-ink-100 pt-4">
+                <p className="mb-2 text-sm font-semibold text-ink-950">Next of kin</p>
                 {application.nextOfKin ? (
                   <DescriptionList
                     items={[
@@ -294,13 +294,13 @@ export default async function AdminApplicationDetail({ params }: { params: Promi
                     ]}
                   />
                 ) : (
-                  <p className="text-sm text-slate-600">Not supplied.</p>
+                  <p className="text-sm text-ink-600">Not supplied.</p>
                 )}
               </div>
 
               {application.skills || Object.keys(extraValues).length > 0 ? (
-                <div className="border-t border-slate-100 pt-4">
-                  <p className="mb-2 text-sm font-semibold text-slate-900">Skills and additional information</p>
+                <div className="border-t border-ink-100 pt-4">
+                  <p className="mb-2 text-sm font-semibold text-ink-950">Skills and additional information</p>
                   {application.skills ? <RichText body={application.skills} /> : null}
                   {Object.keys(extraValues).length > 0 ? (
                     <div className="mt-3">
@@ -315,8 +315,8 @@ export default async function AdminApplicationDetail({ params }: { params: Promi
                 </div>
               ) : null}
 
-              <div className="border-t border-slate-100 pt-4">
-                <p className="text-xs text-slate-500">
+              <div className="border-t border-ink-100 pt-4">
+                <p className="text-xs text-ink-500">
                   Declaration confirmed: {application.declaration ? 'yes' : 'no'} · Data-processing consent:{' '}
                   {application.consent ? 'yes' : 'no'}
                 </p>
@@ -354,15 +354,15 @@ export default async function AdminApplicationDetail({ params }: { params: Promi
               <CardBody>
                 <ul className="space-y-4">
                   {application.screenings.map((s) => (
-                    <li key={s.id} className="rounded-md border border-slate-200 p-3.5">
+                    <li key={s.id} className="rounded-md border border-ink-200 p-3.5">
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <p className="text-sm font-semibold text-slate-900">
+                        <p className="text-sm font-semibold text-ink-950">
                           {s.outcome.replace(/_/g, ' ')} — {s.classification?.replace(/_/g, ' ').toLowerCase() ?? 'unclassified'}
                         </p>
                         <StatusBadge status={s.outcome === 'PASSED' ? 'VERIFIED' : s.outcome === 'FAILED' ? 'REJECTED' : 'PENDING'}
                           label={s.outcome.replace(/_/g, ' ').toLowerCase()} />
                       </div>
-                      <p className="mt-0.5 text-xs text-slate-500">
+                      <p className="mt-0.5 text-xs text-ink-500">
                         {s.officer?.fullName ?? 'Officer'} · {formatDateTime(s.createdAt)}
                       </p>
                       <ul className="mt-2 flex flex-wrap gap-1.5">
@@ -378,7 +378,7 @@ export default async function AdminApplicationDetail({ params }: { params: Promi
                           </li>
                         ))}
                       </ul>
-                      {s.remarks ? <p className="mt-2 text-sm text-slate-700">{s.remarks}</p> : null}
+                      {s.remarks ? <p className="mt-2 text-sm text-ink-700">{s.remarks}</p> : null}
                     </li>
                   ))}
                 </ul>
@@ -399,7 +399,7 @@ export default async function AdminApplicationDetail({ params }: { params: Promi
                 items={[
                   { label: 'Reference', value: <span className="font-mono">{application.reference}</span> },
                   { label: 'Position applied for', value: application.vacancy ? `${application.vacancy.jobTitle} (${application.vacancy.gradeLevel})` : '—' },
-                  { label: 'Department / Agency', value: application.vacancy?.department?.name ?? application.vacancy?.agency ?? '—' },
+                  { label: 'Employing MDA', value: application.vacancy?.ministry?.name ?? application.vacancy?.department?.name ?? '—' },
                   { label: 'Current stage', value: application.stage.replace(/_/g, ' ').toLowerCase() },
                   { label: 'Started', value: formatDateTime(application.createdAt) },
                   { label: 'Submitted', value: formatDateTime(application.submittedAt) },
@@ -458,11 +458,11 @@ export default async function AdminApplicationDetail({ params }: { params: Promi
                   ]}
                 />
                 {interview.scores.length > 0 ? (
-                  <ul className="mt-3 space-y-1 border-t border-slate-100 pt-2">
+                  <ul className="mt-3 space-y-1 border-t border-ink-100 pt-2">
                     {interview.scores.map((s) => (
                       <li key={s.id} className="flex justify-between text-xs">
-                        <span className="text-slate-600">{s.member.fullName}</span>
-                        <span className="font-semibold text-slate-900">{s.total}</span>
+                        <span className="text-ink-600">{s.member.fullName}</span>
+                        <span className="font-semibold text-ink-950">{s.total}</span>
                       </li>
                     ))}
                   </ul>
@@ -496,21 +496,21 @@ export default async function AdminApplicationDetail({ params }: { params: Promi
           <Card>
             <div className="card-header"><h2 className="card-title">Status history</h2></div>
             <CardBody>
-              <ol className="space-y-3 border-l-2 border-slate-200 pl-4">
+              <ol className="space-y-3 border-l-2 border-ink-200 pl-4">
                 {application.statusHistory.map((h) => (
                   <li key={h.id} className="relative">
                     <span className="absolute -left-[21px] top-1.5 h-2.5 w-2.5 rounded-full bg-kogi-600" />
-                    <p className="text-sm font-medium text-slate-800">
+                    <p className="text-sm font-medium text-ink-800">
                       {APPLICATION_STATUS_LABELS[h.toStatus] ?? h.toStatus}
                     </p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-ink-500">
                       {formatDateTime(h.createdAt)} · {h.changedByName ?? 'System'}
                     </p>
-                    {h.remarks ? <p className="mt-0.5 text-xs text-slate-600">{h.remarks}</p> : null}
+                    {h.remarks ? <p className="mt-0.5 text-xs text-ink-600">{h.remarks}</p> : null}
                   </li>
                 ))}
                 {application.statusHistory.length === 0 ? (
-                  <li className="text-sm text-slate-600">No history recorded.</li>
+                  <li className="text-sm text-ink-600">No history recorded.</li>
                 ) : null}
               </ol>
             </CardBody>

@@ -94,6 +94,12 @@ const EX_REF = `KGCSC/E2E/${stamp}`;
   await page.goto(exUrl, { waitUntil: 'domcontentloaded' });
   await page.fill('#jobTitle', 'E2E Administrative Officer II');
   await page.selectOption('#gradeLevel', 'GL 08');
+  // Every vacancy is raised against an employing MDA from the establishment register.
+  const mdaValues = await page.locator('#ministryId option').evaluateAll((os) =>
+    os.map((o) => o.value).filter(Boolean),
+  );
+  record('vacancy form offers the establishment register', mdaValues.length > 0);
+  await page.selectOption('#ministryId', mdaValues[0]);
   await page.fill('#positions', '2');
   await page.fill('#qualifications', 'A degree (B.Sc) from a recognised university in any discipline.');
   await page.fill('#experience', 'No previous experience required.');
@@ -106,6 +112,7 @@ const EX_REF = `KGCSC/E2E/${stamp}`;
   // A vacancy with an inverted age range is refused
   await page.fill('#jobTitle', 'Invalid Vacancy');
   await page.selectOption('#gradeLevel', 'GL 07');
+  await page.selectOption('#ministryId', mdaValues[0]);
   await page.fill('#positions', '1');
   await page.fill('#qualifications', 'HND');
   await page.fill('#minAge', '40');

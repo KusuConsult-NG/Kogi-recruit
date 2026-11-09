@@ -10,11 +10,11 @@ import { QUALIFICATIONS } from '@/lib/constants';
 
 export function EducationForm({ applicationId }: { applicationId: string }) {
   return (
-    <ActionForm action={addEducation} resetOnSuccess className="space-y-4 rounded-md border border-slate-200 bg-slate-50/60 p-4">
+    <ActionForm action={addEducation} resetOnSuccess className="space-y-4 rounded-md border border-ink-200 bg-ink-50/60 p-4">
       {(state) => (
         <>
           <input type="hidden" name="applicationId" value={applicationId} />
-          <p className="text-sm font-semibold text-slate-900">Add a qualification</p>
+          <p className="text-sm font-semibold text-ink-950">Add a qualification</p>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Field label="Institution attended" name="institution" required error={state.errors?.institution}>
               <input id="institution" name="institution" required className="input" />
@@ -52,11 +52,11 @@ export function EducationForm({ applicationId }: { applicationId: string }) {
 
 export function EmploymentForm({ applicationId }: { applicationId: string }) {
   return (
-    <ActionForm action={addEmployment} resetOnSuccess className="space-y-4 rounded-md border border-slate-200 bg-slate-50/60 p-4">
+    <ActionForm action={addEmployment} resetOnSuccess className="space-y-4 rounded-md border border-ink-200 bg-ink-50/60 p-4">
       {(state) => (
         <>
           <input type="hidden" name="applicationId" value={applicationId} />
-          <p className="text-sm font-semibold text-slate-900">Add an employment record</p>
+          <p className="text-sm font-semibold text-ink-950">Add an employment record</p>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Field label="Employer" name="employer" required error={state.errors?.employer}>
               <input id="employer" name="employer" required className="input" />
@@ -73,7 +73,7 @@ export function EmploymentForm({ applicationId }: { applicationId: string }) {
               <input id="endDate" name="endDate" type="date" className="input" />
             </Field>
             <div className="flex items-end pb-2">
-              <label className="flex items-center gap-2 text-sm text-slate-700">
+              <label className="flex items-center gap-2 text-sm text-ink-700">
                 <input type="checkbox" name="current" value="true" className="checkbox" />
                 This is my current job
               </label>
@@ -91,11 +91,11 @@ export function EmploymentForm({ applicationId }: { applicationId: string }) {
 
 export function RefereeForm({ applicationId }: { applicationId: string }) {
   return (
-    <ActionForm action={addReferee} resetOnSuccess className="space-y-4 rounded-md border border-slate-200 bg-slate-50/60 p-4">
+    <ActionForm action={addReferee} resetOnSuccess className="space-y-4 rounded-md border border-ink-200 bg-ink-50/60 p-4">
       {(state) => (
         <>
           <input type="hidden" name="applicationId" value={applicationId} />
-          <p className="text-sm font-semibold text-slate-900">Add a referee</p>
+          <p className="text-sm font-semibold text-ink-950">Add a referee</p>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Field label="Referee name" name="name" required error={state.errors?.name}>
               <input id="name" name="name" required className="input" />
@@ -191,8 +191,8 @@ export function AdditionalDetailsForm({
           </Field>
 
           {fields.length > 0 ? (
-            <div className="space-y-3 border-t border-slate-200 pt-4">
-              <p className="text-sm font-semibold text-slate-900">
+            <div className="space-y-3 border-t border-ink-200 pt-4">
+              <p className="text-sm font-semibold text-ink-950">
                 Additional information required for this exercise
               </p>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -215,7 +215,7 @@ export function AdditionalDetailsForm({
                         {f.options.map((o) => <option key={o} value={o}>{o}</option>)}
                       </select>
                     ) : f.inputType === 'checkbox' ? (
-                      <label className="flex items-center gap-2 text-sm text-slate-700">
+                      <label className="flex items-center gap-2 text-sm text-ink-700">
                         <input type="checkbox" id={`field_${f.key}`} name={`field_${f.key}`} value="Yes"
                           defaultChecked={values[f.key] === 'Yes'} className="checkbox" />
                         Yes
@@ -266,11 +266,11 @@ export function DocumentUploadForm({
               accept={accept}
               required
               aria-label={`Upload ${label}`}
-              className="block w-full max-w-xs cursor-pointer rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs file:mr-2 file:rounded file:border-0 file:bg-kogi-700 file:px-2.5 file:py-1 file:text-xs file:font-semibold file:text-white"
+              className="block w-full max-w-xs cursor-pointer rounded-md border border-ink-300 bg-white px-2 py-1.5 text-xs file:mr-2 file:rounded file:border-0 file:bg-kogi-700 file:px-2.5 file:py-1 file:text-xs file:font-semibold file:text-white"
             />
             <SubmitButton className="btn-primary btn-sm" pendingLabel="Uploading…">Upload</SubmitButton>
           </div>
-          <p className="text-[11px] text-slate-500">
+          <p className="text-2xs text-ink-500">
             Accepted: {accept.replace(/application\/pdf/g, 'PDF').replace(/image\//g, '').toUpperCase()} · max {maxMb}MB
           </p>
         </>
@@ -294,7 +294,7 @@ export function SubmitApplicationForm({
         <>
           <input type="hidden" name="applicationId" value={applicationId} />
           {!canSubmit ? (
-            <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            <div className="rounded-md border border-gold-200 bg-gold-50 px-4 py-3 text-sm text-gold-900">
               <p className="font-semibold">Your application is not yet complete.</p>
               <ul className="mt-1.5 list-disc space-y-0.5 pl-4 text-xs">
                 {missing.map((m) => <li key={m}>{m}</li>)}
@@ -302,8 +302,8 @@ export function SubmitApplicationForm({
             </div>
           ) : null}
 
-          <div className="space-y-2.5 rounded-md border border-slate-200 bg-slate-50 p-4">
-            <label className="flex items-start gap-2.5 text-sm text-slate-700">
+          <div className="space-y-2.5 rounded-md border border-ink-200 bg-ink-50 p-4">
+            <label className="flex items-start gap-2.5 text-sm text-ink-700">
               <input type="checkbox" name="declaration" value="on" required className="checkbox mt-0.5" />
               <span>
                 <strong>Declaration.</strong> I declare that the information supplied in this application
@@ -314,7 +314,7 @@ export function SubmitApplicationForm({
             </label>
             {state.errors?.declaration ? <p className="error-text">{state.errors.declaration}</p> : null}
 
-            <label className="flex items-start gap-2.5 text-sm text-slate-700">
+            <label className="flex items-start gap-2.5 text-sm text-ink-700">
               <input type="checkbox" name="consent" value="on" required className="checkbox mt-0.5" />
               <span>
                 <strong>Consent.</strong> I consent to the Kogi State Civil Service Commission processing
@@ -329,7 +329,7 @@ export function SubmitApplicationForm({
           <SubmitButton className="btn-primary" pendingLabel="Submitting…" disabled={!canSubmit}>
             Submit my application
           </SubmitButton>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-ink-500">
             Once submitted, your application cannot be edited unless a screening officer requests a
             correction.
           </p>

@@ -80,8 +80,8 @@ export default async function ShortlistDetail({ params }: { params: Promise<{ id
                         </Link>
                       </td>
                       <td>
-                        <p className="font-medium text-slate-900">{e.application.applicant.fullName}</p>
-                        <p className="text-xs text-slate-500">{e.application.applicant.applicantProfile?.applicantRef}</p>
+                        <p className="font-medium text-ink-950">{e.application.applicant.fullName}</p>
+                        <p className="text-xs text-ink-500">{e.application.applicant.applicantProfile?.applicantRef}</p>
                       </td>
                       <td className="text-xs">
                         {e.application.vacancy ? `${e.application.vacancy.jobTitle} (${e.application.vacancy.gradeLevel})` : '—'}
@@ -92,14 +92,14 @@ export default async function ShortlistDetail({ params }: { params: Promise<{ id
                         <td>
                           <form action={removeShortlistEntry}>
                             <input type="hidden" name="entryId" value={e.id} />
-                            <button type="submit" className="btn-ghost btn-sm text-red-700">Remove</button>
+                            <button type="submit" className="btn-ghost btn-sm text-[#9a2c20]">Remove</button>
                           </form>
                         </td>
                       ) : null}
                     </tr>
                   ))}
                   {shortlist.entries.length === 0 ? (
-                    <tr><td colSpan={7} className="py-6 text-center text-sm text-slate-500">No candidates on this shortlist.</td></tr>
+                    <tr><td colSpan={7} className="py-6 text-center text-sm text-ink-500">No candidates on this shortlist.</td></tr>
                   ) : null}
                 </tbody>
               </table>
@@ -123,8 +123,8 @@ export default async function ShortlistDetail({ params }: { params: Promise<{ id
                 ]}
               />
 
-              <div className="space-y-2 border-t border-slate-200 pt-3">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Available actions</p>
+              <div className="space-y-2 border-t border-ink-200 pt-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-ink-500">Available actions</p>
                 {shortlist.status === 'DRAFT' && canPrepare ? (
                   <ShortlistDecisionForm shortlistId={shortlist.id} decision="SUBMIT"
                     label="Submit for approval" tone="btn-primary" />
@@ -139,7 +139,7 @@ export default async function ShortlistDetail({ params }: { params: Promise<{ id
                   </>
                 ) : null}
                 {shortlist.status === 'APPROVED' ? (
-                  <p className="text-xs text-slate-600">
+                  <p className="text-xs text-ink-600">
                     This shortlist has been approved and the candidates notified. Proceed to the{' '}
                     {shortlist.exercise.requireExam ? (
                       <Link href={`/admin/examinations?exercise=${shortlist.exercise.id}`} className="text-kogi-700 underline">
@@ -154,7 +154,7 @@ export default async function ShortlistDetail({ params }: { params: Promise<{ id
                   </p>
                 ) : null}
                 {shortlist.status === 'PENDING_APPROVAL' && !canApprove ? (
-                  <p className="text-xs text-slate-600">
+                  <p className="text-xs text-ink-600">
                     This shortlist is awaiting approval by an authorised officer.
                   </p>
                 ) : null}

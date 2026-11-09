@@ -118,7 +118,7 @@ export default async function SelectionDetailPage({ params }: { params: Promise<
                         <Link href={`/admin/applications/${e.application.id}`} className="text-xs font-medium text-kogi-700 hover:underline">
                           {e.application.applicant.fullName}
                         </Link>
-                        <p className="font-mono text-[11px] text-slate-500">{e.application.reference}</p>
+                        <p className="font-mono text-2xs text-ink-500">{e.application.reference}</p>
                       </td>
                       <td className="text-xs">
                         {e.application.vacancy ? `${e.application.vacancy.jobTitle} (${e.application.vacancy.gradeLevel})` : '—'}
@@ -126,7 +126,7 @@ export default async function SelectionDetailPage({ params }: { params: Promise<
                       <td className="text-xs">{e.application.applicant.applicantProfile?.lga ?? '—'}</td>
                       <td className="text-xs">{e.examScore ?? '—'}</td>
                       <td className="text-xs">{e.interviewScore ?? '—'}</td>
-                      <td className="text-xs font-bold text-slate-900">{e.finalScore ?? '—'}</td>
+                      <td className="text-xs font-bold text-ink-950">{e.finalScore ?? '—'}</td>
                       <td><StatusBadge status={e.outcome} /></td>
                       {editable ? (
                         <td>
@@ -147,7 +147,7 @@ export default async function SelectionDetailPage({ params }: { params: Promise<
                     </tr>
                   ))}
                   {list.entries.length === 0 ? (
-                    <tr><td colSpan={9} className="py-6 text-center text-sm text-slate-500">No candidates on this list.</td></tr>
+                    <tr><td colSpan={9} className="py-6 text-center text-sm text-ink-500">No candidates on this list.</td></tr>
                   ) : null}
                 </tbody>
               </table>
@@ -169,7 +169,7 @@ export default async function SelectionDetailPage({ params }: { params: Promise<
                   { label: 'Archived', value: list.archivedAt ? formatDateTime(list.archivedAt) : '—' },
                 ]}
               />
-              <div className="space-y-2 border-t border-slate-200 pt-3">
+              <div className="space-y-2 border-t border-ink-200 pt-3">
                 {list.status === 'DRAFT' && canPrepare ? (
                   <>
                     {pendingOutcome.length > 0 ? (
@@ -191,7 +191,7 @@ export default async function SelectionDetailPage({ params }: { params: Promise<
                   </>
                 ) : null}
                 {list.status === 'PENDING_APPROVAL' && !canApprove ? (
-                  <p className="text-xs text-slate-600">Awaiting approval by an authorised officer.</p>
+                  <p className="text-xs text-ink-600">Awaiting approval by an authorised officer.</p>
                 ) : null}
                 {list.status === 'APPROVED' && canApprove ? (
                   <ArchiveSelectionForm selectionListId={list.id} />
@@ -205,18 +205,18 @@ export default async function SelectionDetailPage({ params }: { params: Promise<
             <CardBody>
               <ul className="space-y-2">
                 {fillByVacancy.map((v) => (
-                  <li key={v.id} className="rounded border border-slate-200 px-3 py-2">
+                  <li key={v.id} className="rounded border border-ink-200 px-3 py-2">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs font-medium text-slate-800">{v.jobTitle}</span>
-                      <span className={`text-xs font-bold ${v.selected >= v.positions ? 'text-kogi-700' : 'text-amber-700'}`}>
+                      <span className="text-xs font-medium text-ink-800">{v.jobTitle}</span>
+                      <span className={`text-xs font-bold ${v.selected >= v.positions ? 'text-kogi-700' : 'text-gold-700'}`}>
                         {v.selected}/{v.positions}
                       </span>
                     </div>
-                    <p className="mt-0.5 text-[11px] text-slate-500">{v.gradeLevel}</p>
+                    <p className="mt-0.5 text-2xs text-ink-500">{v.gradeLevel}</p>
                   </li>
                 ))}
                 {fillByVacancy.length === 0 ? (
-                  <li className="text-sm text-slate-600">No active vacancies on this exercise.</li>
+                  <li className="text-sm text-ink-600">No active vacancies on this exercise.</li>
                 ) : null}
               </ul>
             </CardBody>
@@ -224,7 +224,7 @@ export default async function SelectionDetailPage({ params }: { params: Promise<
 
           <Card>
             <div className="card-header"><h2 className="card-title">Important</h2></div>
-            <CardBody className="text-xs leading-relaxed text-slate-600">
+            <CardBody className="text-xs leading-relaxed text-ink-600">
               This system supports recruitment administration and records. It does not independently
               determine legal eligibility or make statutory recruitment decisions. Final approval of
               successful candidates remains with the legally authorised government authorities.

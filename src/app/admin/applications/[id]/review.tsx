@@ -30,9 +30,9 @@ export function ScreeningForm({
         <>
           <input type="hidden" name="applicationId" value={applicationId} />
 
-          <div className="rounded-md border border-sky-200 bg-sky-50 p-4">
-            <p className="text-sm font-semibold text-sky-900">Preliminary automated checks</p>
-            <p className="mt-0.5 text-xs text-sky-800">
+          <div className="rounded-md border border-[#bcd4e4] bg-[#eef5fa] p-4">
+            <p className="text-sm font-semibold text-[#164765]">Preliminary automated checks</p>
+            <p className="mt-0.5 text-xs text-[#1a4b6e]">
               These checks assist your review. The final decision is yours and is recorded against your name.
             </p>
             <ul className="mt-3 space-y-1.5">
@@ -42,19 +42,19 @@ export function ScreeningForm({
                     {c.pass ? 'pass' : c.advisory ? 'review' : 'fail'}
                   </span>
                   <span>
-                    <span className="font-medium text-slate-800">{c.label}</span>
-                    <span className="ml-1 text-slate-600">— {c.detail}</span>
+                    <span className="font-medium text-ink-800">{c.label}</span>
+                    <span className="ml-1 text-ink-600">— {c.detail}</span>
                   </span>
                 </li>
               ))}
             </ul>
-            <p className="mt-3 text-xs font-medium text-sky-900">
+            <p className="mt-3 text-xs font-medium text-[#164765]">
               Suggested outcome: {suggestedOutcome.replace(/_/g, ' ').toLowerCase()} ({suggestedClassification.replace(/_/g, ' ').toLowerCase()})
             </p>
           </div>
 
-          <fieldset className="space-y-2 rounded-md border border-slate-200 p-4">
-            <legend className="px-1 text-sm font-semibold text-slate-900">Officer's assessment</legend>
+          <fieldset className="space-y-2 rounded-md border border-ink-200 p-4">
+            <legend className="px-1 text-sm font-semibold text-ink-950">Officer's assessment</legend>
             {[
               { name: 'completenessPass', label: 'Application is complete' },
               { name: 'eligibilityPass', label: 'Applicant is eligible for the post' },
@@ -62,7 +62,7 @@ export function ScreeningForm({
               { name: 'experiencePass', label: 'Experience requirements met' },
               { name: 'documentsPass', label: 'Supporting documents are in order' },
             ].map((item) => (
-              <label key={item.name} className="flex items-center gap-2.5 text-sm text-slate-700">
+              <label key={item.name} className="flex items-center gap-2.5 text-sm text-ink-700">
                 <input type="checkbox" name={item.name} value="true" className="checkbox" />
                 {item.label}
               </label>
@@ -124,7 +124,7 @@ export function DocumentReviewForm({
           </div>
           {state.errors?.notes ? <p className="error-text">{state.errors.notes}</p> : null}
           {state.message ? (
-            <p className={`text-xs ${state.ok ? 'text-kogi-800' : 'text-red-700'}`}>{state.message}</p>
+            <p className={`text-xs ${state.ok ? 'text-kogi-800' : 'text-[#9a2c20]'}`}>{state.message}</p>
           ) : null}
         </>
       )}

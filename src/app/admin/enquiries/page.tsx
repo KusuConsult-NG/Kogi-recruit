@@ -64,23 +64,23 @@ export default async function EnquiriesAdmin({
               <div className="card-header">
                 <div>
                   <h2 className="card-title">{e.subject}</h2>
-                  <p className="mt-0.5 text-sm text-slate-500">
+                  <p className="mt-0.5 text-sm text-ink-500">
                     <span className="font-mono">{e.reference}</span> · {e.name} · {e.email}
                     {e.phone ? ` · ${e.phone}` : ''}
                   </p>
-                  <p className="text-xs text-slate-500">Received {formatDateTime(e.createdAt)}</p>
+                  <p className="text-xs text-ink-500">Received {formatDateTime(e.createdAt)}</p>
                 </div>
                 <StatusBadge status={e.status} />
               </div>
               <CardBody className="space-y-4">
-                <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
-                  <p className="whitespace-pre-line text-sm text-slate-700">{e.message}</p>
+                <div className="rounded-md border border-ink-200 bg-ink-50 p-3">
+                  <p className="whitespace-pre-line text-sm text-ink-700">{e.message}</p>
                 </div>
                 {e.response ? (
                   <div className="rounded-md border border-kogi-200 bg-kogi-50 p-3">
                     <p className="text-xs font-semibold uppercase tracking-wide text-kogi-800">Response</p>
                     <p className="mt-1 whitespace-pre-line text-sm text-kogi-900">{e.response}</p>
-                    <p className="mt-1.5 text-[11px] text-kogi-700">Sent {formatDateTime(e.respondedAt)}</p>
+                    <p className="mt-1.5 text-2xs text-kogi-700">Sent {formatDateTime(e.respondedAt)}</p>
                   </div>
                 ) : null}
                 <EnquiryResponseForm id={e.id} current={e.response ?? ''} />

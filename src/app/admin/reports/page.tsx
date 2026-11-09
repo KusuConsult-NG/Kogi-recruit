@@ -5,11 +5,11 @@ import { hasPermission, PERMISSIONS } from '@/lib/rbac';
 import {
   applicationsByDepartment, applicationsByGender, applicationsByLga,
   applicationsByQualification, applicationsByStatus, applicationsByVacancy,
-  dashboardSummary, type GroupCount,
+  dashboardSummary, onlineTestSummary, postsByMinistry, type GroupCount,
 } from '@/lib/reports';
 import { APPLICATION_STATUS_LABELS } from '@/lib/constants';
 import { formatDateTime, percent } from '@/lib/format';
-import { Card, CardBody, PageHeading, ProgressBar, StatCard } from '@/components/ui';
+import { Card, CardBody, CardHeader, PageHeading, ProgressBar, StatCard } from '@/components/ui';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Reports and Analytics' };
@@ -33,7 +33,7 @@ function DistributionCard({
       </div>
       <CardBody className="space-y-2.5">
         {top.length === 0 ? (
-          <p className="text-sm text-slate-600">No data available.</p>
+          <p className="text-sm text-ink-600">No data available.</p>
         ) : (
           top.map((r) => (
             <ProgressBar
@@ -45,11 +45,11 @@ function DistributionCard({
           ))
         )}
         {rows.length > top.length ? (
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-ink-500">
             Showing the top {top.length} of {rows.length} groups. Export for the complete breakdown.
           </p>
         ) : null}
-        {note ? <p className="border-t border-slate-100 pt-2 text-xs text-slate-500">{note}</p> : null}
+        {note ? <p className="border-t border-ink-100 pt-2 text-xs text-ink-500">{note}</p> : null}
       </CardBody>
     </Card>
   );
@@ -66,7 +66,7 @@ export default async function ReportsPage({
   const canExport = hasPermission(user, PERMISSIONS.REPORT_EXPORT);
   const exerciseId = sp.exercise || undefined;
 
-  const [summary, exercises, byVacancy, byQualification, byLga, byGender, byStatus, byDepartment, vacancyFill] =
+  const [summary, exercises, byVacancy, byQualification, byLga, byGender, byStatus, byDepartment, postsByMda, onlineTests, vacancyFill] =
     await Promise.all([
       dashboardSummary(exerciseId),
       prisma.recruitmentExercise.findMany({ orderBy: { createdAt: 'desc' }, select: { id: true, reference: true, title: true } }),
@@ -76,6 +76,8 @@ export default async function ReportsPage({
       applicationsByGender(exerciseId),
       applicationsByStatus(exerciseId),
       applicationsByDepartment(exerciseId),
+      postsByMinistry(exerciseId),
+      onlineTestSummary(exerciseId),
       prisma.vacancy.findMany({
         where: { active: true, ...(exerciseId ? { exerciseId } : {}) },
         select: {
@@ -119,7 +121,7 @@ export default async function ReportsPage({
         </form>
       </Card>
 
-      <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-500">Recruitment exercises</h2>
+      <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-500">Recruitment exercises</h2>
       <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-5">
         <StatCard label="Total exercises" value={summary.exercises.total} />
         <StatCard label="Active" value={summary.exercises.active} tone="green" />
@@ -128,7 +130,7 @@ export default async function ReportsPage({
         <StatCard label="Archived" value={summary.exercises.archived} />
       </div>
 
-      <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-500">Applications</h2>
+      <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-500">Applications</h2>
       <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-6">
         <StatCard label="Total received" value={summary.applications.submitted.toLocaleString('en-NG')} />
         <StatCard label="Complete" value={summary.applications.complete} tone="green"
@@ -139,7 +141,7 @@ export default async function ReportsPage({
         <StatCard label="Withdrawn" value={summary.applications.withdrawn} />
       </div>
 
-      <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-500">Recruitment stages</h2>
+      <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-500">Recruitment stages</h2>
       <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-6">
         <StatCard label="Qualified" value={summary.applications.qualified} tone="green" />
         <StatCard label="Shortlisted" value={summary.applications.shortlisted} tone="green" />
@@ -170,7 +172,7 @@ export default async function ReportsPage({
               label={`Awaiting review — ${summary.documents.pending}`} tone="amber" />
             <ProgressBar value={summary.documents.total ? (summary.documents.rejected / summary.documents.total) * 100 : 0}
               label={`Rejected or needing correction — ${summary.documents.rejected}`} tone="blue" />
-            <div className="border-t border-slate-100 pt-3 text-sm text-slate-700">
+            <div className="border-t border-ink-100 pt-3 text-sm text-ink-700">
               <p>Registered applicants: <strong>{summary.users.applicants.toLocaleString('en-NG')}</strong></p>
               <p>Staff accounts: <strong>{summary.users.staff}</strong></p>
               <p>Open public enquiries: <strong>{summary.enquiries.open}</strong> of {summary.enquiries.total}</p>
@@ -179,7 +181,39 @@ export default async function ReportsPage({
         </Card>
       </div>
 
-      <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-500">Distribution analysis</h2>
+      {onlineTests.schedules > 0 ? (
+        <>
+          <h2 className="micro-label mb-3">Computer-based testing</h2>
+          <Card className="mb-6">
+            <CardHeader
+              title="Online aptitude tests and examinations"
+              description="Papers sat in the applicant portal and marked automatically."
+            />
+            <CardBody>
+              <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+                <StatCard label="Online examinations" value={onlineTests.schedules} />
+                <StatCard label="Tests released" value={onlineTests.released} tone="blue" />
+                <StatCard label="Awaiting a sitting" value={onlineTests.notStarted} tone={onlineTests.notStarted ? 'amber' : 'default'} />
+                <StatCard label="In progress now" value={onlineTests.inProgress} tone={onlineTests.inProgress ? 'amber' : 'default'} />
+                <StatCard label="Submitted by candidates" value={onlineTests.submitted} tone="green" />
+                <StatCard label="Auto-submitted on time" value={onlineTests.expired} />
+                <StatCard
+                  label="Average score"
+                  value={onlineTests.averagePercentage === null ? '—' : `${onlineTests.averagePercentage}%`}
+                  tone="green"
+                />
+                <StatCard
+                  label="At or above the pass mark"
+                  value={`${onlineTests.passed}/${onlineTests.passed + onlineTests.failed}`}
+                  tone={onlineTests.passed >= onlineTests.failed ? 'green' : 'amber'}
+                />
+              </div>
+            </CardBody>
+          </Card>
+        </>
+      ) : null}
+
+      <h2 className="micro-label mb-3">Distribution analysis</h2>
       <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <DistributionCard title="Applications by vacancy" rows={byVacancy} />
         <DistributionCard title="Applications by qualification" rows={byQualification} />
@@ -189,7 +223,8 @@ export default async function ReportsPage({
           rows={byGender}
           note="Gender statistics are collected and reported only where lawfully permitted and approved by the Commission."
         />
-        <DistributionCard title="Applications by department or agency" rows={byDepartment} />
+        <DistributionCard title="Applications by employing MDA" rows={byDepartment} />
+        <DistributionCard title="Approved posts advertised by MDA" rows={postsByMda} />
         <DistributionCard
           title="Applications by status"
           rows={byStatus.map((r) => ({ label: APPLICATION_STATUS_LABELS[r.label] ?? r.label, count: r.count }))}
@@ -210,7 +245,7 @@ export default async function ReportsPage({
             <tbody>
               {vacancyFill.map((v) => (
                 <tr key={v.id}>
-                  <td className="font-medium text-slate-900">{v.jobTitle}</td>
+                  <td className="font-medium text-ink-950">{v.jobTitle}</td>
                   <td>{v.gradeLevel}</td>
                   <td>{v.positions}</td>
                   <td>{v._count.applications.toLocaleString('en-NG')}</td>
@@ -220,7 +255,7 @@ export default async function ReportsPage({
                 </tr>
               ))}
               {vacancyFill.length === 0 ? (
-                <tr><td colSpan={7} className="py-6 text-center text-sm text-slate-500">No active vacancies.</td></tr>
+                <tr><td colSpan={7} className="py-6 text-center text-sm text-ink-500">No active vacancies.</td></tr>
               ) : null}
             </tbody>
           </table>
@@ -237,8 +272,8 @@ export default async function ReportsPage({
                 { label: 'Application register', path: `/api/reports/applications?${exportQuery}` },
                 { label: 'Audit trail', path: '/api/reports/audit?' },
               ].map((item) => (
-                <div key={item.label} className="rounded-md border border-slate-200 p-3">
-                  <p className="mb-2 text-sm font-medium text-slate-900">{item.label}</p>
+                <div key={item.label} className="rounded-md border border-ink-200 p-3">
+                  <p className="mb-2 text-sm font-medium text-ink-950">{item.label}</p>
                   <div className="flex flex-wrap gap-1.5">
                     <Link href={`${item.path}format=pdf`} className="btn-secondary btn-sm">PDF</Link>
                     <Link href={`${item.path}format=excel`} className="btn-secondary btn-sm">Excel</Link>
@@ -247,7 +282,7 @@ export default async function ReportsPage({
                 </div>
               ))}
             </div>
-            <p className="mt-4 text-xs text-slate-500">
+            <p className="mt-4 text-xs text-ink-500">
               Reports are generated from live data at {formatDateTime(new Date())}. Every export is
               recorded in the audit trail against your account.
             </p>

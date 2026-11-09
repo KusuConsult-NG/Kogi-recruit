@@ -11,7 +11,7 @@ import {
 } from '@/components/ui';
 import { deleteDocumentRequirement, deleteFormField, deleteVacancy, toggleVacancy } from '@/actions/recruitment';
 import { ExerciseForm } from '../exercise-form';
-import { FormFieldForm, RequirementForm, StatusActionForm, VacancyForm } from './manage';
+import { ExerciseUnitForm, FormFieldForm, RequirementForm, StatusActionForm, VacancyForm } from './manage';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,19 +37,38 @@ export default async function AdminExerciseDetail({ params }: { params: Promise<
     include: {
       vacancies: {
         orderBy: [{ active: 'desc' }, { jobTitle: 'asc' }],
-        include: { department: { select: { name: true } }, _count: { select: { applications: true } } },
+        include: {
+          department: { select: { name: true } },
+          ministry: { select: { name: true, code: true, kind: true } },
+          ministryDept: { select: { name: true } },
+          _count: { select: { applications: true } },
+        },
       },
       requirements: { orderBy: { position: 'asc' } },
       formFields: { orderBy: { position: 'asc' } },
       approvals: { orderBy: { createdAt: 'desc' }, take: 5 },
+      unit: { select: { id: true, name: true, code: true } },
       _count: { select: { applications: true, shortlists: true, examSchedules: true, interviewSchedules: true, selectionLists: true } },
     },
   });
   if (!exercise) notFound();
 
-  const [departments, statusCounts] = await Promise.all([
+  const [departments, statusCounts, units, ministries] = await Promise.all([
     prisma.department.findMany({ where: { published: true }, orderBy: { name: 'asc' }, select: { id: true, name: true } }),
     prisma.application.groupBy({ by: ['status'], where: { exerciseId: id }, _count: { _all: true } }),
+    prisma.recruitmentUnit.findMany({
+      where: { active: true },
+      orderBy: { name: 'asc' },
+      select: { id: true, name: true, code: true },
+    }),
+    prisma.ministry.findMany({
+      where: { active: true },
+      orderBy: [{ kind: 'asc' }, { name: 'asc' }],
+      select: {
+        id: true, name: true, code: true, kind: true,
+        departments: { orderBy: { name: 'asc' }, select: { id: true, name: true } },
+      },
+    }),
   ]);
 
   const nextStates = EXERCISE_TRANSITIONS[exercise.status] ?? [];
@@ -91,6 +110,41 @@ export default async function AdminExerciseDetail({ params }: { params: Promise<
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         <div className="space-y-6 xl:col-span-2">
+          {/* Managing recruitment unit */}
+          <Card>
+            <div className="card-header">
+              <h2 className="card-title">Managing recruitment unit</h2>
+              {exercise.unit ? (
+                <span className="badge-green">{exercise.unit.code}</span>
+              ) : (
+                <span className="badge-amber">not assigned</span>
+              )}
+            </div>
+            <CardBody>
+              {exercise.unit ? (
+                <p className="mb-4 text-sm text-ink-700">
+                  This exercise is managed by{' '}
+                  <Link href={`/admin/establishment/units/${exercise.unit.id}`} className="link">
+                    {exercise.unit.name}
+                  </Link>
+                  . The unit's membership records who is answerable for each stage.
+                </p>
+              ) : (
+                <p className="mb-4 text-sm text-ink-700">
+                  No recruitment unit has been placed in charge of this exercise. Assigning one records
+                  who is answerable for screening, examinations, interviews and selection.
+                </p>
+              )}
+              {canManage ? (
+                <ExerciseUnitForm
+                  exerciseId={exercise.id}
+                  units={units}
+                  currentUnitId={exercise.unitId ?? ''}
+                />
+              ) : null}
+            </CardBody>
+          </Card>
+
           {/* Vacancies */}
           <Card>
             <div className="card-header">
@@ -101,7 +155,7 @@ export default async function AdminExerciseDetail({ params }: { params: Promise<
               <table className="table">
                 <thead>
                   <tr>
-                    <th>Job title</th><th>Grade</th><th>Department / Agency</th>
+                    <th>Job title</th><th>Grade</th><th>Employing MDA</th>
                     <th>Posts</th><th>Applications</th><th>State</th>{canManage && editable ? <th></th> : null}
                   </tr>
                 </thead>
@@ -109,15 +163,15 @@ export default async function AdminExerciseDetail({ params }: { params: Promise<
                   {exercise.vacancies.map((v) => (
                     <tr key={v.id} className={v.active ? '' : 'opacity-60'}>
                       <td>
-                        <p className="font-medium text-slate-900">{v.jobTitle}</p>
-                        <p className="mt-0.5 max-w-sm text-xs text-slate-500">{v.qualifications}</p>
-                        {v.experience ? <p className="text-xs text-slate-500">Experience: {v.experience}</p> : null}
+                        <p className="font-medium text-ink-950">{v.jobTitle}</p>
+                        <p className="mt-0.5 max-w-sm text-xs text-ink-500">{v.qualifications}</p>
+                        {v.experience ? <p className="text-xs text-ink-500">Experience: {v.experience}</p> : null}
                         {v.minAge || v.maxAge ? (
-                          <p className="text-xs text-slate-500">Age: {v.minAge ?? '—'} to {v.maxAge ?? '—'}</p>
+                          <p className="text-xs text-ink-500">Age: {v.minAge ?? '—'} to {v.maxAge ?? '—'}</p>
                         ) : null}
                       </td>
                       <td className="whitespace-nowrap">{v.gradeLevel}</td>
-                      <td className="text-xs">{v.department?.name ?? v.agency ?? '—'}</td>
+                      <td className="text-xs">{v.ministry ? <span>{v.ministry.name}{v.ministryDept ? <span className="block text-ink-500">{v.ministryDept.name}</span> : null}</span> : (v.department?.name ?? '—')}</td>
                       <td>{v.positions}</td>
                       <td>{v._count.applications}</td>
                       <td>{v.active ? <span className="badge-green">active</span> : <span className="badge-slate">inactive</span>}</td>
@@ -129,14 +183,14 @@ export default async function AdminExerciseDetail({ params }: { params: Promise<
                           </form>
                           <form action={deleteVacancy} className="inline">
                             <input type="hidden" name="id" value={v.id} />
-                            <button type="submit" className="btn-ghost btn-sm text-red-700">Remove</button>
+                            <button type="submit" className="btn-ghost btn-sm text-[#9a2c20]">Remove</button>
                           </form>
                         </td>
                       ) : null}
                     </tr>
                   ))}
                   {exercise.vacancies.length === 0 ? (
-                    <tr><td colSpan={7} className="py-6 text-center text-sm text-slate-500">
+                    <tr><td colSpan={7} className="py-6 text-center text-sm text-ink-500">
                       No vacancies added. At least one approved vacancy is required before this exercise can be submitted for approval.
                     </td></tr>
                   ) : null}
@@ -144,7 +198,7 @@ export default async function AdminExerciseDetail({ params }: { params: Promise<
               </table>
             </div>
             {canManage && editable ? (
-              <CardBody><VacancyForm exerciseId={exercise.id} departments={departments} /></CardBody>
+              <CardBody><VacancyForm exerciseId={exercise.id} departments={departments} ministries={ministries} /></CardBody>
             ) : null}
           </Card>
 
@@ -162,7 +216,7 @@ export default async function AdminExerciseDetail({ params }: { params: Promise<
                 <tbody>
                   {exercise.requirements.map((r) => (
                     <tr key={r.id}>
-                      <td className="font-medium text-slate-900">{r.label}</td>
+                      <td className="font-medium text-ink-950">{r.label}</td>
                       <td className="max-w-xs text-xs">{r.description ?? '—'}</td>
                       <td>{r.required ? <span className="badge-red">required</span> : <span className="badge-slate">optional</span>}</td>
                       <td className="whitespace-nowrap text-xs">{r.maxSizeMb} MB</td>
@@ -171,14 +225,14 @@ export default async function AdminExerciseDetail({ params }: { params: Promise<
                         <td>
                           <form action={deleteDocumentRequirement}>
                             <input type="hidden" name="id" value={r.id} />
-                            <button type="submit" className="btn-ghost btn-sm text-red-700">Remove</button>
+                            <button type="submit" className="btn-ghost btn-sm text-[#9a2c20]">Remove</button>
                           </form>
                         </td>
                       ) : null}
                     </tr>
                   ))}
                   {exercise.requirements.length === 0 ? (
-                    <tr><td colSpan={6} className="py-6 text-center text-sm text-slate-500">No document requirements configured.</td></tr>
+                    <tr><td colSpan={6} className="py-6 text-center text-sm text-ink-500">No document requirements configured.</td></tr>
                   ) : null}
                 </tbody>
               </table>
@@ -194,7 +248,7 @@ export default async function AdminExerciseDetail({ params }: { params: Promise<
             </div>
             <CardBody className="space-y-4">
               {exercise.formFields.length === 0 ? (
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-ink-600">
                   The standard application form captures personal details, contact information, State and
                   LGA, qualifications, employment history, referees, next of kin, declaration and consent.
                   Add custom fields here if this exercise needs anything further.
@@ -208,7 +262,7 @@ export default async function AdminExerciseDetail({ params }: { params: Promise<
                     <tbody>
                       {exercise.formFields.map((f) => (
                         <tr key={f.id}>
-                          <td className="font-medium text-slate-900">{f.label}</td>
+                          <td className="font-medium text-ink-950">{f.label}</td>
                           <td className="font-mono text-xs">{f.key}</td>
                           <td className="text-xs">{f.section.toLowerCase()}</td>
                           <td className="text-xs">{f.inputType}</td>
@@ -217,7 +271,7 @@ export default async function AdminExerciseDetail({ params }: { params: Promise<
                             <td>
                               <form action={deleteFormField}>
                                 <input type="hidden" name="id" value={f.id} />
-                                <button type="submit" className="btn-ghost btn-sm text-red-700">Remove</button>
+                                <button type="submit" className="btn-ghost btn-sm text-[#9a2c20]">Remove</button>
                               </form>
                             </td>
                           ) : null}
@@ -278,8 +332,8 @@ export default async function AdminExerciseDetail({ params }: { params: Promise<
               />
 
               {nextStates.length > 0 ? (
-                <div className="space-y-2 border-t border-slate-200 pt-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Available actions</p>
+                <div className="space-y-2 border-t border-ink-200 pt-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-ink-500">Available actions</p>
                   {nextStates.includes(EXERCISE_STATUS.PENDING_APPROVAL) && canManage ? (
                     <StatusActionForm exerciseId={exercise.id} to={EXERCISE_STATUS.PENDING_APPROVAL}
                       label="Submit for approval" tone="btn-primary" />
@@ -313,7 +367,7 @@ export default async function AdminExerciseDetail({ params }: { params: Promise<
                   ) : null}
                 </div>
               ) : (
-                <p className="border-t border-slate-200 pt-3 text-xs text-slate-500">
+                <p className="border-t border-ink-200 pt-3 text-xs text-ink-500">
                   No further lifecycle actions are available from this status.
                 </p>
               )}
@@ -332,9 +386,9 @@ export default async function AdminExerciseDetail({ params }: { params: Promise<
                 { label: 'Selection lists', count: exercise._count.selectionLists, href: `/admin/selection?exercise=${exercise.id}` },
               ].map((row) => (
                 <Link key={row.label} href={row.href}
-                  className="flex items-center justify-between rounded border border-slate-200 px-3 py-2 hover:border-kogi-400 hover:bg-kogi-50">
-                  <span className="text-slate-700">{row.label}</span>
-                  <span className="font-semibold text-slate-900">{row.count}</span>
+                  className="flex items-center justify-between rounded border border-ink-200 px-3 py-2 hover:border-kogi-400 hover:bg-kogi-50">
+                  <span className="text-ink-700">{row.label}</span>
+                  <span className="font-semibold text-ink-950">{row.count}</span>
                 </Link>
               ))}
             </CardBody>
@@ -346,20 +400,20 @@ export default async function AdminExerciseDetail({ params }: { params: Promise<
               <CardBody>
                 <ul className="space-y-2.5">
                   {exercise.approvals.map((a) => (
-                    <li key={a.id} className="border-b border-slate-100 pb-2.5 last:border-0 last:pb-0">
+                    <li key={a.id} className="border-b border-ink-100 pb-2.5 last:border-0 last:pb-0">
                       <div className="flex items-center justify-between gap-2">
-                        <p className="text-xs font-medium text-slate-800">{a.action.replace(/_/g, ' ').toLowerCase()}</p>
+                        <p className="text-xs font-medium text-ink-800">{a.action.replace(/_/g, ' ').toLowerCase()}</p>
                         <StatusBadge status={a.status} />
                       </div>
-                      <p className="mt-0.5 text-[11px] text-slate-500">
+                      <p className="mt-0.5 text-2xs text-ink-500">
                         Requested by {a.requestedByName ?? '—'} · {formatDateTime(a.createdAt)}
                       </p>
                       {a.decidedByName ? (
-                        <p className="text-[11px] text-slate-500">
+                        <p className="text-2xs text-ink-500">
                           Decided by {a.decidedByName} · {formatDateTime(a.decidedAt)}
                         </p>
                       ) : null}
-                      {a.note ? <p className="mt-0.5 text-[11px] text-slate-600">{a.note}</p> : null}
+                      {a.note ? <p className="mt-0.5 text-2xs text-ink-600">{a.note}</p> : null}
                     </li>
                   ))}
                 </ul>

@@ -4,6 +4,7 @@ import {
   hasAnyPermission, hasPermission, permissionsForRole, roleHas,
 } from '@/lib/rbac';
 import { ROLES, ROLE_LABELS, STAFF_ROLES, type Role } from '@/lib/constants';
+import { visibleNav } from '@/components/admin-nav';
 
 const P = PERMISSIONS;
 
@@ -155,5 +156,70 @@ describe('role coverage of the recruitment lifecycle', () => {
     for (const permission of Object.values(P)) {
       expect(covered.has(permission), `${permission} is held by no role`).toBe(true);
     }
+  });
+});
+
+describe('establishment, unit and examination-setting permissions', () => {
+  it('lets the recruitment director maintain the register and the unit', () => {
+    const user = { role: ROLES.RECRUITMENT_DIRECTOR };
+    expect(hasPermission(user, PERMISSIONS.MDA_VIEW)).toBe(true);
+    expect(hasPermission(user, PERMISSIONS.MDA_MANAGE)).toBe(true);
+    expect(hasPermission(user, PERMISSIONS.UNIT_MANAGE)).toBe(true);
+    expect(hasPermission(user, PERMISSIONS.EXAM_SET)).toBe(true);
+  });
+
+  it('lets a recruitment officer maintain MDAs but not the unit’s membership', () => {
+    const user = { role: ROLES.RECRUITMENT_OFFICER };
+    expect(hasPermission(user, PERMISSIONS.MDA_MANAGE)).toBe(true);
+    expect(hasPermission(user, PERMISSIONS.UNIT_MANAGE)).toBe(false);
+  });
+
+  it('lets the examination officer set papers but not amend the register', () => {
+    const user = { role: ROLES.EXAMINATION_OFFICER };
+    expect(hasPermission(user, PERMISSIONS.EXAM_SET)).toBe(true);
+    expect(hasPermission(user, PERMISSIONS.MDA_VIEW)).toBe(true);
+    expect(hasPermission(user, PERMISSIONS.MDA_MANAGE)).toBe(false);
+    expect(hasPermission(user, PERMISSIONS.UNIT_MANAGE)).toBe(false);
+  });
+
+  it('keeps question setting away from screening and interview roles', () => {
+    for (const role of [ROLES.SCREENING_OFFICER, ROLES.DOCUMENT_OFFICER, ROLES.INTERVIEW_PANEL, ROLES.CONTENT_OFFICER]) {
+      expect(hasPermission({ role }, PERMISSIONS.EXAM_SET), `${role} can set examinations`).toBe(false);
+      expect(hasPermission({ role }, PERMISSIONS.MDA_MANAGE), `${role} can amend the register`).toBe(false);
+      expect(hasPermission({ role }, PERMISSIONS.UNIT_MANAGE), `${role} can manage the unit`).toBe(false);
+    }
+  });
+
+  it('lets the reporting officer read the register without amending it', () => {
+    const user = { role: ROLES.REPORTING_OFFICER };
+    expect(hasPermission(user, PERMISSIONS.MDA_VIEW)).toBe(true);
+    expect(hasPermission(user, PERMISSIONS.MDA_MANAGE)).toBe(false);
+  });
+
+  it('gives an applicant none of these permissions', () => {
+    for (const p of [PERMISSIONS.MDA_VIEW, PERMISSIONS.MDA_MANAGE, PERMISSIONS.UNIT_MANAGE, PERMISSIONS.EXAM_SET]) {
+      expect(hasPermission({ role: ROLES.APPLICANT }, p)).toBe(false);
+    }
+  });
+
+  it('labels every new permission for the user-permissions screen', () => {
+    for (const p of [PERMISSIONS.MDA_VIEW, PERMISSIONS.MDA_MANAGE, PERMISSIONS.UNIT_MANAGE, PERMISSIONS.EXAM_SET]) {
+      expect(PERMISSION_LABELS[p], `${p} has no label`).toBeTruthy();
+    }
+  });
+});
+
+describe('the new navigation groups', () => {
+  it('shows the establishment group to the recruitment director', () => {
+    const groups = visibleNav({ id: 'u', fullName: 'Director', email: 'd@x', role: ROLES.RECRUITMENT_DIRECTOR, permissions: [] } as never);
+    const labels = groups.map((g) => g.label);
+    expect(labels).toContain('Establishment');
+    expect(labels).toContain('Examinations & Tests');
+  });
+
+  it('hides both groups from an interview panel member', () => {
+    const groups = visibleNav({ id: 'u', fullName: 'Panel', email: 'p@x', role: ROLES.INTERVIEW_PANEL, permissions: [] } as never);
+    const labels = groups.map((g) => g.label);
+    expect(labels).not.toContain('Establishment');
   });
 });

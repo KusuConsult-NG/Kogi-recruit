@@ -86,14 +86,14 @@ export default async function TasksPage({
                     return (
                       <tr key={t.id}>
                         <td>
-                          <p className="font-medium text-slate-900">{t.title}</p>
-                          {t.description ? <p className="max-w-sm text-xs text-slate-500">{t.description}</p> : null}
-                          <p className="text-[11px] text-slate-400">Created by {t.creator?.fullName ?? '—'}</p>
+                          <p className="font-medium text-ink-950">{t.title}</p>
+                          {t.description ? <p className="max-w-sm text-xs text-ink-500">{t.description}</p> : null}
+                          <p className="text-2xs text-ink-400">Created by {t.creator?.fullName ?? '—'}</p>
                         </td>
                         <td className="text-xs">{t.assignee?.fullName ?? 'Unassigned'}</td>
                         <td className="text-xs">{t.department?.name ?? '—'}</td>
                         <td><StatusBadge status={t.priority} /></td>
-                        <td className={`whitespace-nowrap text-xs ${isOverdue ? 'font-semibold text-red-700' : ''}`}>
+                        <td className={`whitespace-nowrap text-xs ${isOverdue ? 'font-semibold text-[#9a2c20]' : ''}`}>
                           {t.dueDate ? formatDate(t.dueDate) : '—'}
                           {isOverdue ? ' (overdue)' : ''}
                         </td>
@@ -112,14 +112,14 @@ export default async function TasksPage({
                         <td>
                           <form action={deleteTask}>
                             <input type="hidden" name="id" value={t.id} />
-                            <button type="submit" className="btn-ghost btn-sm text-red-700">Delete</button>
+                            <button type="submit" className="btn-ghost btn-sm text-[#9a2c20]">Delete</button>
                           </form>
                         </td>
                       </tr>
                     );
                   })}
                   {tasks.length === 0 ? (
-                    <tr><td colSpan={8} className="py-6 text-center text-sm text-slate-500">No tasks in this view.</td></tr>
+                    <tr><td colSpan={8} className="py-6 text-center text-sm text-ink-500">No tasks in this view.</td></tr>
                   ) : null}
                 </tbody>
               </table>

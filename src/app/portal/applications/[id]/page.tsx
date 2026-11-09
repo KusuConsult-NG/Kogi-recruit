@@ -42,7 +42,7 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
           formFields: { where: { enabled: true }, orderBy: { position: 'asc' } },
         },
       },
-      vacancy: { include: { department: { select: { name: true } } } },
+      vacancy: { include: { department: { select: { name: true } }, ministry: { select: { id: true, name: true, code: true, kind: true } }, ministryDept: { select: { name: true } } } },
       applicant: { include: { applicantProfile: true } },
       education: { orderBy: { position: 'asc' } },
       employment: { orderBy: { position: 'asc' } },
@@ -209,12 +209,12 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
                 <li key={s.key} className="text-center">
                   <span
                     className={`mx-auto flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold ${
-                      done ? 'bg-kogi-600 text-white' : active ? 'bg-gold-400 text-gold-950 ring-2 ring-gold-200' : 'bg-slate-200 text-slate-500'
+                      done ? 'bg-kogi-600 text-white' : active ? 'bg-gold-400 text-gold-950 ring-2 ring-gold-200' : 'bg-ink-200 text-ink-500'
                     }`}
                   >
                     {done ? '✓' : s.n}
                   </span>
-                  <span className={`mt-1.5 block text-[10px] leading-tight ${active ? 'font-semibold text-slate-900' : 'text-slate-500'}`}>
+                  <span className={`mt-1.5 block text-2xs leading-tight ${active ? 'font-semibold text-ink-950' : 'text-ink-500'}`}>
                     {s.name}
                   </span>
                 </li>
@@ -258,7 +258,7 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
             </div>
             <CardBody className="space-y-4">
               {application.education.length === 0 ? (
-                <p className="text-sm text-slate-600">No qualifications recorded yet. At least one is required.</p>
+                <p className="text-sm text-ink-600">No qualifications recorded yet. At least one is required.</p>
               ) : (
                 <div className="table-wrap">
                   <table className="table">
@@ -268,7 +268,7 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
                     <tbody>
                       {application.education.map((e) => (
                         <tr key={e.id}>
-                          <td className="font-medium text-slate-900">{e.institution}</td>
+                          <td className="font-medium text-ink-950">{e.institution}</td>
                           <td>{e.qualification}</td>
                           <td>{e.course ?? '—'}</td>
                           <td>{e.grade ?? '—'}</td>
@@ -278,7 +278,7 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
                               <form action={removeEntry}>
                                 <input type="hidden" name="kind" value="education" />
                                 <input type="hidden" name="id" value={e.id} />
-                                <button type="submit" className="btn-ghost btn-sm text-red-700">Remove</button>
+                                <button type="submit" className="btn-ghost btn-sm text-[#9a2c20]">Remove</button>
                               </form>
                             </td>
                           ) : null}
@@ -300,7 +300,7 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
             </div>
             <CardBody className="space-y-4">
               {application.employment.length === 0 ? (
-                <p className="text-sm text-slate-600">No employment records added.</p>
+                <p className="text-sm text-ink-600">No employment records added.</p>
               ) : (
                 <div className="table-wrap">
                   <table className="table">
@@ -310,7 +310,7 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
                     <tbody>
                       {application.employment.map((e) => (
                         <tr key={e.id}>
-                          <td className="font-medium text-slate-900">{e.employer}</td>
+                          <td className="font-medium text-ink-950">{e.employer}</td>
                           <td>{e.jobTitle}</td>
                           <td className="whitespace-nowrap text-xs">
                             {formatDate(e.startDate)} – {e.current ? 'Present' : formatDate(e.endDate)}
@@ -321,7 +321,7 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
                               <form action={removeEntry}>
                                 <input type="hidden" name="kind" value="employment" />
                                 <input type="hidden" name="id" value={e.id} />
-                                <button type="submit" className="btn-ghost btn-sm text-red-700">Remove</button>
+                                <button type="submit" className="btn-ghost btn-sm text-[#9a2c20]">Remove</button>
                               </form>
                             </td>
                           ) : null}
@@ -343,45 +343,45 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
             </div>
             <CardBody className="space-y-4">
               {application.exercise.requirements.length === 0 ? (
-                <p className="text-sm text-slate-600">No documents have been configured for this exercise.</p>
+                <p className="text-sm text-ink-600">No documents have been configured for this exercise.</p>
               ) : (
-                <ul className="divide-y divide-slate-100">
+                <ul className="divide-y divide-ink-100">
                   {application.exercise.requirements.map((req) => {
                     const doc = uploadedByType.get(req.code);
                     return (
                       <li key={req.id} className="py-4 first:pt-0 last:pb-0">
                         <div className="flex flex-wrap items-start justify-between gap-3">
                           <div>
-                            <p className="text-sm font-medium text-slate-900">
+                            <p className="text-sm font-medium text-ink-950">
                               {req.label}
                               {req.required ? <span className="ml-1.5 badge-red">required</span> : <span className="ml-1.5 badge-slate">optional</span>}
                             </p>
-                            {req.description ? <p className="mt-0.5 text-xs text-slate-600">{req.description}</p> : null}
+                            {req.description ? <p className="mt-0.5 text-xs text-ink-600">{req.description}</p> : null}
                           </div>
                           {doc ? <StatusBadge status={doc.reviewStatus} /> : <span className="badge-amber">not uploaded</span>}
                         </div>
 
                         {doc ? (
-                          <div className="mt-2.5 rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
+                          <div className="mt-2.5 rounded-md border border-ink-200 bg-ink-50 px-3 py-2">
                             <div className="flex flex-wrap items-center justify-between gap-2">
                               <div className="text-xs">
                                 <a href={`/api/files/document/${doc.id}`} target="_blank" rel="noopener"
                                   className="font-medium text-kogi-700 underline">
                                   {doc.originalName}
                                 </a>
-                                <span className="ml-2 text-slate-500">
+                                <span className="ml-2 text-ink-500">
                                   {formatBytes(doc.sizeBytes)} · v{doc.version} · uploaded {formatDateTime(doc.createdAt)}
                                 </span>
                               </div>
                               {editable ? (
                                 <form action={deleteDocument}>
                                   <input type="hidden" name="documentId" value={doc.id} />
-                                  <button type="submit" className="btn-ghost btn-sm text-red-700">Remove</button>
+                                  <button type="submit" className="btn-ghost btn-sm text-[#9a2c20]">Remove</button>
                                 </form>
                               ) : null}
                             </div>
                             {doc.reviewNotes ? (
-                              <p className={`mt-1.5 text-xs ${doc.reviewStatus === 'VERIFIED' ? 'text-kogi-800' : 'text-amber-800'}`}>
+                              <p className={`mt-1.5 text-xs ${doc.reviewStatus === 'VERIFIED' ? 'text-kogi-800' : 'text-gold-800'}`}>
                                 Officer&apos;s note: {doc.reviewNotes}
                               </p>
                             ) : null}
@@ -406,8 +406,8 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
               )}
 
               {otherDocs.length > 0 ? (
-                <div className="border-t border-slate-200 pt-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Other documents</p>
+                <div className="border-t border-ink-200 pt-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-ink-500">Other documents</p>
                   <ul className="mt-2 space-y-1.5">
                     {otherDocs.map((d) => (
                       <li key={d.id} className="flex flex-wrap items-center justify-between gap-2 text-xs">
@@ -419,7 +419,7 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
                           {editable ? (
                             <form action={deleteDocument}>
                               <input type="hidden" name="documentId" value={d.id} />
-                              <button type="submit" className="btn-ghost btn-sm text-red-700">Remove</button>
+                              <button type="submit" className="btn-ghost btn-sm text-[#9a2c20]">Remove</button>
                             </form>
                           ) : null}
                         </span>
@@ -430,12 +430,12 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
               ) : null}
 
               {editable ? (
-                <div className="border-t border-slate-200 pt-4">
-                  <p className="mb-2 text-sm font-semibold text-slate-900">Upload another document</p>
+                <div className="border-t border-ink-200 pt-4">
+                  <p className="mb-2 text-sm font-semibold text-ink-950">Upload another document</p>
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {DOCUMENT_TYPES.filter((t) => !application.exercise.requirements.some((r) => r.code === t.code)).map((t) => (
-                      <div key={t.code} className="rounded-md border border-slate-200 p-3">
-                        <p className="mb-1.5 text-xs font-medium text-slate-800">{t.label}</p>
+                      <div key={t.code} className="rounded-md border border-ink-200 p-3">
+                        <p className="mb-1.5 text-xs font-medium text-ink-800">{t.label}</p>
                         <DocumentUploadForm
                           applicationId={application.id}
                           label={t.label}
@@ -456,25 +456,25 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
             <div className="card-header"><h2 className="card-title">5. Referees and next of kin</h2></div>
             <CardBody className="space-y-5">
               <div>
-                <p className="mb-2 text-sm font-semibold text-slate-900">Referees</p>
+                <p className="mb-2 text-sm font-semibold text-ink-950">Referees</p>
                 {application.referees.length === 0 ? (
-                  <p className="text-sm text-slate-600">No referees listed.</p>
+                  <p className="text-sm text-ink-600">No referees listed.</p>
                 ) : (
-                  <ul className="divide-y divide-slate-100">
+                  <ul className="divide-y divide-ink-100">
                     {application.referees.map((r) => (
                       <li key={r.id} className="flex flex-wrap items-start justify-between gap-2 py-2.5 first:pt-0">
                         <div className="text-sm">
-                          <p className="font-medium text-slate-900">{r.name}</p>
-                          <p className="text-xs text-slate-600">
+                          <p className="font-medium text-ink-950">{r.name}</p>
+                          <p className="text-xs text-ink-600">
                             {[r.occupation, r.organisation].filter(Boolean).join(', ') || '—'}
                           </p>
-                          <p className="text-xs text-slate-500">{[r.phone, r.email].filter(Boolean).join(' · ')}</p>
+                          <p className="text-xs text-ink-500">{[r.phone, r.email].filter(Boolean).join(' · ')}</p>
                         </div>
                         {editable ? (
                           <form action={removeEntry}>
                             <input type="hidden" name="kind" value="referee" />
                             <input type="hidden" name="id" value={r.id} />
-                            <button type="submit" className="btn-ghost btn-sm text-red-700">Remove</button>
+                            <button type="submit" className="btn-ghost btn-sm text-[#9a2c20]">Remove</button>
                           </form>
                         ) : null}
                       </li>
@@ -486,8 +486,8 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
                 ) : null}
               </div>
 
-              <div className="border-t border-slate-200 pt-4">
-                <p className="mb-2 text-sm font-semibold text-slate-900">Next of kin</p>
+              <div className="border-t border-ink-200 pt-4">
+                <p className="mb-2 text-sm font-semibold text-ink-950">Next of kin</p>
                 {editable ? (
                   <NextOfKinForm
                     applicationId={application.id}
@@ -513,7 +513,7 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
                     ]}
                   />
                 ) : (
-                  <p className="text-sm text-slate-600">Not supplied.</p>
+                  <p className="text-sm text-ink-600">Not supplied.</p>
                 )}
               </div>
             </CardBody>
@@ -532,9 +532,9 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
                 />
               ) : (
                 <>
-                  {application.skills ? <RichText body={application.skills} /> : <p className="text-sm text-slate-600">None recorded.</p>}
+                  {application.skills ? <RichText body={application.skills} /> : <p className="text-sm text-ink-600">None recorded.</p>}
                   {Object.keys(extraValues).length > 0 ? (
-                    <div className="mt-4 border-t border-slate-200 pt-3">
+                    <div className="mt-4 border-t border-ink-200 pt-3">
                       <DescriptionList
                         items={formFields.map((f) => ({ label: f.label, value: extraValues[f.key] ?? '—' }))}
                       />
@@ -575,7 +575,7 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
                   { label: 'Reference', value: <span className="font-mono">{application.reference}</span> },
                   { label: 'Exercise reference', value: application.exercise.reference },
                   { label: 'Position', value: application.vacancy ? `${application.vacancy.jobTitle} (${application.vacancy.gradeLevel})` : '—' },
-                  { label: 'Department', value: application.vacancy?.department?.name ?? application.vacancy?.agency ?? '—' },
+                  { label: 'Employing MDA', value: application.vacancy?.ministry?.name ?? application.vacancy?.department?.name ?? '—' },
                   { label: 'Status', value: <StatusBadge status={application.status} label={APPLICATION_STATUS_LABELS[application.status]} /> },
                   { label: 'Current stage', value: application.stage.replace(/_/g, ' ').toLowerCase() },
                   { label: 'Started', value: formatDateTime(application.createdAt) },
@@ -623,7 +623,7 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
                     { label: 'Attendance', value: <StatusBadge status={interview.attendance} /> },
                   ]}
                 />
-                <p className="mt-3 rounded bg-purple-50 px-3 py-2 text-xs text-purple-900">
+                <p className="mt-3 rounded bg-[#f4f1f9] px-3 py-2 text-xs text-[#3a3053]">
                   Bring the originals of every document uploaded with your application, together with a
                   valid means of identification.
                 </p>
@@ -635,17 +635,17 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
             <div className="card-header"><h2 className="card-title">Application history</h2></div>
             <CardBody>
               {application.statusHistory.length === 0 ? (
-                <p className="text-sm text-slate-600">No history recorded.</p>
+                <p className="text-sm text-ink-600">No history recorded.</p>
               ) : (
-                <ol className="space-y-3 border-l-2 border-slate-200 pl-4">
+                <ol className="space-y-3 border-l-2 border-ink-200 pl-4">
                   {application.statusHistory.map((h) => (
                     <li key={h.id} className="relative">
                       <span className="absolute -left-[21px] top-1.5 h-2.5 w-2.5 rounded-full bg-kogi-600" />
-                      <p className="text-sm font-medium text-slate-800">
+                      <p className="text-sm font-medium text-ink-800">
                         {APPLICATION_STATUS_LABELS[h.toStatus] ?? h.toStatus}
                       </p>
-                      <p className="text-xs text-slate-500">{formatDateTime(h.createdAt)}</p>
-                      {h.remarks ? <p className="mt-0.5 text-xs text-slate-600">{h.remarks}</p> : null}
+                      <p className="text-xs text-ink-500">{formatDateTime(h.createdAt)}</p>
+                      {h.remarks ? <p className="mt-0.5 text-xs text-ink-600">{h.remarks}</p> : null}
                     </li>
                   ))}
                 </ol>
@@ -657,7 +657,7 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
             <Card>
               <div className="card-header"><h2 className="card-title">Withdraw application</h2></div>
               <CardBody>
-                <p className="text-xs text-slate-600">
+                <p className="text-xs text-ink-600">
                   Withdrawing cannot be undone. You will not be considered further in this exercise.
                 </p>
                 <form action={withdrawApplication} className="mt-3 space-y-2">

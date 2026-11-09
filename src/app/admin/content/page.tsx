@@ -4,7 +4,9 @@ import { requirePagePermission } from '@/lib/page-guards';
 import { hasPermission, PERMISSIONS } from '@/lib/rbac';
 import { ARTICLE_TYPES } from '@/lib/constants';
 import { formatDateTime } from '@/lib/format';
-import { Card, EmptyState, PageHeading, StatCard, StatusBadge, Tabs } from '@/components/ui';
+import {
+  Card, EmptyState, PageHeading, StatCard, StatusBadge, Tabs, readable,
+} from '@/components/ui';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'News and Notices' };
@@ -100,9 +102,9 @@ export default async function AdminContentPage({
                       <Link href={`/admin/content/${a.id}`} className="font-medium text-kogi-700 hover:underline">
                         {a.title}
                       </Link>
-                      {a.approvalNote ? <p className="mt-0.5 text-xs text-red-700">{a.approvalNote}</p> : null}
+                      {a.approvalNote ? <p className="mt-0.5 text-xs text-[#9a2c20]">{a.approvalNote}</p> : null}
                     </td>
-                    <td><span className="badge-slate">{a.type.replace(/_/g, ' ').toLowerCase()}</span></td>
+                    <td><span className="badge-slate">{readable(a.type)}</span></td>
                     <td><StatusBadge status={a.status} /></td>
                     <td className="text-xs">{a.author?.fullName ?? '—'}</td>
                     <td>{a._count.attachments}</td>

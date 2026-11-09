@@ -112,7 +112,7 @@ export async function GET(request: Request) {
     },
     {
       title: 'By department',
-      columns: ['Department or agency', 'Applications'],
+      columns: ['Employing MDA', 'Applications'],
       rows: byDepartment.map((r) => [r.label, r.count]),
     },
     {

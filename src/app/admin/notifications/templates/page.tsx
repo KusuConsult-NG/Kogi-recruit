@@ -31,13 +31,13 @@ export default async function TemplatesPage() {
               <div className="card-header">
                 <div>
                   <h2 className="card-title">{fallback.name}</h2>
-                  <p className="mt-0.5 font-mono text-xs text-slate-500">{code}</p>
+                  <p className="mt-0.5 font-mono text-xs text-ink-500">{code}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   {record ? (
                     <>
                       <span className="badge-blue">customised</span>
-                      <span className="text-[11px] text-slate-500">
+                      <span className="text-2xs text-ink-500">
                         {formatDateTime(record.updatedAt)}
                       </span>
                       <form action={resetTemplate}>

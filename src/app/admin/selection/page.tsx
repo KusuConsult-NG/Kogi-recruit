@@ -70,7 +70,7 @@ export default async function SelectionPage({
                       <Link href={`/admin/selection/${l.id}`} className="font-medium text-kogi-700 hover:underline">
                         {l.title}
                       </Link>
-                      {l.rejectionNote ? <p className="mt-0.5 text-xs text-red-700">Returned: {l.rejectionNote}</p> : null}
+                      {l.rejectionNote ? <p className="mt-0.5 text-xs text-[#9a2c20]">Returned: {l.rejectionNote}</p> : null}
                     </td>
                     <td className="text-xs">{l.exercise.reference}</td>
                     <td>{l.entries.length}</td>

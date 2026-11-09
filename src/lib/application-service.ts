@@ -10,7 +10,7 @@ export const APPLICATION_DETAIL_INCLUDE = {
   exercise: {
     include: { requirements: { orderBy: { position: 'asc' as const } }, formFields: { where: { enabled: true }, orderBy: { position: 'asc' as const } } },
   },
-  vacancy: { include: { department: { select: { name: true } } } },
+  vacancy: { include: { department: { select: { name: true } }, ministry: { select: { id: true, name: true, code: true, kind: true } }, ministryDept: { select: { name: true } } } },
   applicant: { include: { applicantProfile: true } },
   education: { orderBy: { position: 'asc' as const } },
   employment: { orderBy: { position: 'asc' as const } },

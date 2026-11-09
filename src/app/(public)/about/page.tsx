@@ -29,21 +29,21 @@ export default async function AboutPage() {
           <Card>
             <div className="card-header"><h2 className="card-title">Profile</h2></div>
             <CardBody>
-              {about ? <RichText body={about.body} /> : <p className="text-sm text-slate-600">Content pending publication.</p>}
+              {about ? <RichText body={about.body} /> : <p className="text-sm text-ink-600">Content pending publication.</p>}
             </CardBody>
           </Card>
 
           <Card id="mandate">
             <div className="card-header"><h2 className="card-title">{mandate?.title ?? 'Mandate'}</h2></div>
             <CardBody>
-              {mandate ? <RichText body={mandate.body} /> : <p className="text-sm text-slate-600">Content pending publication.</p>}
+              {mandate ? <RichText body={mandate.body} /> : <p className="text-sm text-ink-600">Content pending publication.</p>}
             </CardBody>
           </Card>
 
           <Card id="functions">
             <div className="card-header"><h2 className="card-title">{functions?.title ?? 'Functions and Responsibilities'}</h2></div>
             <CardBody>
-              {functions ? <RichText body={functions.body} /> : <p className="text-sm text-slate-600">Content pending publication.</p>}
+              {functions ? <RichText body={functions.body} /> : <p className="text-sm text-ink-600">Content pending publication.</p>}
             </CardBody>
           </Card>
         </div>
@@ -57,7 +57,7 @@ export default async function AboutPage() {
           ) : null}
           <Card>
             <div className="card-header"><h2 className="card-title">Contact</h2></div>
-            <CardBody className="space-y-2 text-sm text-slate-700">
+            <CardBody className="space-y-2 text-sm text-ink-700">
               <p>{COMMISSION.address}</p>
               <p><span className="font-medium">Telephone:</span> {COMMISSION.phone}</p>
               <p><span className="font-medium">Email:</span> {COMMISSION.email}</p>

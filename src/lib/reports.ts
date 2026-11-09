@@ -207,14 +207,73 @@ export async function applicationsByStatus(exerciseId?: string): Promise<GroupCo
 export async function applicationsByDepartment(exerciseId?: string): Promise<GroupCount[]> {
   const apps = await prisma.application.findMany({
     where: { ...(exerciseId ? { exerciseId } : {}), status: { not: APPLICATION_STATUS.DRAFT } },
-    select: { vacancy: { select: { department: { select: { name: true } }, agency: true } } },
+    select: { vacancy: { select: { department: { select: { name: true } }, ministry: { select: { name: true } } } } },
   });
   const counts = new Map<string, number>();
   for (const a of apps) {
-    const key = a.vacancy?.department?.name ?? a.vacancy?.agency ?? 'Unassigned';
+    const key = a.vacancy?.ministry?.name ?? a.vacancy?.department?.name ?? 'Unassigned';
     counts.set(key, (counts.get(key) ?? 0) + 1);
   }
   return Array.from(counts, ([label, count]) => ({ label, count })).sort((a, b) => b.count - a.count);
+}
+
+/**
+ * Approved posts advertised by employing MDA. Vacancies belong to a ministry,
+ * department or agency, so this is the Commission's establishment view of an
+ * exercise rather than an applicant view.
+ */
+export async function postsByMinistry(exerciseId?: string): Promise<GroupCount[]> {
+  const vacancies = await prisma.vacancy.findMany({
+    where: { active: true, ...(exerciseId ? { exerciseId } : {}) },
+    select: { positions: true, ministry: { select: { name: true, shortName: true } } },
+  });
+  const counts = new Map<string, number>();
+  for (const v of vacancies) {
+    const key = v.ministry?.shortName ?? v.ministry?.name ?? 'MDA not stated';
+    counts.set(key, (counts.get(key) ?? 0) + v.positions);
+  }
+  return Array.from(counts, ([label, count]) => ({ label, count })).sort((a, b) => b.count - a.count);
+}
+
+/** How candidates fared on the computer-based tests of an exercise. */
+export interface OnlineTestSummary {
+  schedules: number;
+  released: number;
+  notStarted: number;
+  inProgress: number;
+  submitted: number;
+  expired: number;
+  averagePercentage: number | null;
+  passed: number;
+  failed: number;
+}
+
+export async function onlineTestSummary(exerciseId?: string): Promise<OnlineTestSummary> {
+  const sittings = await prisma.examSitting.findMany({
+    where: {
+      candidate: { schedule: { mode: { in: ['CBT', 'HYBRID'] }, ...(exerciseId ? { exerciseId } : {}) } },
+    },
+    select: { status: true, percentage: true, paper: { select: { passMark: true } } },
+  });
+  const schedules = await prisma.examSchedule.count({
+    where: { mode: { in: ['CBT', 'HYBRID'] }, ...(exerciseId ? { exerciseId } : {}) },
+  });
+  const done = sittings.filter((s) => s.percentage !== null);
+  const average =
+    done.length > 0
+      ? Math.round((done.reduce((t, s) => t + (s.percentage ?? 0), 0) / done.length) * 10) / 10
+      : null;
+  return {
+    schedules,
+    released: sittings.length,
+    notStarted: sittings.filter((s) => s.status === 'NOT_STARTED').length,
+    inProgress: sittings.filter((s) => s.status === 'IN_PROGRESS').length,
+    submitted: sittings.filter((s) => s.status === 'SUBMITTED').length,
+    expired: sittings.filter((s) => s.status === 'EXPIRED').length,
+    averagePercentage: average,
+    passed: done.filter((s) => (s.percentage ?? 0) >= s.paper.passMark).length,
+    failed: done.filter((s) => (s.percentage ?? 0) < s.paper.passMark).length,
+  };
 }
 
 export interface ExerciseReport {

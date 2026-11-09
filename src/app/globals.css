@@ -2,79 +2,178 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --font-sans: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-}
+@layer base {
+  :root {
+    --rule: 229 227 218; /* ink-200 */
+  }
 
-html { scroll-behavior: smooth; }
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
 
-body {
-  @apply bg-slate-50 text-slate-800 antialiased;
+  body {
+    @apply bg-ink-100 font-sans text-[15px] leading-relaxed text-ink-800 antialiased;
+    font-feature-settings: 'kern' 1, 'liga' 1;
+  }
+
+  /*
+   * Headings are set in the editorial serif, as on the Commission's gazettes.
+   * Colour is inherited rather than fixed here, so a heading on one of the
+   * portal's dark green fields takes the white of its surroundings.
+   */
+  h1, h2, h3, h4 {
+    @apply font-serif;
+    color: inherit;
+    font-feature-settings: 'kern' 1, 'liga' 1;
+  }
+
+  /* Figures line up in columns wherever numbers are compared. */
+  table, .tabular, [data-numeric] {
+    font-variant-numeric: tabular-nums;
+  }
+
+  ::selection {
+    @apply bg-kogi-200 text-kogi-950;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-kogi-600 ring-offset-2 ring-offset-white;
+  }
 }
 
 @layer components {
-  .container-page { @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8; }
+  .container-page { @apply mx-auto w-full max-w-[84rem] px-4 sm:px-6 lg:px-10; }
 
+  /* --- Seal and official marks ------------------------------------------ */
+  .seal-text { @apply font-serif uppercase tracking-seal; }
+  .rule-gold { @apply border-t-2 border-gold-400; }
+
+  /* --- Buttons ---------------------------------------------------------- */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold
-           transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
-           disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex select-none items-center justify-center gap-2 rounded-sm border border-transparent
+           px-4 py-2 text-sm font-semibold leading-tight transition-colors
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+           disabled:cursor-not-allowed disabled:opacity-50;
   }
-  .btn-primary { @apply btn bg-kogi-700 text-white hover:bg-kogi-800 focus-visible:ring-kogi-600; }
-  .btn-secondary { @apply btn border border-kogi-700 bg-white text-kogi-800 hover:bg-kogi-50 focus-visible:ring-kogi-600; }
-  .btn-ghost { @apply btn text-slate-700 hover:bg-slate-100 focus-visible:ring-slate-400; }
-  .btn-danger { @apply btn bg-red-700 text-white hover:bg-red-800 focus-visible:ring-red-600; }
-  .btn-gold { @apply btn bg-gold-500 text-gold-950 hover:bg-gold-400 focus-visible:ring-gold-500; }
+  .btn-primary {
+    @apply btn border-kogi-800 bg-kogi-700 text-white shadow-raised
+           hover:border-kogi-900 hover:bg-kogi-800 focus-visible:ring-kogi-600 active:bg-kogi-900;
+  }
+  .btn-secondary {
+    @apply btn border-ink-300 bg-white text-ink-900 shadow-raised
+           hover:border-kogi-700 hover:bg-kogi-50 hover:text-kogi-900 focus-visible:ring-kogi-600;
+  }
+  .btn-ghost {
+    @apply btn border-transparent text-ink-700 hover:bg-ink-200/70 hover:text-ink-950 focus-visible:ring-ink-400;
+  }
+  .btn-danger {
+    @apply btn border-[#7d2219] bg-[#9a2c20] text-white shadow-raised hover:bg-[#7d2219] focus-visible:ring-[#9a2c20];
+  }
+  .btn-gold {
+    @apply btn border-gold-500 bg-gold-300 font-bold text-gold-950
+           hover:bg-gold-400 focus-visible:ring-gold-500;
+  }
   .btn-sm { @apply px-2.5 py-1.5 text-xs; }
+  .btn-lg { @apply px-5 py-2.5 text-base; }
 
-  .card { @apply rounded-lg border border-slate-200 bg-white shadow-sm; }
-  .card-header { @apply flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-4; }
-  .card-title { @apply text-base font-semibold text-slate-900; }
+  /* --- Panels ----------------------------------------------------------- */
+  .card { @apply rounded-md border border-ink-200 bg-white shadow-raised; }
+  .card-header {
+    @apply flex flex-wrap items-center justify-between gap-3 border-b border-ink-200
+           bg-ink-50/80 px-5 py-3.5;
+  }
+  .card-title { @apply font-serif text-[1.0625rem] font-semibold leading-snug text-ink-950; }
   .card-body { @apply px-5 py-4; }
+  .card-footer { @apply border-t border-ink-200 bg-ink-50/70 px-5 py-3; }
 
-  .label { @apply mb-1.5 block text-sm font-medium text-slate-700; }
-  .hint { @apply mt-1 text-xs text-slate-500; }
-  .error-text { @apply mt-1 text-xs font-medium text-red-700; }
+  /* A framed block used for secondary forms inside a panel. */
+  .panel-inset { @apply rounded-md border border-ink-200 bg-ink-50/70 p-4; }
+
+  /* --- Micro labels ----------------------------------------------------- */
+  .micro-label {
+    @apply text-2xs font-bold uppercase tracking-label text-ink-500;
+  }
+
+  /* --- Forms ------------------------------------------------------------ */
+  .label { @apply mb-1 block text-[0.8125rem] font-semibold text-ink-800; }
+  .hint { @apply mt-1 text-xs leading-snug text-ink-500; }
+  .error-text { @apply mt-1 text-xs font-semibold text-[#9a2c20]; }
 
   .input {
-    @apply block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900
-           placeholder:text-slate-400 focus:border-kogi-600 focus:outline-none focus:ring-1 focus:ring-kogi-600
-           disabled:bg-slate-100 disabled:text-slate-500;
+    @apply block w-full rounded-sm border border-ink-300 bg-white px-3 py-2 text-sm text-ink-950
+           shadow-[inset_0_1px_1px_rgb(26_25_24/0.04)] transition
+           placeholder:text-ink-400
+           focus:border-kogi-600 focus:outline-none focus:ring-1 focus:ring-kogi-600
+           disabled:cursor-not-allowed disabled:bg-ink-100 disabled:text-ink-500;
   }
-  .input-error { @apply border-red-400 focus:border-red-500 focus:ring-red-500; }
+  .input-error { @apply border-[#9a2c20] focus:border-[#9a2c20] focus:ring-[#9a2c20]; }
   .select { @apply input pr-8; }
-  .textarea { @apply input min-h-[110px]; }
-  .checkbox { @apply h-4 w-4 rounded border-slate-300 text-kogi-700 focus:ring-kogi-600; }
-
-  .badge { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold; }
-  .badge-green { @apply badge bg-kogi-100 text-kogi-800; }
-  .badge-amber { @apply badge bg-amber-100 text-amber-800; }
-  .badge-red { @apply badge bg-red-100 text-red-800; }
-  .badge-blue { @apply badge bg-sky-100 text-sky-800; }
-  .badge-slate { @apply badge bg-slate-100 text-slate-700; }
-  .badge-purple { @apply badge bg-purple-100 text-purple-800; }
-
-  .table-wrap { @apply w-full overflow-x-auto; }
-  .table { @apply w-full border-collapse text-sm; }
-  .table thead th {
-    @apply whitespace-nowrap border-b border-slate-200 bg-slate-50 px-3 py-2.5 text-left
-           text-xs font-semibold uppercase tracking-wide text-slate-600;
+  .textarea { @apply input min-h-[108px] leading-relaxed; }
+  .checkbox {
+    @apply h-4 w-4 rounded-sm border-ink-400 text-kogi-700 focus:ring-kogi-600;
   }
-  .table tbody td { @apply border-b border-slate-100 px-3 py-2.5 align-top text-slate-700; }
-  .table tbody tr:hover { @apply bg-slate-50/70; }
+  .radio { @apply h-4 w-4 border-ink-400 text-kogi-700 focus:ring-kogi-600; }
+  .fieldset-legend { @apply mb-2 font-serif text-base font-semibold text-ink-950; }
 
-  .prose-content { @apply text-sm leading-relaxed text-slate-700; }
-  .prose-content p { @apply mb-3; }
-  .prose-content h2 { @apply mb-2 mt-5 text-lg font-semibold text-slate-900; }
-  .prose-content h3 { @apply mb-2 mt-4 text-base font-semibold text-slate-900; }
-  .prose-content ul { @apply mb-3 list-disc space-y-1 pl-5; }
-  .prose-content ol { @apply mb-3 list-decimal space-y-1 pl-5; }
-  .prose-content a { @apply text-kogi-700 underline; }
-  .prose-content table { @apply mb-3 w-full border-collapse text-sm; }
-  .prose-content th, .prose-content td { @apply border border-slate-200 px-2 py-1.5; }
+  /* --- Badges ----------------------------------------------------------- */
+  /*
+   * Status chips are set in sentence case rather than capitals: a status such
+   * as "Approved (not yet published)" is unreadable shouted, and the portal
+   * reserves capitals for the micro-labels above fields and panels.
+   */
+  .badge {
+    @apply inline-flex items-center gap-1 whitespace-nowrap rounded-sm border
+           px-1.5 py-0.5 text-2xs font-semibold leading-4;
+  }
+  .badge-green { @apply badge border-kogi-300 bg-kogi-50 text-kogi-800; }
+  .badge-amber { @apply badge border-gold-300 bg-gold-50 text-gold-800; }
+  .badge-red { @apply badge border-[#e7c3bd] bg-[#fcefed] text-[#9a2c20]; }
+  .badge-blue { @apply badge border-[#bcd4e4] bg-[#eef5fa] text-[#1f5b86]; }
+  .badge-slate { @apply badge border-ink-300 bg-ink-100 text-ink-700; }
+  .badge-purple { @apply badge border-[#cfc6de] bg-[#f4f1f9] text-[#55457a]; }
+
+  /* --- Tables ----------------------------------------------------------- */
+  .table-wrap { @apply w-full overflow-x-auto; }
+  .table { @apply w-full border-collapse text-[0.8125rem]; }
+  .table thead th {
+    @apply whitespace-nowrap border-y border-ink-200 bg-ink-50 px-3 py-2
+           text-left text-2xs font-bold uppercase tracking-label text-ink-600;
+  }
+  .table tbody td { @apply border-b border-ink-150 px-3 py-2.5 align-top text-ink-800; }
+  .table tbody tr:nth-child(even) { @apply bg-ink-50/40; }
+  .table tbody tr:hover { @apply bg-kogi-50/60; }
+  .table tfoot td {
+    @apply border-t-2 border-ink-300 bg-ink-50 px-3 py-2 text-xs font-bold text-ink-900;
+  }
+  .num { @apply text-right; font-variant-numeric: tabular-nums; }
+  .ref { @apply font-mono text-xs tracking-tight text-ink-700; }
+
+  /* --- Long-form content ------------------------------------------------ */
+  .prose-content { @apply max-w-measure text-[0.9375rem] leading-[1.75] text-ink-800; }
+  .prose-content p { @apply mb-4; }
+  .prose-content h2 { @apply mb-2 mt-7 font-serif text-xl font-semibold text-ink-950; }
+  .prose-content h3 { @apply mb-2 mt-5 font-serif text-lg font-semibold text-ink-950; }
+  .prose-content ul { @apply mb-4 list-disc space-y-1.5 pl-5; }
+  .prose-content ol { @apply mb-4 list-decimal space-y-1.5 pl-5; }
+  .prose-content a { @apply font-medium text-kogi-700 underline decoration-kogi-300 underline-offset-2 hover:decoration-kogi-700; }
+  .prose-content blockquote {
+    @apply mb-4 border-l-2 border-gold-400 pl-4 font-serif text-ink-700;
+  }
+  .prose-content table { @apply mb-4 w-full border-collapse text-sm; }
+  .prose-content th { @apply border border-ink-200 bg-ink-50 px-2.5 py-1.5 text-left font-semibold; }
+  .prose-content td { @apply border border-ink-200 px-2.5 py-1.5; }
+
+  /* --- Links ------------------------------------------------------------ */
+  .link { @apply font-medium text-kogi-700 underline decoration-kogi-300 underline-offset-2 hover:decoration-kogi-700; }
+}
+
+@layer utilities {
+  .divide-hairline > * + * { border-top: 1px solid #e3e1da; }
 }
 
 @media print {
   .no-print { display: none !important; }
-  body { background: #fff; }
+  body { @apply bg-white text-black; }
+  .card { @apply border border-black shadow-none; }
 }

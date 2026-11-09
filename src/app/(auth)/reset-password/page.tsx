@@ -14,7 +14,7 @@ export default async function ResetPasswordPage({
   return (
     <Card>
       <CardBody className="p-6 sm:p-8">
-        <h1 className="text-xl font-bold text-slate-900">Set a new password</h1>
+        <h1 className="text-xl font-bold text-ink-950">Set a new password</h1>
         {!token ? (
           <div className="mt-4">
             <Alert tone="error" title="Reset link missing">
@@ -24,7 +24,7 @@ export default async function ResetPasswordPage({
           </div>
         ) : (
           <>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="mt-1 text-sm text-ink-600">
               Choose a new password for your account. All other sessions will be signed out.
             </p>
             <div className="mt-6">
@@ -32,7 +32,7 @@ export default async function ResetPasswordPage({
             </div>
           </>
         )}
-        <p className="mt-6 border-t border-slate-200 pt-4 text-sm">
+        <p className="mt-6 border-t border-ink-200 pt-4 text-sm">
           <Link href="/login" className="text-kogi-700 hover:underline">← Back to sign in</Link>
         </p>
       </CardBody>

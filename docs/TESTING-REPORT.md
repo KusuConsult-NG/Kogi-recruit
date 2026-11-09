@@ -316,3 +316,64 @@ These follow the proposal's own scope boundaries (§14) and are not defects.
 ---
 
 Prepared by **Edumanager Information System Ltd.** · edumanagerinfosys@gmail.com
+
+---
+
+## Addendum — Commission-directed extensions
+
+This addendum covers the establishment register, the recruitment unit, computer-based
+testing and the redesigned interface, tested on the same basis as the proposal modules.
+
+### What was added to the suites
+
+| Suite | Added |
+|---|---|
+| `tests/cbt.test.ts` | The computer-based testing engine and the new validation schemas: seeded paper assembly, random drawing, marking (single, multiple and blank answers), totalling and scaling, the sitting clock, selection storage, the plain-text question importer, question/bank/paper/section validation, and the establishment and unit schemas. |
+| `tests/integration.test.ts` | The seeded establishment register and its departments; every active vacancy bound to an employing MDA; grouping posts by ministry; the recruitment unit, its roles and its exercises; question banks (every question with exactly one correct option); a published paper whose sections can be filled from their banks; the online examination, its released sittings, the consistency of every marked sitting against its own answers, that candidates were only ever shown their own options, that the score reached the candidate and the application, that no question was issued twice on one paper, and that allocation to an online test carries no centre or seat. |
+| `tests/rbac.test.ts` | The four new permissions (`mda.view`, `mda.manage`, `unit.manage`, `exam.set`) across every role, and the two new navigation groups. |
+| `tests/validation.test.ts` | Vacancies refused without an employing MDA. |
+| `tests/browser/cbt.mjs` | A new end-to-end suite: an officer sets a bank, sets and imports questions, assembles a paper from a random-draw section and a hand-picked section, is refused publication while a section is empty, publishes, creates an online examination, allocates candidates and releases the test; a candidate then begins the sitting, answers, flags and unflags, navigates backwards and by the navigator, answers the whole paper and submits; the officer sees the marked result, the reports and the now-locked paper; and access control is checked for a screening officer and for another applicant. |
+| `tests/browser/lifecycle.mjs` | The vacancy step now selects an employing MDA from the establishment register. |
+| `tests/browser/screenshots.mjs` | The MDA directory, vacancies filtered by MDA, the establishment and unit screens, question banks, papers, the online examination, the applicant's test list and the examination hall itself (before and after answering). |
+
+### Defects found by this round of testing, and fixed
+
+1. **Allocation to a purely online examination was refused.** `assignExamCandidates`
+   required at least one examination centre. A computer-based test is sat in the
+   applicant portal and has no centres, so no candidate could ever be allocated to
+   one. Found by `tests/browser/cbt.mjs`. Fixed: a `CBT` examination allocates
+   without a centre and without a seat number, and the invitation names the portal
+   instead of a venue. Regression cover in `tests/integration.test.ts`
+   ("allocates candidates to a computer-based test without a centre").
+
+2. **The examination hall rendered a second `main` landmark inside the portal
+   layout.** The sitting page supplied its own full-page chrome while still nested
+   in the applicant portal, producing two elements with `id="main-content"`, an
+   invalid document outline and the portal navigation visible to a candidate under
+   a clock. Found by `tests/browser/cbt.mjs`. Fixed: the sitting and its receipt
+   moved to their own top-level segment at `/examination/[id]`, outside the portal
+   chrome. Covered by two checks in the browser suite ("the portal navigation is
+   withheld during a sitting", "exactly one main landmark is present").
+
+3. **Headings on the portal's dark fields were dark on dark.** The base stylesheet
+   fixed a heading colour, so the homepage hero, the call to action and the
+   examination hall header rendered near-invisible once the new palette was in
+   place. Found by reviewing captured screenshots. Fixed: headings inherit their
+   colour from their surroundings.
+
+4. **Long status labels were shouted.** Status chips were set in capitals, which
+   made labels such as "Approved (not yet published)" unreadable. Fixed: chips are
+   set in sentence case, and capitals are reserved for the micro-labels above
+   fields and panels.
+
+### Known characteristics, not defects
+
+- **Next.js development server.** With the self-hosted web fonts, the development
+  server intermittently fails to fetch a font from Google at first compile and then
+  reports `cookies was called outside a request scope` on the next server action.
+  The production build is unaffected; the browser suites are therefore run against
+  `npm run build && npm start`, which is also how the system is deployed.
+- **Client-side validation runs first.** Where a numeric field carries a `max`
+  attribute — the draw count on a paper section, for instance — the browser refuses
+  the submission before the server sees it. The suites assert both layers: the
+  attribute is capped to the size of the bank, and no section is created.

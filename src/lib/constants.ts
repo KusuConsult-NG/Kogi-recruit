@@ -126,7 +126,7 @@ export const WORKFLOW_STAGES = [
   { n: 4, key: 'SUBMISSION', name: 'Application Submission', description: 'Applicants complete forms, upload documents and submit applications.' },
   { n: 5, key: 'SCREENING', name: 'Preliminary Screening', description: 'Officers review eligibility and document completeness and record outcomes.' },
   { n: 6, key: 'SHORTLIST', name: 'Shortlisting', description: 'Qualified candidates are shortlisted, reviewed and approved.' },
-  { n: 7, key: 'EXAMINATION', name: 'Examination and Assessment', description: 'Where applicable, schedules and centres are created and results recorded.' },
+  { n: 7, key: 'EXAMINATION', name: 'Examination and Assessment', description: 'Where applicable, an aptitude test or examination is set. It is sat at a centre, or online in the applicant portal under a timed sitting that is marked automatically.' },
   { n: 8, key: 'INTERVIEW', name: 'Interview', description: 'Candidates are scheduled and panel assessments recorded.' },
   { n: 9, key: 'SELECTION', name: 'Final Selection', description: 'Results are consolidated and authorised recruitment outcomes documented.' },
   { n: 10, key: 'CLOSURE', name: 'Closure and Archiving', description: 'Applicants are notified, records archived, reports generated and exercise closed.' },
@@ -212,3 +212,116 @@ export const DEFAULT_INTERVIEW_CRITERIA = [
   { key: 'conduct', label: 'Conduct, Comportment & Attitude', maxScore: 15 },
   { key: 'suitability', label: 'Overall Suitability for the Position', maxScore: 15 },
 ] as const;
+
+// --- Establishment: Ministries, Departments and Agencies ----------------
+export const MDA_KINDS = [
+  { code: 'MINISTRY', label: 'Ministry' },
+  { code: 'EXTRA_MINISTERIAL', label: 'Extra-Ministerial Department' },
+  { code: 'AGENCY', label: 'Agency' },
+  { code: 'PARASTATAL', label: 'Parastatal / Corporation' },
+  { code: 'BOARD', label: 'Board' },
+  { code: 'COMMISSION', label: 'Commission' },
+] as const;
+
+export const MDA_KIND_LABELS: Record<string, string> = Object.fromEntries(
+  MDA_KINDS.map((k) => [k.code, k.label]),
+);
+
+export const MDA_HEAD_TITLES = [
+  'Permanent Secretary',
+  'Director-General',
+  'Executive Secretary',
+  'General Manager',
+  'Managing Director',
+  'Registrar',
+  'Chairman',
+  'Head of Department',
+] as const;
+
+// --- Recruitment unit ---------------------------------------------------
+export const UNIT_MEMBER_ROLES = [
+  { code: 'COORDINATOR', label: 'Unit Coordinator' },
+  { code: 'DEPUTY_COORDINATOR', label: 'Deputy Coordinator' },
+  { code: 'SECRETARY', label: 'Unit Secretary' },
+  { code: 'SCREENING_LEAD', label: 'Screening Lead' },
+  { code: 'EXAMINATION_LEAD', label: 'Examination Lead' },
+  { code: 'INTERVIEW_LEAD', label: 'Interview Lead' },
+  { code: 'RECORDS_OFFICER', label: 'Records Officer' },
+  { code: 'MEMBER', label: 'Unit Member' },
+] as const;
+
+export const UNIT_MEMBER_ROLE_LABELS: Record<string, string> = Object.fromEntries(
+  UNIT_MEMBER_ROLES.map((r) => [r.code, r.label]),
+);
+
+// --- Computer based testing ---------------------------------------------
+export const QUESTION_TYPES = [
+  { code: 'SINGLE_CHOICE', label: 'Single answer (choose one)' },
+  { code: 'MULTI_CHOICE', label: 'Multiple answers (choose all that apply)' },
+  { code: 'TRUE_FALSE', label: 'True or false' },
+] as const;
+
+export const QUESTION_TYPE_LABELS: Record<string, string> = Object.fromEntries(
+  QUESTION_TYPES.map((t) => [t.code, t.label]),
+);
+
+export const DIFFICULTIES = ['EASY', 'MEDIUM', 'HARD'] as const;
+
+export const EXAM_SUBJECTS = [
+  { code: 'GENERAL', label: 'General Paper' },
+  { code: 'APTITUDE', label: 'Aptitude / Reasoning' },
+  { code: 'NUMERICAL', label: 'Numerical Reasoning' },
+  { code: 'VERBAL', label: 'Verbal Reasoning' },
+  { code: 'ENGLISH', label: 'Use of English' },
+  { code: 'CURRENT_AFFAIRS', label: 'Current Affairs' },
+  { code: 'CIVIL_SERVICE_RULES', label: 'Civil Service Rules & Public Administration' },
+  { code: 'COMPUTER_LITERACY', label: 'Computer Appreciation' },
+  { code: 'PROFESSIONAL', label: 'Professional / Technical Subject' },
+] as const;
+
+export const EXAM_SUBJECT_LABELS: Record<string, string> = Object.fromEntries(
+  EXAM_SUBJECTS.map((s) => [s.code, s.label]),
+);
+
+export const PAPER_KINDS = [
+  { code: 'APTITUDE_TEST', label: 'Aptitude Test' },
+  { code: 'QUALIFYING_EXAM', label: 'Qualifying Examination' },
+  { code: 'PROMOTION_EXAM', label: 'Promotion Examination' },
+  { code: 'TRADE_TEST', label: 'Trade Test' },
+] as const;
+
+export const PAPER_KIND_LABELS: Record<string, string> = Object.fromEntries(
+  PAPER_KINDS.map((k) => [k.code, k.label]),
+);
+
+export const PAPER_STATUS = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+  RETIRED: 'RETIRED',
+} as const;
+
+export const EXAM_MODES = [
+  { code: 'CENTRE', label: 'Centre-based (paper)', description: 'Candidates attend a physical centre and scores are entered by officers.' },
+  { code: 'CBT', label: 'Computer-based test (online)', description: 'Candidates sit the paper online in the applicant portal and it is marked automatically.' },
+  { code: 'HYBRID', label: 'Hybrid', description: 'Candidates are allocated to centres and sit the paper on a computer under supervision.' },
+] as const;
+
+export const EXAM_MODE_LABELS: Record<string, string> = Object.fromEntries(
+  EXAM_MODES.map((m) => [m.code, m.label]),
+);
+
+export const SITTING_STATUS = {
+  NOT_STARTED: 'NOT_STARTED',
+  IN_PROGRESS: 'IN_PROGRESS',
+  SUBMITTED: 'SUBMITTED',
+  EXPIRED: 'EXPIRED',
+} as const;
+
+export const SITTING_STATUS_LABELS: Record<string, string> = {
+  NOT_STARTED: 'Not started',
+  IN_PROGRESS: 'In progress',
+  SUBMITTED: 'Submitted',
+  EXPIRED: 'Expired (auto-submitted)',
+};
+
+export const OPTION_LABELS = ['A', 'B', 'C', 'D', 'E', 'F'] as const;

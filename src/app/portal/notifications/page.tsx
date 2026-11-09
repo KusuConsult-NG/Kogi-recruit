@@ -1,7 +1,9 @@
 import { prisma } from '@/lib/db';
 import { requirePageApplicant } from '@/lib/page-guards';
 import { formatDateTime } from '@/lib/format';
-import { Card, CardBody, EmptyState, PageHeading, StatusBadge } from '@/components/ui';
+import {
+  Card, CardBody, EmptyState, PageHeading, StatusBadge, readable,
+} from '@/components/ui';
 import { markAllNotificationsRead, markNotificationRead } from '@/actions/applications';
 
 export const dynamic = 'force-dynamic';
@@ -45,15 +47,15 @@ export default async function NotificationsPage() {
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h2 className={`text-sm ${n.readAt ? 'font-medium text-slate-800' : 'font-bold text-slate-900'}`}>
+                      <h2 className={`text-sm ${n.readAt ? 'font-medium text-ink-800' : 'font-bold text-ink-950'}`}>
                         {n.subject}
                       </h2>
-                      <span className="badge-slate">{n.channel.toLowerCase()}</span>
+                      <span className="badge-slate">{readable(n.channel)}</span>
                       <StatusBadge status={n.status} />
                       {!n.readAt ? <span className="badge-green">new</span> : null}
                     </div>
-                    <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-slate-700">{n.body}</p>
-                    <p className="mt-2 text-xs text-slate-500">
+                    <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-ink-700">{n.body}</p>
+                    <p className="mt-2 text-xs text-ink-500">
                       {formatDateTime(n.createdAt)}
                       {n.sentAt ? ` · delivered ${formatDateTime(n.sentAt)}` : ''}
                       {n.error ? ` · delivery problem: ${n.error}` : ''}

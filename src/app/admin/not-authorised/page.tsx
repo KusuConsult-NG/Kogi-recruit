@@ -53,12 +53,12 @@ export default async function NotAuthorisedPage({
           </div>
           <CardBody>
             {groups.length === 0 ? (
-              <p className="text-sm text-slate-600">Your role has no administrative functions assigned.</p>
+              <p className="text-sm text-ink-600">Your role has no administrative functions assigned.</p>
             ) : (
               <div className="space-y-4">
                 {groups.map((group) => (
                   <div key={group.label}>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-ink-500">
                       {group.label}
                     </p>
                     <ul className="mt-1.5 flex flex-wrap gap-1.5">
@@ -79,7 +79,7 @@ export default async function NotAuthorisedPage({
 
         <Card>
           <div className="card-header"><h2 className="card-title">Need different access?</h2></div>
-          <CardBody className="text-sm text-slate-700">
+          <CardBody className="text-sm text-ink-700">
             <p>
               Roles and permissions are managed centrally by a Commission Administrator or the Super
               Administrator. Contact the Commission secretariat at{' '}

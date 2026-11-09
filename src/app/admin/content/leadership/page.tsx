@@ -23,20 +23,20 @@ export default async function LeadershipAdmin() {
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         <div className="space-y-5 xl:col-span-2">
           {profiles.length === 0 ? (
-            <Card><CardBody><p className="text-sm text-slate-600">No profiles yet.</p></CardBody></Card>
+            <Card><CardBody><p className="text-sm text-ink-600">No profiles yet.</p></CardBody></Card>
           ) : (
             profiles.map((p) => (
               <Card key={p.id}>
                 <div className="card-header">
                   <div>
                     <h2 className="card-title">{p.name}</h2>
-                    <p className="mt-0.5 text-sm text-slate-500">{p.position}</p>
+                    <p className="mt-0.5 text-sm text-ink-500">{p.position}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     {p.published ? <span className="badge-green">published</span> : <span className="badge-slate">hidden</span>}
                     <form action={deleteLeadership}>
                       <input type="hidden" name="id" value={p.id} />
-                      <button type="submit" className="btn-ghost btn-sm text-red-700">Delete</button>
+                      <button type="submit" className="btn-ghost btn-sm text-[#9a2c20]">Delete</button>
                     </form>
                   </div>
                 </div>
