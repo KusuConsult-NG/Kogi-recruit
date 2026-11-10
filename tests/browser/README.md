@@ -57,3 +57,30 @@ returns a 5xx response.
 | `CHROMIUM_PATH` | Path to a Chromium binary, where Playwright's own download is not used |
 | `OUT_DIR` | Where `screenshots.mjs` writes. Defaults to `./screens` |
 | `STAFF_PASSWORD`, `APPLICANT_PASSWORD` | Seeded sign-in details, where they have been changed |
+
+## `walkthrough.mjs` — a recorded demonstration
+
+Records one continuous video of the whole portal, driving the live application
+with a real browser. Chapter cards and captions are injected into the page as it
+runs, so the result can be watched without a narrator.
+
+```bash
+npm run build && npm start        # the walkthrough records a production build
+npm run db:reset                  # a clean, fully seeded database
+npm run walkthrough               # writes demo/<hash>.webm
+```
+
+Six parts: the public portal; registering and applying for a post; the
+establishment register, recruitment unit and an exercise under management;
+setting a question bank and an examination paper; a candidate sitting the
+computer-based test under the clock; and marking, outcomes, reporting and the
+audit trail.
+
+The recording is a real session, not a mock-up — the registration, the question
+set during part four and the test sitting in part five all exist in the database
+afterwards, so reseed before recording again. Output lands in `demo/`, which is
+not tracked. Convert to MP4 with:
+
+```bash
+ffmpeg -i demo/*.webm -c:v libx264 -preset slow -crf 23 -pix_fmt yuv420p demo/walkthrough.mp4
+```
