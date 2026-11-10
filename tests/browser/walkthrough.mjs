@@ -91,7 +91,8 @@ async function chapter(n, title, sub, hold = 3000) {
 }
 
 async function go(route, hold = 1400) {
-  await page.goto(`${BASE_URL}${route}`, { waitUntil: 'domcontentloaded' });
+  const url = /^https?:\/\//.test(route) ? route : `${BASE_URL}${route}`;
+  await page.goto(url, { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(hold);
 }
 
@@ -105,6 +106,7 @@ async function scan(distance = 2200, steps = 22) {
 }
 
 async function signIn(email, password) {
+  await context.clearCookies();
   await go('/login', 600);
   await page.fill('#email', email);
   await page.fill('#password', password);
@@ -118,6 +120,7 @@ async function signIn(email, password) {
 async function signOut() {
   await page.locator('form button:has-text("Sign out")').first().click().catch(() => {});
   await page.waitForTimeout(1500);
+  await context.clearCookies();
 }
 
 /** One act; a failure inside it must not cost the whole recording. */
