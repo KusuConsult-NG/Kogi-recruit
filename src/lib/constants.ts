@@ -256,8 +256,8 @@ export const UNIT_MEMBER_ROLE_LABELS: Record<string, string> = Object.fromEntrie
 
 // --- Computer based testing ---------------------------------------------
 export const QUESTION_TYPES = [
-  { code: 'SINGLE_CHOICE', label: 'Single answer (choose one)' },
-  { code: 'MULTI_CHOICE', label: 'Multiple answers (choose all that apply)' },
+  { code: 'SINGLE_CHOICE', label: 'Single answer' },
+  { code: 'MULTI_CHOICE', label: 'Multiple answers' },
   { code: 'TRUE_FALSE', label: 'True or false' },
 ] as const;
 

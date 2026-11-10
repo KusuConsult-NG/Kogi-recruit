@@ -6,7 +6,7 @@ import {
   savePaperSection, saveQuestion, setSectionQuestions, updateExamPaper, updateQuestionBank,
 } from '@/actions/exams';
 import { ActionForm, SubmitButton } from '@/components/forms';
-import { Field } from '@/components/ui';
+import { Field, readable } from '@/components/ui';
 import {
   DIFFICULTIES, EXAM_SUBJECTS, OPTION_LABELS, PAPER_KINDS, QUESTION_TYPES,
 } from '@/lib/constants';
@@ -41,7 +41,7 @@ export function QuestionBankForm({ initial }: { initial?: BankValues }) {
               placeholder="General aptitude — numerical reasoning"
             />
           </Field>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="space-y-4">
             <Field label="Short code" name="code" required error={state.errors?.code}>
               <input
                 id="code"
@@ -122,7 +122,7 @@ export function QuestionForm({
           <input type="hidden" name="bankId" value={bankId} />
           {initial ? <input type="hidden" name="id" value={initial.id} /> : null}
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1.4fr_1fr_5.5rem_1.4fr]">
             <Field label="Question type" name={`type-${initial?.id ?? 'new'}`} required error={state.errors?.type}>
               <select
                 id={`type-${initial?.id ?? 'new'}`}
@@ -142,7 +142,7 @@ export function QuestionForm({
                 className="select"
                 defaultValue={initial?.difficulty ?? 'MEDIUM'}
               >
-                {DIFFICULTIES.map((d) => <option key={d} value={d}>{d}</option>)}
+                {DIFFICULTIES.map((d) => <option key={d} value={d}>{readable(d)}</option>)}
               </select>
             </Field>
             <Field label="Marks" name={`marks-${initial?.id ?? 'new'}`} error={state.errors?.marks}>
@@ -267,7 +267,7 @@ Ajaokuta`}</pre>
             </Field>
             <Field label="Difficulty" name="import-difficulty">
               <select id="import-difficulty" name="difficulty" className="select" defaultValue="MEDIUM">
-                {DIFFICULTIES.map((d) => <option key={d} value={d}>{d}</option>)}
+                {DIFFICULTIES.map((d) => <option key={d} value={d}>{readable(d)}</option>)}
               </select>
             </Field>
             <Field label="Topic" name="import-topic">

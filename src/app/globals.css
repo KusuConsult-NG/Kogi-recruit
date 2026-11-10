@@ -110,10 +110,14 @@
   .input-error { @apply border-[#9a2c20] focus:border-[#9a2c20] focus:ring-[#9a2c20]; }
   .select { @apply input pr-8; }
   .textarea { @apply input min-h-[108px] leading-relaxed; }
+  /*
+   * `accent-color` is what tints a native checkbox or radio; a text colour
+   * alone leaves them in the browser's default blue.
+   */
   .checkbox {
-    @apply h-4 w-4 rounded-sm border-ink-400 text-kogi-700 focus:ring-kogi-600;
+    @apply h-4 w-4 shrink-0 rounded-sm border-ink-400 accent-kogi-700 focus:ring-kogi-600;
   }
-  .radio { @apply h-4 w-4 border-ink-400 text-kogi-700 focus:ring-kogi-600; }
+  .radio { @apply h-4 w-4 shrink-0 border-ink-400 accent-kogi-700 focus:ring-kogi-600; }
   .fieldset-legend { @apply mb-2 font-serif text-base font-semibold text-ink-950; }
 
   /* --- Badges ----------------------------------------------------------- */

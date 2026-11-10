@@ -338,7 +338,10 @@ export function Field({
       <label className="label" htmlFor={name}>
         {label}
         {required ? (
-          <span className="ml-1 text-2xs font-bold uppercase tracking-label text-[#9a2c20]">required</span>
+          <>
+            <span aria-hidden className="ml-1 font-semibold text-[#9a2c20]">*</span>
+            <span className="sr-only"> (required)</span>
+          </>
         ) : null}
       </label>
       {children}
