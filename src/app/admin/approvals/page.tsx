@@ -3,7 +3,9 @@ import { prisma } from '@/lib/db';
 import { requirePageStaff } from '@/lib/page-guards';
 import { hasAnyPermission, PERMISSIONS } from '@/lib/rbac';
 import { formatDateTime } from '@/lib/format';
-import { Alert, Card, EmptyState, PageHeading, StatCard, StatusBadge, Tabs } from '@/components/ui';
+import {
+  Alert, Card, EmptyState, PageHeading, StatCard, StatusBadge, Tabs, readable,
+} from '@/components/ui';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Approvals' };
@@ -83,7 +85,7 @@ export default async function ApprovalsPage({
               <tbody>
                 {requests.map((r) => (
                   <tr key={r.id}>
-                    <td><span className="badge-slate">{r.entityType.replace(/_/g, ' ').toLowerCase()}</span></td>
+                    <td><span className="badge-slate">{readable(r.entityType)}</span></td>
                     <td className="text-xs">{r.action.replace(/_/g, ' ').toLowerCase()}</td>
                     <td className="text-xs">{r.exercise?.reference ?? '—'}</td>
                     <td className="text-xs">{r.requestedByName ?? '—'}</td>
@@ -91,7 +93,7 @@ export default async function ApprovalsPage({
                     <td><StatusBadge status={r.status} /></td>
                     <td className="text-xs">
                       {r.decidedByName ?? '—'}
-                      {r.decidedAt ? <p className="text-slate-500">{formatDateTime(r.decidedAt)}</p> : null}
+                      {r.decidedAt ? <p className="text-ink-500">{formatDateTime(r.decidedAt)}</p> : null}
                     </td>
                     <td className="max-w-xs text-xs">{r.note ?? '—'}</td>
                     <td>

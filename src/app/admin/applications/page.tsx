@@ -126,9 +126,9 @@ export default async function AdminApplicationsPage({
                     <tr key={a.id}>
                       <td className="whitespace-nowrap font-mono text-xs">{a.reference}</td>
                       <td>
-                        <p className="font-medium text-slate-900">{a.applicant.fullName}</p>
-                        <p className="text-xs text-slate-500">{a.applicant.applicantProfile?.applicantRef}</p>
-                        <p className="text-xs text-slate-500">{a.applicant.applicantProfile?.lga ?? '—'}</p>
+                        <p className="font-medium text-ink-950">{a.applicant.fullName}</p>
+                        <p className="text-xs text-ink-500">{a.applicant.applicantProfile?.applicantRef}</p>
+                        <p className="text-xs text-ink-500">{a.applicant.applicantProfile?.lga ?? '—'}</p>
                       </td>
                       <td className="text-xs">{a.exercise.reference}</td>
                       <td className="text-xs">
@@ -138,14 +138,14 @@ export default async function AdminApplicationsPage({
                       <td className="whitespace-nowrap text-xs">{a.completeness}%</td>
                       <td className="whitespace-nowrap text-xs">
                         {verified}/{a.documents.length}
-                        {rejected > 0 ? <span className="mt-0.5 block text-amber-700">{rejected} rejected</span> : null}
+                        {rejected > 0 ? <span className="mt-0.5 block text-gold-700">{rejected} rejected</span> : null}
                       </td>
                       <td className="text-xs">
                         {a.assignments.length === 0
-                          ? <span className="text-slate-400">Unassigned</span>
+                          ? <span className="text-ink-400">Unassigned</span>
                           : a.assignments.map((x) => x.officer.fullName).join(', ')}
                       </td>
-                      <td className="whitespace-nowrap text-xs">{a.submittedAt ? formatDate(a.submittedAt) : <span className="text-slate-400">draft</span>}</td>
+                      <td className="whitespace-nowrap text-xs">{a.submittedAt ? formatDate(a.submittedAt) : <span className="text-ink-400">draft</span>}</td>
                       <td><Link href={`/admin/applications/${a.id}`} className="btn-secondary btn-sm">Open</Link></td>
                     </tr>
                   );
@@ -157,7 +157,7 @@ export default async function AdminApplicationsPage({
             params={{ exercise: sp.exercise, status: sp.status, q: sp.q }} />
         </Card>
       )}
-      <p className="mt-4 text-xs text-slate-500">
+      <p className="mt-4 text-xs text-ink-500">
         Showing {applications.length} of {total.toLocaleString('en-NG')} application(s)
         {total > 0 ? ` · last refreshed ${formatDateTime(new Date())}` : ''}.
       </p>

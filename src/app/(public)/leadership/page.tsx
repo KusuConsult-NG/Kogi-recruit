@@ -15,6 +15,7 @@ export default async function LeadershipPage() {
   return (
     <div className="container-page py-10">
       <PageHeading
+        eyebrow="The Commission"
         title="Commission Leadership"
         description="Approved leadership profiles of the Kogi State Civil Service Commission."
         breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Leadership' }]}
@@ -31,12 +32,12 @@ export default async function LeadershipPage() {
                     {initials(p.name)}
                   </span>
                   <div>
-                    <h2 className="text-base font-semibold text-slate-900">{p.name}</h2>
+                    <h2 className="text-base font-semibold text-ink-950">{p.name}</h2>
                     <p className="text-sm text-kogi-700">{p.position}</p>
-                    {p.email ? <p className="mt-0.5 text-xs text-slate-500">{p.email}</p> : null}
+                    {p.email ? <p className="mt-0.5 text-xs text-ink-500">{p.email}</p> : null}
                   </div>
                 </div>
-                {p.bio ? <div className="mt-4 border-t border-slate-100 pt-4"><RichText body={p.bio} /></div> : null}
+                {p.bio ? <div className="mt-4 border-t border-ink-100 pt-4"><RichText body={p.bio} /></div> : null}
               </CardBody>
             </Card>
           ))}

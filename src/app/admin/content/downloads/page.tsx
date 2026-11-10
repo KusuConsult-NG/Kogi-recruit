@@ -3,7 +3,9 @@ import { requirePagePermission } from '@/lib/page-guards';
 import { PERMISSIONS } from '@/lib/rbac';
 import { formatDateTime } from '@/lib/format';
 import { formatBytes } from '@/lib/storage';
-import { Card, CardBody, PageHeading, StatCard } from '@/components/ui';
+import {
+  Card, CardBody, PageHeading, StatCard, readable,
+} from '@/components/ui';
 import { deleteDownload } from '@/actions/content';
 import { DownloadForm } from '../forms';
 
@@ -41,13 +43,13 @@ export default async function DownloadsAdmin() {
                   {items.map((i) => (
                     <tr key={i.id}>
                       <td>
-                        <p className="font-medium text-slate-900">{i.title}</p>
-                        {i.description ? <p className="text-xs text-slate-500">{i.description}</p> : null}
+                        <p className="font-medium text-ink-950">{i.title}</p>
+                        {i.description ? <p className="text-xs text-ink-500">{i.description}</p> : null}
                       </td>
-                      <td><span className="badge-slate">{i.category.toLowerCase()}</span></td>
+                      <td><span className="badge-slate">{readable(i.category)}</span></td>
                       <td className="text-xs">
                         <a href={`/api/files/download/${i.id}`} className="text-kogi-700 underline">{i.originalName}</a>
-                        <p className="text-slate-500">{formatBytes(i.sizeBytes)}</p>
+                        <p className="text-ink-500">{formatBytes(i.sizeBytes)}</p>
                       </td>
                       <td>{i.downloads}</td>
                       <td>{i.published ? <span className="badge-green">yes</span> : <span className="badge-slate">no</span>}</td>
@@ -55,13 +57,13 @@ export default async function DownloadsAdmin() {
                       <td>
                         <form action={deleteDownload}>
                           <input type="hidden" name="id" value={i.id} />
-                          <button type="submit" className="btn-ghost btn-sm text-red-700">Remove</button>
+                          <button type="submit" className="btn-ghost btn-sm text-[#9a2c20]">Remove</button>
                         </form>
                       </td>
                     </tr>
                   ))}
                   {items.length === 0 ? (
-                    <tr><td colSpan={7} className="py-6 text-center text-sm text-slate-500">No documents published.</td></tr>
+                    <tr><td colSpan={7} className="py-6 text-center text-sm text-ink-500">No documents published.</td></tr>
                   ) : null}
                 </tbody>
               </table>

@@ -31,7 +31,7 @@ export async function GET(request: Request) {
     take: 20000,
     include: {
       exercise: { select: { reference: true, title: true } },
-      vacancy: { select: { jobTitle: true, gradeLevel: true, department: { select: { name: true } }, agency: true } },
+      vacancy: { select: { jobTitle: true, gradeLevel: true, department: { select: { name: true } }, ministry: { select: { name: true } } } },
       applicant: { select: { email: true, phone: true, applicantProfile: true } },
       education: { select: { qualification: true, institution: true } },
       documents: { select: { reviewStatus: true } },
@@ -45,7 +45,7 @@ export async function GET(request: Request) {
       columns: [
         'Application reference', 'Applicant reference', 'Surname', 'First name', 'Gender', 'Age',
         'Email', 'Telephone', 'State of origin', 'LGA', 'Exercise', 'Position', 'Grade',
-        'Department or agency', 'Highest qualification', 'Status', 'Completeness %',
+        'Employing MDA', 'Highest qualification', 'Status', 'Completeness %',
         'Documents verified', 'Documents total', 'Screening outcome', 'Classification',
         'Exam score', 'Interview score', 'Final score', 'Submitted',
       ],
@@ -66,7 +66,7 @@ export async function GET(request: Request) {
           app.exercise.reference,
           app.vacancy?.jobTitle ?? '',
           app.vacancy?.gradeLevel ?? '',
-          app.vacancy?.department?.name ?? app.vacancy?.agency ?? '',
+          app.vacancy?.ministry?.name ?? app.vacancy?.department?.name ?? '',
           app.education.map((e) => e.qualification).join('; '),
           APPLICATION_STATUS_LABELS[app.status] ?? app.status,
           app.completeness,

@@ -1,6 +1,13 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
+/* ---------------------------------------------------------------------------
+ * The Commission's shared interface components.
+ *
+ * Everything here is styled through the design system in globals.css, so a
+ * change to a token or a component class carries across every page.
+ * ------------------------------------------------------------------------- */
+
 export function Card({
   children,
   className = '',
@@ -21,16 +28,19 @@ export function CardHeader({
   title,
   description,
   actions,
+  eyebrow,
 }: {
   title: ReactNode;
   description?: ReactNode;
   actions?: ReactNode;
+  eyebrow?: string;
 }) {
   return (
     <header className="card-header">
-      <div>
+      <div className="min-w-0">
+        {eyebrow ? <p className="micro-label mb-0.5">{eyebrow}</p> : null}
         <h2 className="card-title">{title}</h2>
-        {description ? <p className="mt-0.5 text-sm text-slate-500">{description}</p> : null}
+        {description ? <p className="mt-0.5 text-[0.8125rem] text-ink-600">{description}</p> : null}
       </div>
       {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
     </header>
@@ -41,41 +51,68 @@ export function CardBody({ children, className = '' }: { children: ReactNode; cl
   return <div className={`card-body ${className}`}>{children}</div>;
 }
 
+export function CardFooter({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return <div className={`card-footer ${className}`}>{children}</div>;
+}
+
+/** A labelled rule used to separate groups of fields or records. */
+export function SectionRule({ label, children }: { label: string; children?: ReactNode }) {
+  return (
+    <div className="my-5 flex items-center gap-3">
+      <span className="micro-label whitespace-nowrap">{label}</span>
+      <span className="h-px flex-1 bg-ink-200" aria-hidden />
+      {children}
+    </div>
+  );
+}
+
 export function PageHeading({
   title,
   description,
   actions,
   breadcrumb,
+  eyebrow,
 }: {
   title: string;
   description?: ReactNode;
   actions?: ReactNode;
   breadcrumb?: Array<{ label: string; href?: string }>;
+  eyebrow?: string;
 }) {
   return (
     <div className="mb-6">
       {breadcrumb && breadcrumb.length > 0 ? (
-        <nav aria-label="Breadcrumb" className="mb-2 text-xs text-slate-500">
+        <nav aria-label="Breadcrumb" className="mb-2.5 text-xs text-ink-500">
           <ol className="flex flex-wrap items-center gap-1.5">
             {breadcrumb.map((item, i) => (
               <li key={`${item.label}-${i}`} className="flex items-center gap-1.5">
-                {i > 0 ? <span aria-hidden>/</span> : null}
+                {i > 0 ? <span aria-hidden className="text-ink-400">›</span> : null}
                 {item.href ? (
                   <Link href={item.href} className="hover:text-kogi-700 hover:underline">
                     {item.label}
                   </Link>
                 ) : (
-                  <span className="text-slate-700">{item.label}</span>
+                  <span className="font-medium text-ink-700">{item.label}</span>
                 )}
               </li>
             ))}
           </ol>
         </nav>
       ) : null}
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">{title}</h1>
-          {description ? <p className="mt-1 max-w-3xl text-sm text-slate-600">{description}</p> : null}
+      <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3 border-b border-ink-200 pb-4">
+        <div className="min-w-0">
+          {eyebrow ? (
+            <>
+              <span aria-hidden className="mb-2.5 block h-0.5 w-10 bg-gold-500" />
+              <p className="micro-label mb-1.5 text-gold-700">{eyebrow}</p>
+            </>
+          ) : null}
+          <h1 className="font-serif text-[1.5rem] font-semibold leading-tight tracking-tight text-ink-950 sm:text-[1.75rem]">
+            {title}
+          </h1>
+          {description ? (
+            <p className="mt-1.5 max-w-measure text-sm leading-relaxed text-ink-600">{description}</p>
+          ) : null}
         </div>
         {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
       </div>
@@ -93,15 +130,18 @@ export function Alert({
   children?: ReactNode;
 }) {
   const tones = {
-    info: 'border-sky-200 bg-sky-50 text-sky-900',
-    success: 'border-kogi-200 bg-kogi-50 text-kogi-900',
-    warning: 'border-amber-200 bg-amber-50 text-amber-900',
-    error: 'border-red-200 bg-red-50 text-red-900',
+    info: 'border-[#bcd4e4] bg-[#eef5fa] text-[#164765] before:bg-[#1f5b86]',
+    success: 'border-kogi-300 bg-kogi-50 text-kogi-900 before:bg-kogi-600',
+    warning: 'border-gold-300 bg-gold-50 text-gold-900 before:bg-gold-500',
+    error: 'border-[#e7c3bd] bg-[#fcefed] text-[#7d2219] before:bg-[#9a2c20]',
   } as const;
   return (
-    <div role={tone === 'error' ? 'alert' : 'status'} className={`rounded-md border px-4 py-3 text-sm ${tones[tone]}`}>
+    <div
+      role={tone === 'error' ? 'alert' : 'status'}
+      className={`relative overflow-hidden rounded-sm border px-4 py-3 pl-5 text-sm before:absolute before:inset-y-0 before:left-0 before:w-1 before:content-[''] ${tones[tone]}`}
+    >
       {title ? <p className="font-semibold">{title}</p> : null}
-      {children ? <div className={title ? 'mt-1' : ''}>{children}</div> : null}
+      {children ? <div className={title ? 'mt-1 leading-relaxed' : 'leading-relaxed'}>{children}</div> : null}
     </div>
   );
 }
@@ -116,9 +156,10 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-md border border-dashed border-slate-300 bg-slate-50/60 px-6 py-12 text-center">
-      <p className="text-sm font-semibold text-slate-700">{title}</p>
-      {description ? <p className="mt-1 max-w-md text-sm text-slate-500">{description}</p> : null}
+    <div className="flex flex-col items-center justify-center rounded-md border border-dashed border-ink-300 bg-ink-50/60 px-6 py-12 text-center">
+      <span aria-hidden className="mb-3 h-8 w-8 rounded-full border border-ink-300 bg-white shadow-hairline" />
+      <p className="font-serif text-base font-semibold text-ink-800">{title}</p>
+      {description ? <p className="mt-1 max-w-measure text-sm text-ink-500">{description}</p> : null}
       {action ? <div className="mt-4">{action}</div> : null}
     </div>
   );
@@ -137,21 +178,25 @@ export function StatCard({
   tone?: 'default' | 'green' | 'amber' | 'red' | 'blue';
   href?: string;
 }) {
-  const tones = {
-    default: 'border-slate-200',
-    green: 'border-kogi-300 bg-kogi-50/50',
-    amber: 'border-amber-300 bg-amber-50/50',
-    red: 'border-red-300 bg-red-50/50',
-    blue: 'border-sky-300 bg-sky-50/50',
+  const accents = {
+    default: 'before:bg-ink-300',
+    green: 'before:bg-kogi-600',
+    amber: 'before:bg-gold-500',
+    red: 'before:bg-[#9a2c20]',
+    blue: 'before:bg-[#1f5b86]',
   } as const;
   const inner = (
     <>
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</p>
-      <p className="mt-1.5 text-2xl font-bold text-slate-900">{value}</p>
-      {hint ? <p className="mt-0.5 text-xs text-slate-500">{hint}</p> : null}
+      <p className="micro-label">{label}</p>
+      <p className="mt-2 font-serif text-[1.75rem] font-semibold leading-none text-ink-950" data-numeric>
+        {value}
+      </p>
+      {hint ? <p className="mt-1.5 text-xs leading-snug text-ink-500">{hint}</p> : null}
     </>
   );
-  const className = `rounded-lg border bg-white px-4 py-3.5 shadow-sm ${tones[tone]} ${href ? 'transition hover:shadow-md' : ''}`;
+  const className = `relative overflow-hidden rounded-md border border-ink-200 bg-white px-4 py-3.5 pl-5 shadow-raised before:absolute before:inset-y-0 before:left-0 before:w-1 before:content-[''] ${accents[tone]} ${
+    href ? 'transition hover:border-kogi-400 hover:shadow-panel' : ''
+  }`;
   return href ? (
     <Link href={href} className={`block ${className}`}>
       {inner}
@@ -170,6 +215,7 @@ const STATUS_TONES: Record<string, string> = {
   CLOSED: 'badge-slate',
   ARCHIVED: 'badge-slate',
   REJECTED: 'badge-red',
+  RETIRED: 'badge-slate',
   SUBMITTED: 'badge-blue',
   UNDER_SCREENING: 'badge-amber',
   INCOMPLETE: 'badge-amber',
@@ -204,7 +250,6 @@ const STATUS_TONES: Record<string, string> = {
   ONGOING: 'badge-amber',
   COMPLETED: 'badge-green',
   RESERVE: 'badge-amber',
-  NOT_SELECTED_: 'badge-red',
   URGENT: 'badge-red',
   HIGH: 'badge-amber',
   NORMAL: 'badge-slate',
@@ -212,11 +257,33 @@ const STATUS_TONES: Record<string, string> = {
   CONFIDENTIAL: 'badge-red',
   RESTRICTED: 'badge-amber',
   GENERAL: 'badge-slate',
+  // Computer-based testing
+  NOT_STARTED: 'badge-slate',
+  EXPIRED: 'badge-amber',
+  EASY: 'badge-green',
+  MEDIUM: 'badge-blue',
+  HARD: 'badge-amber',
+  CBT: 'badge-blue',
+  CENTRE: 'badge-slate',
+  HYBRID: 'badge-purple',
+  // Establishment
+  MINISTRY: 'badge-green',
+  EXTRA_MINISTERIAL: 'badge-blue',
+  AGENCY: 'badge-blue',
+  PARASTATAL: 'badge-purple',
+  BOARD: 'badge-slate',
+  COMMISSION: 'badge-green',
 };
+
+/** A code rendered as readable prose: EXAM_SCHEDULED → "Exam scheduled". */
+export function readable(status: string): string {
+  const words = status.replace(/_/g, ' ').trim().toLowerCase();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
 
 export function StatusBadge({ status, label }: { status: string; label?: string }) {
   const tone = STATUS_TONES[status] ?? 'badge-slate';
-  return <span className={tone}>{label ?? status.replace(/_/g, ' ').toLowerCase()}</span>;
+  return <span className={tone}>{label ?? readable(status)}</span>;
 }
 
 export function ProgressBar({
@@ -229,23 +296,23 @@ export function ProgressBar({
   tone?: 'green' | 'amber' | 'blue';
 }) {
   const clamped = Math.max(0, Math.min(100, Math.round(value)));
-  const tones = { green: 'bg-kogi-600', amber: 'bg-amber-500', blue: 'bg-sky-600' } as const;
+  const tones = { green: 'bg-kogi-600', amber: 'bg-gold-500', blue: 'bg-[#1f5b86]' } as const;
   return (
     <div>
       {label ? (
-        <div className="mb-1 flex items-center justify-between text-xs text-slate-600">
+        <div className="mb-1 flex items-center justify-between text-xs text-ink-600">
           <span>{label}</span>
-          <span className="font-semibold">{clamped}%</span>
+          <span className="font-semibold" data-numeric>{clamped}%</span>
         </div>
       ) : null}
       <div
-        className="h-2 w-full overflow-hidden rounded-full bg-slate-200"
+        className="h-1.5 w-full overflow-hidden rounded-sm bg-ink-200"
         role="progressbar"
         aria-valuenow={clamped}
         aria-valuemin={0}
         aria-valuemax={100}
       >
-        <div className={`h-full rounded-full ${tones[tone]}`} style={{ width: `${clamped}%` }} />
+        <div className={`h-full ${tones[tone]}`} style={{ width: `${clamped}%` }} />
       </div>
     </div>
   );
@@ -270,7 +337,12 @@ export function Field({
     <div>
       <label className="label" htmlFor={name}>
         {label}
-        {required ? <span className="ml-0.5 text-red-600">*</span> : null}
+        {required ? (
+          <>
+            <span aria-hidden className="ml-1 font-semibold text-[#9a2c20]">*</span>
+            <span className="sr-only"> (required)</span>
+          </>
+        ) : null}
       </label>
       {children}
       {hint ? <p className="hint">{hint}</p> : null}
@@ -288,11 +360,11 @@ export function DescriptionList({
 }) {
   const cols = { 1: 'sm:grid-cols-1', 2: 'sm:grid-cols-2', 3: 'sm:grid-cols-3' } as const;
   return (
-    <dl className={`grid grid-cols-1 gap-x-6 gap-y-3 ${cols[columns]}`}>
+    <dl className={`grid grid-cols-1 gap-x-8 gap-y-3.5 ${cols[columns]}`}>
       {items.map((item) => (
-        <div key={item.label}>
-          <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">{item.label}</dt>
-          <dd className="mt-0.5 text-sm text-slate-800">{item.value ?? '—'}</dd>
+        <div key={item.label} className="border-b border-ink-150 pb-2.5 last:border-0">
+          <dt className="micro-label">{item.label}</dt>
+          <dd className="mt-1 text-sm text-ink-900">{item.value ?? '—'}</dd>
         </div>
       ))}
     </dl>
@@ -321,19 +393,19 @@ export function Pagination({
     (p) => p === 1 || p === pageCount || Math.abs(p - page) <= 2,
   );
   return (
-    <nav className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 px-5 py-3 text-sm">
-      <p className="text-xs text-slate-500">
+    <nav className="flex flex-wrap items-center justify-between gap-3 border-t border-ink-200 bg-ink-50/70 px-5 py-3 text-sm">
+      <p className="micro-label">
         Page {page} of {pageCount}
       </p>
       <div className="flex flex-wrap items-center gap-1">
         {page > 1 ? (
-          <Link href={build(page - 1)} className="btn-ghost btn-sm">
+          <Link href={build(page - 1)} className="btn-secondary btn-sm">
             Previous
           </Link>
         ) : null}
         {pages.map((p, i) => (
           <span key={p} className="flex items-center gap-1">
-            {i > 0 && p - pages[i - 1] > 1 ? <span className="px-1 text-slate-400">…</span> : null}
+            {i > 0 && p - pages[i - 1] > 1 ? <span className="px-1 text-ink-400">…</span> : null}
             <Link
               href={build(p)}
               className={p === page ? 'btn-primary btn-sm' : 'btn-ghost btn-sm'}
@@ -344,7 +416,7 @@ export function Pagination({
           </span>
         ))}
         {page < pageCount ? (
-          <Link href={build(page + 1)} className="btn-ghost btn-sm">
+          <Link href={build(page + 1)} className="btn-secondary btn-sm">
             Next
           </Link>
         ) : null}
@@ -361,8 +433,8 @@ export function Tabs({
   active: string;
 }) {
   return (
-    <div className="mb-5 border-b border-slate-200">
-      <nav className="-mb-px flex flex-wrap gap-1" aria-label="Tabs">
+    <div className="mb-5 border-b border-ink-200">
+      <nav className="-mb-px flex flex-wrap gap-0.5" aria-label="Tabs">
         {tabs.map((tab) => {
           const isActive = tab.href === active;
           return (
@@ -370,15 +442,20 @@ export function Tabs({
               key={tab.href}
               href={tab.href}
               aria-current={isActive ? 'page' : undefined}
-              className={`whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-medium transition ${
+              className={`whitespace-nowrap border-b-2 px-3.5 py-2.5 text-[0.8125rem] font-semibold transition ${
                 isActive
-                  ? 'border-kogi-700 text-kogi-800'
-                  : 'border-transparent text-slate-600 hover:border-slate-300 hover:text-slate-900'
+                  ? 'border-kogi-700 text-kogi-900'
+                  : 'border-transparent text-ink-600 hover:border-ink-300 hover:text-ink-950'
               }`}
             >
               {tab.label}
               {typeof tab.count === 'number' ? (
-                <span className="ml-1.5 rounded-full bg-slate-100 px-1.5 py-0.5 text-xs text-slate-600">
+                <span
+                  className={`ml-1.5 rounded-sm px-1.5 py-0.5 text-2xs font-bold ${
+                    isActive ? 'bg-kogi-100 text-kogi-800' : 'bg-ink-150 text-ink-600'
+                  }`}
+                  data-numeric
+                >
                   {tab.count}
                 </span>
               ) : null}
@@ -388,4 +465,18 @@ export function Tabs({
       </nav>
     </div>
   );
+}
+
+/** A compact toolbar for filters above a table. */
+export function Toolbar({ children }: { children: ReactNode }) {
+  return (
+    <div className="mb-4 flex flex-wrap items-end gap-3 rounded-md border border-ink-200 bg-white px-4 py-3 shadow-raised">
+      {children}
+    </div>
+  );
+}
+
+/** A reference number or code, set in the monospace face. */
+export function Ref({ children }: { children: ReactNode }) {
+  return <span className="ref">{children}</span>;
 }

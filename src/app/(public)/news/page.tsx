@@ -2,7 +2,9 @@ import Link from 'next/link';
 import { prisma } from '@/lib/db';
 import { ARTICLE_TYPES } from '@/lib/constants';
 import { formatDate } from '@/lib/format';
-import { Card, CardBody, EmptyState, PageHeading, Pagination } from '@/components/ui';
+import {
+  Card, CardBody, EmptyState, PageHeading, Pagination, readable,
+} from '@/components/ui';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'News and Announcements' };
@@ -39,6 +41,7 @@ export default async function NewsPage({
   return (
     <div className="container-page py-10">
       <PageHeading
+        eyebrow="From the Commission"
         title="News, Announcements and Notices"
         description="Official information published by the Kogi State Civil Service Commission."
         breadcrumb={[{ label: 'Home', href: '/' }, { label: 'News & Notices' }]}
@@ -66,17 +69,17 @@ export default async function NewsPage({
           {articles.map((a) => (
             <Card key={a.id} className="transition hover:shadow-md">
               <CardBody>
-                <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                  <span className="badge-green">{a.type.replace(/_/g, ' ').toLowerCase()}</span>
+                <div className="flex flex-wrap items-center gap-2 text-xs text-ink-500">
+                  <span className="badge-green">{readable(a.type)}</span>
                   <span>{formatDate(a.publishedAt)}</span>
                   {a.attachments.length > 0 ? (
                     <span className="badge-slate">{a.attachments.length} attachment(s)</span>
                   ) : null}
                 </div>
-                <h2 className="mt-2 text-lg font-semibold text-slate-900">
+                <h2 className="mt-2 text-lg font-semibold text-ink-950">
                   <Link href={`/news/${a.slug}`} className="hover:text-kogi-700 hover:underline">{a.title}</Link>
                 </h2>
-                {a.summary ? <p className="mt-1.5 text-sm text-slate-600">{a.summary}</p> : null}
+                {a.summary ? <p className="mt-1.5 text-sm text-ink-600">{a.summary}</p> : null}
                 <Link href={`/news/${a.slug}`} className="mt-3 inline-block text-sm font-medium text-kogi-700 hover:underline">
                   Read more →
                 </Link>

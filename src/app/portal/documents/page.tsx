@@ -77,7 +77,7 @@ export default async function DocumentsPage() {
               <tbody>
                 {documents.map((d) => (
                   <tr key={d.id}>
-                    <td className="font-medium text-slate-900">
+                    <td className="font-medium text-ink-950">
                       {d.label}
                       {d.version > 1 ? <span className="ml-1.5 badge-slate">v{d.version}</span> : null}
                     </td>
@@ -85,15 +85,15 @@ export default async function DocumentsPage() {
                       <Link href={`/portal/applications/${d.application.id}`} className="text-kogi-700 underline">
                         {d.application.reference}
                       </Link>
-                      <p className="mt-0.5 text-slate-500">{d.application.exercise.title}</p>
+                      <p className="mt-0.5 text-ink-500">{d.application.exercise.title}</p>
                     </td>
                     <td className="text-xs">
                       {d.originalName}
-                      <p className="mt-0.5 text-slate-500">{formatBytes(d.sizeBytes)}</p>
+                      <p className="mt-0.5 text-ink-500">{formatBytes(d.sizeBytes)}</p>
                     </td>
                     <td><StatusBadge status={d.reviewStatus} /></td>
                     <td className="max-w-xs text-xs">
-                      {d.reviewNotes ?? <span className="text-slate-400">—</span>}
+                      {d.reviewNotes ?? <span className="text-ink-400">—</span>}
                     </td>
                     <td className="whitespace-nowrap text-xs">{formatDateTime(d.createdAt)}</td>
                     <td>

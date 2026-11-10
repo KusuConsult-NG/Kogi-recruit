@@ -4,7 +4,9 @@ import { useState } from 'react';
 import { assignScreening, bulkScreen } from '@/actions/screening';
 import { createShortlist } from '@/actions/screening';
 import { ActionForm, SubmitButton } from '@/components/forms';
-import { Field } from '@/components/ui';
+import {
+  Field, readable,
+} from '@/components/ui';
 
 export interface QueueRow {
   id: string;
@@ -84,11 +86,11 @@ export function ScreeningWorkspace({
                   </td>
                   <td className="whitespace-nowrap font-mono text-xs">{r.reference}</td>
                   <td>
-                    <p className="font-medium text-slate-900">{r.applicantName}</p>
-                    <p className="text-xs text-slate-500">{r.applicantRef} · {r.lga}</p>
+                    <p className="font-medium text-ink-950">{r.applicantName}</p>
+                    <p className="text-xs text-ink-500">{r.applicantRef} · {r.lga}</p>
                   </td>
                   <td className="text-xs">{r.position}</td>
-                  <td><span className="badge-slate">{r.status.replace(/_/g, ' ').toLowerCase()}</span></td>
+                  <td><span className="badge-slate">{readable(r.status)}</span></td>
                   <td className="text-xs">{r.completeness}%</td>
                   <td className="text-xs">{r.documents}</td>
                   {mode === 'queue' ? <td className="text-xs">{r.officers || '—'}</td> : null}
@@ -100,7 +102,7 @@ export function ScreeningWorkspace({
               ))}
               {rows.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="py-8 text-center text-sm text-slate-500">
+                  <td colSpan={10} className="py-8 text-center text-sm text-ink-500">
                     {mode === 'queue'
                       ? 'No applications are currently awaiting screening.'
                       : 'No qualified applications are available for shortlisting.'}

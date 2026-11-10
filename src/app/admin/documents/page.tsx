@@ -102,29 +102,29 @@ export default async function DocumentQueuePage({
         <EmptyState title="No documents in this queue" description="Documents appear here as applicants upload them." />
       ) : (
         <Card>
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-ink-100">
             {documents.map((d) => (
               <div key={d.id} className="p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <p className="text-sm font-semibold text-slate-900">
+                    <p className="text-sm font-semibold text-ink-950">
                       {d.label}
                       {d.requirement?.required ? <span className="ml-1.5 badge-red">required</span> : null}
                       {d.version > 1 ? <span className="ml-1.5 badge-slate">version {d.version}</span> : null}
                     </p>
-                    <p className="mt-0.5 text-xs text-slate-600">
+                    <p className="mt-0.5 text-xs text-ink-600">
                       <Link href={`/admin/applications/${d.application.id}`} className="font-mono text-kogi-700 underline">
                         {d.application.reference}
                       </Link>{' '}
                       · {d.application.applicant.fullName} ({d.application.applicant.applicantProfile?.applicantRef}) ·{' '}
                       {d.application.vacancy?.jobTitle ?? '—'}
                     </p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-ink-500">
                       {d.application.exercise.reference} · {d.originalName} · {formatBytes(d.sizeBytes)} · uploaded{' '}
                       {formatDateTime(d.createdAt)}
                     </p>
                     {d.reviewNotes ? (
-                      <p className="mt-1 text-xs text-amber-800">Previous remarks: {d.reviewNotes}</p>
+                      <p className="mt-1 text-xs text-gold-800">Previous remarks: {d.reviewNotes}</p>
                     ) : null}
                   </div>
                   <div className="flex items-center gap-2">
@@ -134,7 +134,7 @@ export default async function DocumentQueuePage({
                     </a>
                   </div>
                 </div>
-                <div className="mt-3 rounded-md border border-slate-200 bg-slate-50 p-3">
+                <div className="mt-3 rounded-md border border-ink-200 bg-ink-50 p-3">
                   <DocumentReviewForm documentId={d.id} currentStatus={d.reviewStatus} />
                 </div>
               </div>

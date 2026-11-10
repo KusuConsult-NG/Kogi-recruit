@@ -46,9 +46,9 @@ export default async function NewApplicationPage({
             {open.map((ex) => (
               <Card key={ex.id}>
                 <CardBody>
-                  <h2 className="text-base font-semibold text-slate-900">{ex.title}</h2>
-                  <p className="mt-0.5 text-xs text-slate-500">{ex.reference} · closes {formatDate(ex.closesAt)}</p>
-                  <p className="mt-2 line-clamp-3 text-sm text-slate-600">{ex.description}</p>
+                  <h2 className="text-base font-semibold text-ink-950">{ex.title}</h2>
+                  <p className="mt-0.5 text-xs text-ink-500">{ex.reference} · closes {formatDate(ex.closesAt)}</p>
+                  <p className="mt-2 line-clamp-3 text-sm text-ink-600">{ex.description}</p>
                   <Link href={`/portal/applications/new?exercise=${ex.id}`} className="btn-primary btn-sm mt-4">
                     Apply to this exercise
                   </Link>
@@ -67,7 +67,7 @@ export default async function NewApplicationPage({
       vacancies: {
         where: { active: true },
         orderBy: [{ gradeLevel: 'desc' }, { jobTitle: 'asc' }],
-        include: { department: { select: { name: true } } },
+        include: { department: { select: { name: true } }, ministry: { select: { id: true, name: true, code: true, kind: true } }, ministryDept: { select: { name: true } } },
       },
       requirements: { orderBy: { position: 'asc' } },
     },
@@ -123,7 +123,7 @@ export default async function NewApplicationPage({
                     jobTitle: v.jobTitle,
                     gradeLevel: v.gradeLevel,
                     positions: v.positions,
-                    department: v.department?.name ?? v.agency ?? null,
+                    department: v.ministry?.name ?? v.department?.name ?? null,
                     qualifications: v.qualifications,
                     experience: v.experience,
                     minAge: v.minAge,
@@ -152,7 +152,7 @@ export default async function NewApplicationPage({
           <div className="card-header"><h2 className="card-title">Documents you will need</h2></div>
           <CardBody>
             {exercise.requirements.length === 0 ? (
-              <p className="text-sm text-slate-600">No specific documents have been configured.</p>
+              <p className="text-sm text-ink-600">No specific documents have been configured.</p>
             ) : (
               <ul className="space-y-2.5 text-sm">
                 {exercise.requirements.map((r) => (
@@ -161,14 +161,14 @@ export default async function NewApplicationPage({
                       {r.required ? 'required' : 'optional'}
                     </span>
                     <span>
-                      <span className="block font-medium text-slate-800">{r.label}</span>
-                      <span className="block text-xs text-slate-500">Max {r.maxSizeMb}MB</span>
+                      <span className="block font-medium text-ink-800">{r.label}</span>
+                      <span className="block text-xs text-ink-500">Max {r.maxSizeMb}MB</span>
                     </span>
                   </li>
                 ))}
               </ul>
             )}
-            <p className="mt-4 rounded bg-slate-50 px-3 py-2 text-xs text-slate-600">
+            <p className="mt-4 rounded bg-ink-50 px-3 py-2 text-xs text-ink-600">
               Prepare clear scans or photographs before you begin. You can save your application as a
               draft and return to it at any time before the closing date.
             </p>

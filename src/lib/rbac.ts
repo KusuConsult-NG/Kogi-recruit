@@ -45,6 +45,12 @@ export const PERMISSIONS = {
   // Audit (Module 8)
   AUDIT_VIEW: 'audit.view',
   AUDIT_VIEW_SENSITIVE: 'audit.view.sensitive',
+  // Establishment and recruitment unit
+  MDA_VIEW: 'mda.view',
+  MDA_MANAGE: 'mda.manage',
+  UNIT_MANAGE: 'unit.manage',
+  // Question banks and examination papers
+  EXAM_SET: 'exam.set',
   // Administration (Module 4)
   ADMIN_RECORDS: 'admin.records',
   SETTINGS_MANAGE: 'settings.manage',
@@ -66,6 +72,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     P.SELECTION_PREPARE, P.SELECTION_APPROVE,
     P.REPORT_VIEW, P.REPORT_EXPORT, P.NOTIFICATION_SEND, P.NOTIFICATION_APPROVE,
     P.USER_VIEW, P.USER_MANAGE, P.AUDIT_VIEW, P.AUDIT_VIEW_SENSITIVE,
+    P.MDA_VIEW, P.MDA_MANAGE, P.UNIT_MANAGE, P.EXAM_SET,
     P.ADMIN_RECORDS, P.SETTINGS_MANAGE,
   ],
   [ROLES.RECRUITMENT_DIRECTOR]: [
@@ -79,6 +86,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     P.REPORT_VIEW, P.REPORT_EXPORT,
     P.NOTIFICATION_SEND, P.NOTIFICATION_APPROVE,
     P.DOCUMENT_REVIEW, P.AUDIT_VIEW, P.ADMIN_RECORDS,
+    P.MDA_VIEW, P.MDA_MANAGE, P.UNIT_MANAGE, P.EXAM_SET,
   ],
   [ROLES.RECRUITMENT_OFFICER]: [
     P.CONTENT_VIEW, P.EXERCISE_VIEW, P.EXERCISE_MANAGE,
@@ -86,6 +94,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     P.SCREENING_ASSIGN, P.SHORTLIST_PREPARE,
     P.EXAM_MANAGE, P.INTERVIEW_MANAGE, P.SELECTION_PREPARE,
     P.REPORT_VIEW, P.REPORT_EXPORT, P.NOTIFICATION_SEND, P.ADMIN_RECORDS,
+    P.MDA_VIEW, P.MDA_MANAGE, P.EXAM_SET,
   ],
   [ROLES.SCREENING_OFFICER]: [
     P.EXERCISE_VIEW, P.APPLICATION_VIEW,
@@ -96,7 +105,8 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   ],
   [ROLES.EXAMINATION_OFFICER]: [
     P.EXERCISE_VIEW, P.APPLICATION_VIEW,
-    P.EXAM_MANAGE, P.EXAM_SCORE, P.REPORT_VIEW, P.NOTIFICATION_SEND,
+    P.EXAM_MANAGE, P.EXAM_SCORE, P.EXAM_SET, P.MDA_VIEW,
+    P.REPORT_VIEW, P.NOTIFICATION_SEND,
   ],
   [ROLES.INTERVIEW_PANEL]: [
     P.EXERCISE_VIEW, P.APPLICATION_VIEW, P.INTERVIEW_SCORE,
@@ -107,6 +117,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   ],
   [ROLES.REPORTING_OFFICER]: [
     P.EXERCISE_VIEW, P.APPLICATION_VIEW, P.REPORT_VIEW, P.REPORT_EXPORT, P.AUDIT_VIEW,
+    P.MDA_VIEW,
   ],
   [ROLES.APPLICANT]: [],
 };
@@ -171,6 +182,10 @@ export const PERMISSION_LABELS: Record<string, string> = {
   'user.manage': 'Create and manage user accounts',
   'audit.view': 'View audit trail',
   'audit.view.sensitive': 'View sensitive audit records',
+  'mda.view': 'View the register of ministries, departments and agencies',
+  'mda.manage': 'Create and maintain ministries, departments and agencies',
+  'unit.manage': 'Manage the recruitment unit and its membership',
+  'exam.set': 'Set examinations: question banks, questions and papers',
   'admin.records': 'Commission administrative records',
   'settings.manage': 'Manage system settings',
 };

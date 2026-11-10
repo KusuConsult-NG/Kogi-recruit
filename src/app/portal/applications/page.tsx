@@ -70,8 +70,8 @@ export default async function ApplicationsPage({
                     <tr key={app.id}>
                       <td className="whitespace-nowrap font-mono text-xs">{app.reference}</td>
                       <td>
-                        <p className="font-medium text-slate-900">{app.exercise.title}</p>
-                        <p className="text-xs text-slate-500">{app.exercise.reference} · closes {formatDate(app.exercise.closesAt)}</p>
+                        <p className="font-medium text-ink-950">{app.exercise.title}</p>
+                        <p className="text-xs text-ink-500">{app.exercise.reference} · closes {formatDate(app.exercise.closesAt)}</p>
                       </td>
                       <td className="text-xs">
                         {app.vacancy ? `${app.vacancy.jobTitle} (${app.vacancy.gradeLevel})` : '—'}
@@ -80,11 +80,11 @@ export default async function ApplicationsPage({
                       <td className="w-32"><ProgressBar value={app.completeness} tone={app.completeness >= 100 ? 'green' : 'amber'} /></td>
                       <td className="whitespace-nowrap text-xs">
                         {app.documents.length === 0 ? (
-                          <span className="text-slate-400">None</span>
+                          <span className="text-ink-400">None</span>
                         ) : (
                           <>
                             {verified}/{app.documents.length} verified
-                            {rejected > 0 ? <span className="mt-0.5 block font-semibold text-amber-700">{rejected} to correct</span> : null}
+                            {rejected > 0 ? <span className="mt-0.5 block font-semibold text-gold-700">{rejected} to correct</span> : null}
                           </>
                         )}
                       </td>

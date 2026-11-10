@@ -127,7 +127,7 @@ describe('recruitment exercise configuration (Module 2.1)', () => {
 describe('vacancy configuration (Module 2.1)', () => {
   const valid = {
     jobTitle: 'Administrative Officer II', gradeLevel: 'GL 08', departmentId: '',
-    agency: '', positions: '35', description: '',
+    ministryId: 'min_moe', ministryDeptId: '', positions: '35', description: '',
     qualifications: 'A degree from a recognised university.', experience: '',
     minAge: '18', maxAge: '35',
   };
@@ -271,7 +271,7 @@ describe('empty optional form fields (HTML form behaviour)', () => {
     const r = vacancySchema.safeParse({
       jobTitle: 'Clerical Officer', gradeLevel: 'GL 06', positions: '45',
       qualifications: 'SSCE with five credits.', minAge: '', maxAge: '',
-      departmentId: '', agency: '', description: '', experience: '',
+      ministryId: 'min_mlg', ministryDeptId: '', departmentId: '', description: '', experience: '',
     });
     expect(r.success).toBe(true);
     if (r.success) expect(r.data.minAge).toBeUndefined();
@@ -317,5 +317,35 @@ describe('empty optional form fields (HTML form behaviour)', () => {
     const r = taskSchema.safeParse({ title: 'Task', description: '', dueDate: '' });
     expect(r.success).toBe(true);
     if (r.success) expect(r.data.dueDate).toBeUndefined();
+  });
+});
+
+describe('vacancies are raised against an employing MDA', () => {
+  const base = {
+    jobTitle: 'Accountant II',
+    gradeLevel: 'GL 08',
+    positions: '18',
+    qualifications: 'A degree in Accounting from a recognised university.',
+    ministryDeptId: '',
+    departmentId: '',
+    description: '',
+    experience: '',
+    minAge: '',
+    maxAge: '',
+  };
+
+  it('requires the employing ministry, department or agency', () => {
+    const r = vacancySchema.safeParse({ ...base, ministryId: '' });
+    expect(r.success).toBe(false);
+    if (!r.success) expect(fieldErrors(r.error).ministryId).toMatch(/required/i);
+  });
+
+  it('accepts a vacancy once an MDA is named', () => {
+    expect(vacancySchema.safeParse({ ...base, ministryId: 'min_mof' }).success).toBe(true);
+  });
+
+  it('keeps the department within the MDA optional', () => {
+    const r = vacancySchema.safeParse({ ...base, ministryId: 'min_mof', ministryDeptId: '' });
+    expect(r.success).toBe(true);
   });
 });

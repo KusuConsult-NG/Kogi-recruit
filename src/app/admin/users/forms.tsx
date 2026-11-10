@@ -55,7 +55,7 @@ export function StaffUserForm({
               </select>
             </Field>
             <div className="flex items-end pb-2">
-              <label className="flex items-center gap-2.5 text-sm text-slate-700">
+              <label className="flex items-center gap-2.5 text-sm text-ink-700">
                 <input type="checkbox" name="active" value="true" defaultChecked={initial?.active ?? true} className="checkbox" />
                 Account is active
               </label>
@@ -87,12 +87,12 @@ export function PermissionsForm({
       {() => (
         <>
           <input type="hidden" name="id" value={userId} />
-          <div className="max-h-96 space-y-1 overflow-y-auto rounded border border-slate-200 p-2">
+          <div className="max-h-96 space-y-1 overflow-y-auto rounded border border-ink-200 p-2">
             {Object.entries(PERMISSION_LABELS).map(([key, label]) => {
               const isDefault = defaults.has(key);
               return (
                 <label key={key}
-                  className={`flex items-start gap-2 rounded px-2 py-1.5 text-sm ${isDefault ? 'bg-kogi-50' : 'hover:bg-slate-50'}`}>
+                  className={`flex items-start gap-2 rounded px-2 py-1.5 text-sm ${isDefault ? 'bg-kogi-50' : 'hover:bg-ink-50'}`}>
                   <input
                     type="checkbox"
                     name="permissions"
@@ -102,8 +102,8 @@ export function PermissionsForm({
                     className="checkbox mt-0.5"
                   />
                   <span className="flex-1">
-                    <span className="block text-slate-800">{label}</span>
-                    <span className="block font-mono text-[10px] text-slate-500">{key}</span>
+                    <span className="block text-ink-800">{label}</span>
+                    <span className="block font-mono text-2xs text-ink-500">{key}</span>
                   </span>
                   {isDefault ? <span className="badge-green">role default</span> : null}
                 </label>

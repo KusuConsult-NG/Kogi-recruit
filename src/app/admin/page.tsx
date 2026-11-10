@@ -6,7 +6,7 @@ import { dashboardSummary } from '@/lib/reports';
 import { APPLICATION_STATUS_LABELS, EXERCISE_STATUS, EXERCISE_STATUS_LABELS, ROLE_LABELS, type Role } from '@/lib/constants';
 import { formatDate, formatDateTime, percent } from '@/lib/format';
 import {
-  Card, CardBody, DescriptionList, PageHeading, ProgressBar, StatCard, StatusBadge,
+  Card, CardBody, DescriptionList, PageHeading, ProgressBar, StatCard, StatusBadge, readable,
 } from '@/components/ui';
 
 export const dynamic = 'force-dynamic';
@@ -131,7 +131,7 @@ export default async function AdminDashboard() {
                   </div>
                 ))}
                 {summary.applications.submitted === 0 ? (
-                  <p className="text-sm text-slate-600">No applications have been submitted yet.</p>
+                  <p className="text-sm text-ink-600">No applications have been submitted yet.</p>
                 ) : null}
               </CardBody>
             </Card>
@@ -173,15 +173,15 @@ export default async function AdminDashboard() {
             <Card>
               <div className="card-header"><h2 className="card-title">My interview panel duties</h2></div>
               <CardBody>
-                <ul className="divide-y divide-slate-100">
+                <ul className="divide-y divide-ink-100">
                   {panelDuties.map((d) => (
                     <li key={d.id} className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
                       <div>
-                        <p className="text-sm font-medium text-slate-900">
+                        <p className="text-sm font-medium text-ink-950">
                           {d.panel.schedule.title} — {d.panel.name}
                           {d.isChair ? <span className="ml-1.5 badge-green">chair</span> : null}
                         </p>
-                        <p className="mt-0.5 text-xs text-slate-500">
+                        <p className="mt-0.5 text-xs text-ink-500">
                           {formatDate(d.panel.schedule.interviewDate)} · {d.panel.schedule.venue} ·{' '}
                           {d.panel._count.candidates} candidate(s)
                         </p>
@@ -210,8 +210,8 @@ export default async function AdminDashboard() {
                   {exercises.map((ex) => (
                     <tr key={ex.id}>
                       <td>
-                        <p className="font-medium text-slate-900">{ex.title}</p>
-                        <p className="text-xs text-slate-500">{ex.reference}</p>
+                        <p className="font-medium text-ink-950">{ex.title}</p>
+                        <p className="text-xs text-ink-500">{ex.reference}</p>
                       </td>
                       <td><StatusBadge status={ex.status} label={EXERCISE_STATUS_LABELS[ex.status]} /></td>
                       <td>{ex._count.vacancies}</td>
@@ -221,7 +221,7 @@ export default async function AdminDashboard() {
                     </tr>
                   ))}
                   {exercises.length === 0 ? (
-                    <tr><td colSpan={6} className="py-6 text-center text-sm text-slate-500">
+                    <tr><td colSpan={6} className="py-6 text-center text-sm text-ink-500">
                       No recruitment exercises have been created.
                     </td></tr>
                   ) : null}
@@ -241,14 +241,14 @@ export default async function AdminDashboard() {
               <CardBody>
                 <ul className="space-y-3">
                   {pendingApprovals.map((a) => (
-                    <li key={a.id} className="border-b border-slate-100 pb-3 last:border-0 last:pb-0">
-                      <p className="text-sm font-medium text-slate-900">
-                        {a.entityType.replace(/_/g, ' ').toLowerCase()} — {a.action.replace(/_/g, ' ').toLowerCase()}
+                    <li key={a.id} className="border-b border-ink-100 pb-3 last:border-0 last:pb-0">
+                      <p className="text-sm font-medium text-ink-950">
+                        {readable(a.entityType)} — {a.action.replace(/_/g, ' ').toLowerCase()}
                       </p>
-                      <p className="mt-0.5 text-xs text-slate-500">
+                      <p className="mt-0.5 text-xs text-ink-500">
                         Requested by {a.requestedByName ?? 'an officer'} on {formatDateTime(a.createdAt)}
                       </p>
-                      {a.note ? <p className="mt-0.5 text-xs text-slate-600">{a.note}</p> : null}
+                      {a.note ? <p className="mt-0.5 text-xs text-ink-600">{a.note}</p> : null}
                     </li>
                   ))}
                 </ul>
@@ -284,9 +284,9 @@ export default async function AdminDashboard() {
               <CardBody>
                 <ul className="space-y-2.5">
                   {recentAudit.map((log) => (
-                    <li key={log.id} className="border-b border-slate-100 pb-2.5 last:border-0 last:pb-0">
-                      <p className="text-xs font-medium text-slate-800">{log.summary ?? log.action}</p>
-                      <p className="text-[11px] text-slate-500">
+                    <li key={log.id} className="border-b border-ink-100 pb-2.5 last:border-0 last:pb-0">
+                      <p className="text-xs font-medium text-ink-800">{log.summary ?? log.action}</p>
+                      <p className="text-2xs text-ink-500">
                         {log.actorName ?? 'System'} · {formatDateTime(log.createdAt)}
                       </p>
                     </li>

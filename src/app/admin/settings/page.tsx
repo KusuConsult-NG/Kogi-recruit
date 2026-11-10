@@ -107,7 +107,7 @@ export default async function SettingsPage() {
               <div className="card-header">
                 <div>
                   <h2 className="card-title">{group.label}</h2>
-                  <p className="mt-0.5 text-sm text-slate-500">{group.description}</p>
+                  <p className="mt-0.5 text-sm text-ink-500">{group.description}</p>
                 </div>
               </div>
               <CardBody>
@@ -148,12 +148,12 @@ export default async function SettingsPage() {
 
           <Card>
             <div className="card-header"><h2 className="card-title">Availability monitoring</h2></div>
-            <CardBody className="text-sm text-slate-700">
+            <CardBody className="text-sm text-ink-700">
               <p>
-                A health endpoint is available at <code className="rounded bg-slate-100 px-1">/api/health</code>{' '}
+                A health endpoint is available at <code className="rounded bg-ink-100 px-1">/api/health</code>{' '}
                 for uptime monitoring. It reports database reachability and response latency.
               </p>
-              <p className="mt-2 text-xs text-slate-500">
+              <p className="mt-2 text-xs text-ink-500">
                 Backup frequency, recovery objectives and hosting capacity are agreed during technical
                 design and configured in the deployment environment.
               </p>
@@ -162,7 +162,7 @@ export default async function SettingsPage() {
 
           <Card>
             <div className="card-header"><h2 className="card-title">Data protection</h2></div>
-            <CardBody className="text-xs leading-relaxed text-slate-600">
+            <CardBody className="text-xs leading-relaxed text-ink-600">
               The Commission determines lawful processing bases, retention periods, access
               authorisations and privacy notices. Applicant personal information is not publicly
               accessible merely because it was submitted through the portal, and all access by

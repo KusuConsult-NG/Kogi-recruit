@@ -13,6 +13,7 @@ export default async function ProcessPage() {
   return (
     <div className="container-page py-10">
       <PageHeading
+        eyebrow="Procedure"
         title="The Recruitment Process"
         description="Every approved recruitment exercise follows the same ten documented stages, from planning through to closure and archiving."
         breadcrumb={[
@@ -40,11 +41,11 @@ export default async function ProcessPage() {
                     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-kogi-700 text-sm font-bold text-white">
                       {stage.n}
                     </span>
-                    <div className="border-b border-slate-100 pb-4">
-                      <h3 className="text-sm font-semibold text-slate-900">
+                    <div className="border-b border-ink-100 pb-4">
+                      <h3 className="text-sm font-semibold text-ink-950">
                         Stage {stage.n} — {stage.name}
                       </h3>
-                      <p className="mt-1 text-sm text-slate-600">{stage.description}</p>
+                      <p className="mt-1 text-sm text-ink-600">{stage.description}</p>
                     </div>
                   </li>
                 ))}
@@ -55,15 +56,15 @@ export default async function ProcessPage() {
           <Card>
             <div className="card-header"><h2 className="card-title">Documents commonly required</h2></div>
             <CardBody>
-              <p className="mb-3 text-sm text-slate-600">
+              <p className="mb-3 text-sm text-ink-600">
                 The exact documents required are specified on each recruitment exercise. These are the
                 document categories supported by the portal.
               </p>
               <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {DOCUMENT_TYPES.map((d) => (
-                  <li key={d.code} className="rounded border border-slate-200 px-3 py-2 text-sm text-slate-700">
+                  <li key={d.code} className="rounded border border-ink-200 px-3 py-2 text-sm text-ink-700">
                     {d.label}
-                    <span className="mt-0.5 block text-xs text-slate-500">Up to {d.maxMb}MB</span>
+                    <span className="mt-0.5 block text-xs text-ink-500">Up to {d.maxMb}MB</span>
                   </li>
                 ))}
               </ul>
@@ -74,7 +75,7 @@ export default async function ProcessPage() {
         <div className="space-y-6">
           <Card>
             <div className="card-header"><h2 className="card-title">Before you apply</h2></div>
-            <CardBody className="text-sm text-slate-700">
+            <CardBody className="text-sm text-ink-700">
               <ul className="list-disc space-y-2 pl-4">
                 <li>Scan your certificates and documents clearly, as PDF or JPEG.</li>
                 <li>Use an email address you check regularly — all invitations are sent there.</li>
@@ -86,13 +87,13 @@ export default async function ProcessPage() {
           </Card>
           <Card>
             <div className="card-header"><h2 className="card-title">Important notice</h2></div>
-            <CardBody className="text-sm text-slate-700">
+            <CardBody className="text-sm text-ink-700">
               <p>
                 The portal supports recruitment administration and records. It does not independently
                 determine legal eligibility or make statutory recruitment decisions. Final approval of
                 successful candidates remains with the legally authorised government authorities.
               </p>
-              <p className="mt-2 font-medium text-slate-900">
+              <p className="mt-2 font-medium text-ink-950">
                 No payment of any kind is required to apply for any position advertised on this portal.
               </p>
             </CardBody>

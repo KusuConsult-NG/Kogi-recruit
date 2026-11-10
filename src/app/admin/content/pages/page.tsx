@@ -38,14 +38,14 @@ export default async function PagesAdmin() {
               <div className="card-header">
                 <div>
                   <h2 className="card-title">{p.label}</h2>
-                  <p className="mt-0.5 text-sm text-slate-500">{p.hint}</p>
+                  <p className="mt-0.5 text-sm text-ink-500">{p.hint}</p>
                 </div>
                 <div className="text-right">
                   <span className="badge-slate">{p.slug}</span>
                   {record ? (
-                    <p className="mt-1 text-[11px] text-slate-500">Updated {formatDateTime(record.updatedAt)}</p>
+                    <p className="mt-1 text-2xs text-ink-500">Updated {formatDateTime(record.updatedAt)}</p>
                   ) : (
-                    <p className="mt-1 text-[11px] text-amber-700">Not yet created</p>
+                    <p className="mt-1 text-2xs text-gold-700">Not yet created</p>
                   )}
                 </div>
               </div>

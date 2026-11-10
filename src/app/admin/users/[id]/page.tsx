@@ -162,7 +162,7 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
                     </tr>
                   ))}
                   {account.loginHistory.length === 0 ? (
-                    <tr><td colSpan={4} className="py-4 text-center text-sm text-slate-500">No sign-in attempts recorded.</td></tr>
+                    <tr><td colSpan={4} className="py-4 text-center text-sm text-ink-500">No sign-in attempts recorded.</td></tr>
                   ) : null}
                 </tbody>
               </table>
@@ -184,7 +184,7 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
                 ]}
               />
               {canManage ? (
-                <div className="border-t border-slate-200 pt-3">
+                <div className="border-t border-ink-200 pt-3">
                   <ResetPasswordForm userId={account.id} />
                 </div>
               ) : null}

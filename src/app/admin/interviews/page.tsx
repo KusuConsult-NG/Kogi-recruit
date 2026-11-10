@@ -96,7 +96,7 @@ export default async function InterviewsPage({
                       <Link href={`/admin/interviews/${s.id}`} className="font-medium text-kogi-700 hover:underline">
                         {s.title}
                       </Link>
-                      <p className="text-xs text-slate-500">{s.totalMarks} marks · pass {s.passMark}</p>
+                      <p className="text-xs text-ink-500">{s.totalMarks} marks · pass {s.passMark}</p>
                     </td>
                     <td className="text-xs">{s.exercise.reference}</td>
                     <td className="whitespace-nowrap text-xs">{formatDate(s.interviewDate)} {s.startTime}</td>

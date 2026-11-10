@@ -52,12 +52,12 @@ export function ArticleForm({
             <Field label="Attachments" name="attachments" hint="PDF, image or Office documents, up to 10MB each.">
               <input id="attachments" name="attachments" type="file" multiple
                 accept="application/pdf,image/jpeg,image/png,.doc,.docx,.xls,.xlsx"
-                className="block w-full cursor-pointer rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs file:mr-2 file:rounded file:border-0 file:bg-kogi-700 file:px-2.5 file:py-1 file:text-xs file:font-semibold file:text-white" />
+                className="block w-full cursor-pointer rounded-md border border-ink-300 bg-white px-2 py-1.5 text-xs file:mr-2 file:rounded file:border-0 file:bg-kogi-700 file:px-2.5 file:py-1 file:text-xs file:font-semibold file:text-white" />
             </Field>
           </div>
           {mode === 'create' ? (
-            <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
-              <label className="flex items-start gap-2.5 text-sm text-slate-700">
+            <div className="rounded-md border border-ink-200 bg-ink-50 p-3">
+              <label className="flex items-start gap-2.5 text-sm text-ink-700">
                 <input type="checkbox" name="publish" value="true" className="checkbox mt-0.5" />
                 <span>
                   {canPublish
@@ -131,7 +131,7 @@ export function PageContentForm({
             <textarea id={`body-${slug}`} name="body" rows={10} required
               defaultValue={initial?.body ?? ''} className="textarea font-mono text-xs" />
           </Field>
-          <label className="flex items-center gap-2.5 text-sm text-slate-700">
+          <label className="flex items-center gap-2.5 text-sm text-ink-700">
             <input type="checkbox" name="published" value="true" defaultChecked={initial?.published ?? true} className="checkbox" />
             Visible on the public portal
           </label>
@@ -169,7 +169,7 @@ export function LeadershipForm({
           <Field label="Biography" name="bio" error={state.errors?.bio}>
             <textarea name="bio" rows={4} defaultValue={initial?.bio ?? ''} className="textarea" />
           </Field>
-          <label className="flex items-center gap-2.5 text-sm text-slate-700">
+          <label className="flex items-center gap-2.5 text-sm text-ink-700">
             <input type="checkbox" name="published" value="true" defaultChecked={initial?.published ?? true} className="checkbox" />
             Published on the public portal
           </label>
@@ -240,7 +240,7 @@ export function DepartmentForm({
           <Field label="Description and responsibilities" name="description" error={state.errors?.description}>
             <textarea name="description" rows={3} defaultValue={initial?.description ?? ''} className="textarea" />
           </Field>
-          <label className="flex items-center gap-2.5 text-sm text-slate-700">
+          <label className="flex items-center gap-2.5 text-sm text-ink-700">
             <input type="checkbox" name="published" value="true" defaultChecked={initial?.published ?? true} className="checkbox" />
             Published on the public portal
           </label>
@@ -281,7 +281,7 @@ export function FaqForm({
               <input name="order" type="number" min={0} defaultValue={initial?.order ?? 0} className="input" />
             </Field>
             <div className="flex items-end pb-2">
-              <label className="flex items-center gap-2 text-sm text-slate-700">
+              <label className="flex items-center gap-2 text-sm text-ink-700">
                 <input type="checkbox" name="published" value="true" defaultChecked={initial?.published ?? true} className="checkbox" />
                 Published
               </label>
@@ -319,10 +319,10 @@ export function DownloadForm() {
             <Field label="Document" name="file" required hint="Up to 15MB.">
               <input name="file" type="file" required
                 accept="application/pdf,image/jpeg,image/png,.doc,.docx,.xls,.xlsx"
-                className="block w-full cursor-pointer rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs file:mr-2 file:rounded file:border-0 file:bg-kogi-700 file:px-2.5 file:py-1 file:text-xs file:font-semibold file:text-white" />
+                className="block w-full cursor-pointer rounded-md border border-ink-300 bg-white px-2 py-1.5 text-xs file:mr-2 file:rounded file:border-0 file:bg-kogi-700 file:px-2.5 file:py-1 file:text-xs file:font-semibold file:text-white" />
             </Field>
           </div>
-          <label className="flex items-center gap-2.5 text-sm text-slate-700">
+          <label className="flex items-center gap-2.5 text-sm text-ink-700">
             <input type="checkbox" name="published" value="true" defaultChecked className="checkbox" />
             Publish on the downloads page
           </label>

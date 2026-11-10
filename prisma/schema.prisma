@@ -34,24 +34,26 @@ model User {
   updatedAt          DateTime  @updatedAt
   createdById        String?
 
-  department           Department?            @relation(fields: [departmentId], references: [id])
-  permissions          UserPermission[]
-  loginHistory         LoginHistory[]
-  auditLogs            AuditLog[]
-  resetTokens          PasswordResetToken[]
-  applicantProfile     ApplicantProfile?
-  applications         Application[]
-  notifications        Notification[]
-  screeningAssignments ScreeningAssignment[]  @relation("ScreeningOfficer")
-  screeningRecords     ScreeningRecord[]
-  documentReviews      DocumentReview[]
-  panelMemberships     InterviewPanelMember[]
-  interviewScores      InterviewScore[]
-  authoredArticles     Article[]
-  tasksAssigned        StaffTask[]            @relation("TaskAssignee")
-  tasksCreated         StaffTask[]            @relation("TaskCreator")
-  correspondence       Correspondence[]
-  repositoryUploads    RepositoryDocument[]
+  department            Department?             @relation(fields: [departmentId], references: [id])
+  permissions           UserPermission[]
+  loginHistory          LoginHistory[]
+  auditLogs             AuditLog[]
+  resetTokens           PasswordResetToken[]
+  applicantProfile      ApplicantProfile?
+  applications          Application[]
+  notifications         Notification[]
+  screeningAssignments  ScreeningAssignment[]   @relation("ScreeningOfficer")
+  screeningRecords      ScreeningRecord[]
+  documentReviews       DocumentReview[]
+  panelMemberships      InterviewPanelMember[]
+  interviewScores       InterviewScore[]
+  authoredArticles      Article[]
+  tasksAssigned         StaffTask[]             @relation("TaskAssignee")
+  tasksCreated          StaffTask[]             @relation("TaskCreator")
+  correspondence        Correspondence[]
+  repositoryUploads     RepositoryDocument[]
+  unitMemberships       RecruitmentUnitMember[]
+  authoredQuestionBanks QuestionBank[]
 
   @@index([role])
   @@index([active])
@@ -274,6 +276,7 @@ model RecruitmentExercise {
   opensAt          DateTime
   closesAt         DateTime
   maxApplications  Int       @default(1)
+  unitId           String?
   requireExam      Boolean   @default(true)
   requireInterview Boolean   @default(true)
   createdById      String?
@@ -286,6 +289,7 @@ model RecruitmentExercise {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
+  unit               RecruitmentUnit?      @relation(fields: [unitId], references: [id])
   vacancies          Vacancy[]
   requirements       DocumentRequirement[]
   formFields         FormField[]
@@ -305,7 +309,8 @@ model Vacancy {
   jobTitle       String
   gradeLevel     String
   departmentId   String?
-  agency         String?
+  ministryId     String?
+  ministryDeptId String?
   positions      Int      @default(1)
   description    String?
   qualifications String
@@ -318,9 +323,12 @@ model Vacancy {
 
   exercise     RecruitmentExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
   department   Department?         @relation(fields: [departmentId], references: [id])
+  ministry     Ministry?           @relation(fields: [ministryId], references: [id])
+  ministryDept MinistryDepartment? @relation(fields: [ministryDeptId], references: [id])
   applications Application[]
 
   @@index([exerciseId])
+  @@index([ministryId])
 }
 
 model DocumentRequirement {
@@ -646,6 +654,11 @@ model ExamSchedule {
   totalMarks         Float     @default(100)
   passMark           Float     @default(50)
   instructions       String?
+  mode               String    @default("CENTRE") // CENTRE | CBT | HYBRID
+  paperId            String?
+  durationMinutes    Int?
+  opensAt            DateTime?
+  closesAt           DateTime?
   status             String    @default("SCHEDULED") // SCHEDULED|ONGOING|COMPLETED|CANCELLED
   resultsPublishedAt DateTime?
   createdById        String?
@@ -653,6 +666,7 @@ model ExamSchedule {
   updatedAt          DateTime  @updatedAt
 
   exercise   RecruitmentExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  paper      ExamPaper?          @relation(fields: [paperId], references: [id])
   centres    ExamCentre[]
   candidates ExamCandidate[]
 
@@ -691,6 +705,7 @@ model ExamCandidate {
   schedule    ExamSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
   application Application  @relation(fields: [applicationId], references: [id], onDelete: Cascade)
   centre      ExamCentre?  @relation(fields: [centreId], references: [id])
+  sitting     ExamSitting?
 
   @@unique([scheduleId, applicationId])
   @@index([centreId])
@@ -983,4 +998,257 @@ model SystemSetting {
   group     String   @default("GENERAL")
   label     String?
   updatedAt DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// ESTABLISHMENT - MINISTRIES, DEPARTMENTS AND AGENCIES (MDAs)
+// Vacancies are raised for an employing MDA of the Kogi State Public Service.
+// ---------------------------------------------------------------------------
+
+model Ministry {
+  id              String   @id @default(cuid())
+  name            String   @unique
+  shortName       String?
+  code            String   @unique
+  kind            String   @default("MINISTRY") // see MDA_KINDS
+  mandate         String?
+  description     String?
+  headName        String?
+  headTitle       String?  @default("Permanent Secretary")
+  email           String?
+  phone           String?
+  website         String?
+  address         String?
+  lga             String?
+  establishedYear Int?
+  staffStrength   Int?
+  position        Int      @default(0)
+  published       Boolean  @default(true)
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  departments MinistryDepartment[]
+  vacancies   Vacancy[]
+
+  @@index([kind])
+  @@index([published])
+}
+
+model MinistryDepartment {
+  id         String   @id @default(cuid())
+  ministryId String
+  name       String
+  code       String?
+  kind       String   @default("DEPARTMENT") // DEPARTMENT | UNIT | DIVISION
+  headName   String?
+  position   Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  ministry  Ministry  @relation(fields: [ministryId], references: [id], onDelete: Cascade)
+  vacancies Vacancy[]
+
+  @@unique([ministryId, name])
+  @@index([ministryId])
+}
+
+// ---------------------------------------------------------------------------
+// RECRUITMENT UNIT - the standing unit that manages recruitment exercises
+// ---------------------------------------------------------------------------
+
+model RecruitmentUnit {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  code        String   @unique
+  mandate     String?
+  description String?
+  email       String?
+  phone       String?
+  office      String?
+  active      Boolean  @default(true)
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members   RecruitmentUnitMember[]
+  exercises RecruitmentExercise[]
+}
+
+model RecruitmentUnitMember {
+  id         String    @id @default(cuid())
+  unitId     String
+  userId     String
+  unitRole   String    @default("MEMBER") // see UNIT_MEMBER_ROLES
+  assignedAt DateTime  @default(now())
+  endedAt    DateTime?
+  active     Boolean   @default(true)
+  notes      String?
+
+  unit RecruitmentUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  user User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([unitId, userId])
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// COMPUTER BASED TESTING - QUESTION BANKS, PAPERS AND SITTINGS
+// Officers set aptitude tests and examinations; candidates sit them online.
+// ---------------------------------------------------------------------------
+
+model QuestionBank {
+  id          String   @id @default(cuid())
+  title       String
+  code        String   @unique
+  subject     String   @default("GENERAL") // see EXAM_SUBJECTS
+  description String?
+  active      Boolean  @default(true)
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy User?              @relation(fields: [createdById], references: [id])
+  questions Question[]
+  sections  ExamPaperSection[]
+
+  @@index([subject])
+}
+
+model Question {
+  id          String   @id @default(cuid())
+  bankId      String
+  type        String   @default("SINGLE_CHOICE") // see QUESTION_TYPES
+  stem        String
+  topic       String?
+  difficulty  String   @default("MEDIUM") // EASY | MEDIUM | HARD
+  marks       Float    @default(1)
+  explanation String?
+  active      Boolean  @default(true)
+  position    Int      @default(0)
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  bank         QuestionBank          @relation(fields: [bankId], references: [id], onDelete: Cascade)
+  options      QuestionOption[]
+  paperEntries ExamPaperQuestion[]
+  sittingItems ExamSittingQuestion[]
+
+  @@index([bankId])
+  @@index([difficulty])
+}
+
+model QuestionOption {
+  id         String  @id @default(cuid())
+  questionId String
+  label      String // A, B, C, D ...
+  text       String
+  correct    Boolean @default(false)
+  position   Int     @default(0)
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([questionId])
+}
+
+model ExamPaper {
+  id                    String    @id @default(cuid())
+  title                 String
+  code                  String    @unique
+  kind                  String    @default("APTITUDE_TEST") // see PAPER_KINDS
+  instructions          String?
+  durationMinutes       Int       @default(60)
+  passMark              Float     @default(50)
+  shuffleQuestions      Boolean   @default(true)
+  shuffleOptions        Boolean   @default(true)
+  showResultToCandidate Boolean   @default(false)
+  status                String    @default("DRAFT") // DRAFT | PUBLISHED | RETIRED
+  publishedAt           DateTime?
+  createdById           String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  sections  ExamPaperSection[]
+  schedules ExamSchedule[]
+  sittings  ExamSitting[]
+
+  @@index([status])
+}
+
+model ExamPaperSection {
+  id               String  @id @default(cuid())
+  paperId          String
+  title            String
+  description      String?
+  bankId           String?
+  drawCount        Int? // when set, draw this many random questions from the bank
+  marksPerQuestion Float   @default(1)
+  position         Int     @default(0)
+
+  paper     ExamPaper           @relation(fields: [paperId], references: [id], onDelete: Cascade)
+  bank      QuestionBank?       @relation(fields: [bankId], references: [id])
+  questions ExamPaperQuestion[]
+
+  @@index([paperId])
+}
+
+model ExamPaperQuestion {
+  id         String @id @default(cuid())
+  sectionId  String
+  questionId String
+  marks      Float  @default(1)
+  position   Int    @default(0)
+
+  section  ExamPaperSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  question Question         @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([sectionId, questionId])
+  @@index([questionId])
+}
+
+model ExamSitting {
+  id            String    @id @default(cuid())
+  candidateId   String    @unique
+  paperId       String
+  status        String    @default("NOT_STARTED") // NOT_STARTED | IN_PROGRESS | SUBMITTED | EXPIRED
+  startedAt     DateTime?
+  expiresAt     DateTime?
+  submittedAt   DateTime?
+  submittedBy   String? // CANDIDATE | TIMER | OFFICER
+  totalMarks    Float     @default(0)
+  rawScore      Float     @default(0)
+  percentage    Float?
+  answeredCount Int       @default(0)
+  autoMarkedAt  DateTime?
+  ipAddress     String?
+  userAgent     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  candidate ExamCandidate         @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  paper     ExamPaper             @relation(fields: [paperId], references: [id])
+  items     ExamSittingQuestion[]
+
+  @@index([status])
+}
+
+model ExamSittingQuestion {
+  id           String    @id @default(cuid())
+  sittingId    String
+  questionId   String
+  sectionTitle String?
+  position     Int       @default(0)
+  marks        Float     @default(1)
+  optionOrder  String // comma separated option ids in the order shown
+  selected     String? // comma separated option ids chosen by the candidate
+  flagged      Boolean   @default(false)
+  correct      Boolean?
+  awarded      Float     @default(0)
+  answeredAt   DateTime?
+
+  sitting  ExamSitting @relation(fields: [sittingId], references: [id], onDelete: Cascade)
+  question Question    @relation(fields: [questionId], references: [id])
+
+  @@unique([sittingId, questionId])
+  @@index([sittingId])
 }

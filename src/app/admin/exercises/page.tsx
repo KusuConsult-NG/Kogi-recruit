@@ -98,7 +98,7 @@ export default async function AdminExercisesPage({
                       <Link href={`/admin/exercises/${ex.id}`} className="font-medium text-kogi-700 hover:underline">
                         {ex.title}
                       </Link>
-                      <p className="text-xs text-slate-500">{ex.reference}</p>
+                      <p className="text-xs text-ink-500">{ex.reference}</p>
                     </td>
                     <td><StatusBadge status={ex.status} label={EXERCISE_STATUS_LABELS[ex.status]} /></td>
                     <td>{ex._count.vacancies}</td>

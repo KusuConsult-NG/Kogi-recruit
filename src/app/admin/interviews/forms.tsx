@@ -90,7 +90,7 @@ export function CriteriaForm({
                 />
                 {rows.length > 1 ? (
                   <button type="button" onClick={() => setRows(rows.filter((_, x) => x !== i))}
-                    className="btn-ghost btn-sm text-red-700">Remove</button>
+                    className="btn-ghost btn-sm text-[#9a2c20]">Remove</button>
                 ) : null}
               </div>
             ))}
@@ -120,11 +120,11 @@ export function PanelForm({
   const [members, setMembers] = useState<string[]>([]);
 
   return (
-    <ActionForm action={createPanel} className="space-y-3 rounded-md border border-slate-200 bg-slate-50/60 p-4">
+    <ActionForm action={createPanel} className="space-y-3 rounded-md border border-ink-200 bg-ink-50/60 p-4">
       {(state) => (
         <>
           <input type="hidden" name="scheduleId" value={scheduleId} />
-          <p className="text-sm font-semibold text-slate-900">Create an interview panel</p>
+          <p className="text-sm font-semibold text-ink-950">Create an interview panel</p>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Field label="Panel name" name="name" required error={state.errors?.name}>
               <input id="name" name="name" required placeholder="e.g. Panel A" className="input" />
@@ -135,14 +135,14 @@ export function PanelForm({
           </div>
           <fieldset>
             <legend className="label">Panel members</legend>
-            <div className="max-h-56 space-y-1 overflow-y-auto rounded border border-slate-200 bg-white p-2">
+            <div className="max-h-56 space-y-1 overflow-y-auto rounded border border-ink-200 bg-white p-2">
               {officers.length === 0 ? (
-                <p className="p-2 text-xs text-slate-500">
+                <p className="p-2 text-xs text-ink-500">
                   No officers hold interview scoring rights. Create Interview Panel Member accounts first.
                 </p>
               ) : (
                 officers.map((o) => (
-                  <label key={o.id} className="flex items-center gap-2 rounded px-1.5 py-1 text-sm hover:bg-slate-50">
+                  <label key={o.id} className="flex items-center gap-2 rounded px-1.5 py-1 text-sm hover:bg-ink-50">
                     <input
                       type="checkbox"
                       name="memberIds"
@@ -152,7 +152,7 @@ export function PanelForm({
                       className="checkbox"
                     />
                     <span className="flex-1">{o.name}</span>
-                    <span className="text-[11px] text-slate-500">{o.role.replace(/_/g, ' ').toLowerCase()}</span>
+                    <span className="text-2xs text-ink-500">{o.role.replace(/_/g, ' ').toLowerCase()}</span>
                   </label>
                 ))
               )}
@@ -197,7 +197,7 @@ export function InterviewScoreForm({
       {(state) => (
         <>
           <input type="hidden" name="candidateId" value={candidateId} />
-          <label className="flex items-center gap-2 text-sm text-slate-700">
+          <label className="flex items-center gap-2 text-sm text-ink-700">
             <input
               type="checkbox"
               checked={absent}
@@ -212,9 +212,9 @@ export function InterviewScoreForm({
             <div className="space-y-2">
               {criteria.map((c) => (
                 <div key={c.key} className="flex flex-wrap items-center justify-between gap-2">
-                  <label htmlFor={`score_${c.key}`} className="flex-1 text-sm text-slate-700">
+                  <label htmlFor={`score_${c.key}`} className="flex-1 text-sm text-ink-700">
                     {c.label}
-                    <span className="ml-1 text-xs text-slate-500">(max {c.maxScore})</span>
+                    <span className="ml-1 text-xs text-ink-500">(max {c.maxScore})</span>
                   </label>
                   <input
                     id={`score_${c.key}`}
@@ -228,7 +228,7 @@ export function InterviewScoreForm({
                   />
                 </div>
               ))}
-              <p className="border-t border-slate-200 pt-2 text-xs text-slate-500">
+              <p className="border-t border-ink-200 pt-2 text-xs text-ink-500">
                 Total available: {totalMarks} marks.
               </p>
             </div>
@@ -239,7 +239,7 @@ export function InterviewScoreForm({
           </Field>
           <SubmitButton className="btn-primary btn-sm" pendingLabel="Saving…">Record my assessment</SubmitButton>
           {state.message ? (
-            <p className={`text-xs ${state.ok ? 'text-kogi-800' : 'text-red-700'}`}>{state.message}</p>
+            <p className={`text-xs ${state.ok ? 'text-kogi-800' : 'text-[#9a2c20]'}`}>{state.message}</p>
           ) : null}
         </>
       )}
@@ -256,7 +256,7 @@ export function ConsolidateForm({ scheduleId }: { scheduleId: string }) {
           <SubmitButton className="btn-primary btn-sm w-full" pendingLabel="Consolidating…">
             Consolidate panel assessments
           </SubmitButton>
-          <p className="mt-2 text-xs text-slate-500">
+          <p className="mt-2 text-xs text-ink-500">
             Every candidate must have attendance recorded, and everyone present must have at least one
             panel score. Consolidation takes the mean of the panel members' totals.
           </p>

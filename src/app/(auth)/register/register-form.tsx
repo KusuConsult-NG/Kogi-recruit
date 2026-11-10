@@ -47,8 +47,8 @@ export function RegisterForm() {
                 className={`input ${state.errors?.confirmPassword ? 'input-error' : ''}`} />
             </Field>
           </div>
-          <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
-            <label className="flex items-start gap-2.5 text-sm text-slate-700">
+          <div className="rounded-md border border-ink-200 bg-ink-50 p-3">
+            <label className="flex items-start gap-2.5 text-sm text-ink-700">
               <input type="checkbox" name="consent" value="on" className="checkbox mt-0.5" required />
               <span>
                 I have read the{' '}

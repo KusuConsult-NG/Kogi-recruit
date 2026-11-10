@@ -15,7 +15,7 @@ function inline(text: string): string {
   return escapeHtml(text)
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
     .replace(/(^|[\s(])\*([^*\n]+)\*/g, '$1<em>$2</em>')
-    .replace(/`([^`]+)`/g, '<code class="rounded bg-slate-100 px-1 py-0.5 text-xs">$1</code>')
+    .replace(/`([^`]+)`/g, '<code class="rounded bg-ink-100 px-1 py-0.5 text-xs">$1</code>')
     .replace(
       /\[([^\]]+)\]\((https?:\/\/[^\s)]+|\/[^\s)]*)\)/g,
       '<a href="$2" rel="noopener">$1</a>',

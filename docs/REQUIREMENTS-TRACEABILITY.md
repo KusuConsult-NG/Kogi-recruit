@@ -423,3 +423,93 @@ cannot skip screening, and a candidate cannot be selected without assessment. Se
   integrations are subject to technical access and agreed scope. Email and SMS ship with
   configurable providers; the others are not assumed.
 - Major additions outside the approved specification are change requests.
+
+---
+
+## 15. Commission-directed extensions
+
+These were requested after the proposal was accepted, and are built, seeded and
+tested on the same footing as the proposal modules.
+
+### 15.1 Vacancies raised against ministries, departments and agencies
+
+| Requirement | Where it is met |
+|---|---|
+| A register of the employing MDAs of the Kogi State Public Service | `Ministry` and `MinistryDepartment` models; `/admin/establishment/ministries` |
+| Six classifications: ministry, extra-ministerial department, agency, parastatal, board, commission | `MDA_KINDS` in `src/lib/constants.ts` |
+| Each MDA records its code, mandate, accounting officer, contact details, LGA and approved staff strength | `ministrySchema`; the MDA record page |
+| Departments, divisions and units inside an MDA | `MinistryDepartment`; the MDA record page |
+| Every vacancy belongs to an employing MDA, and optionally to a department within it | `Vacancy.ministryId` / `Vacancy.ministryDeptId`; required by `vacancySchema` |
+| Public MDA directory | `/ministries` |
+| Public browse and filter of vacancies by MDA | `/recruitment?ministry=…`; the ministry strip on the homepage |
+| The employing MDA appears on the advertisement, the application and the applicant's record | public exercise page, `/portal/applications/[id]`, `/admin/applications/[id]` |
+| Reporting and export by MDA | `applicationsByDepartment`, `postsByMinistry`; the exercise report exports |
+| An MDA with vacancies is retired, not deleted | `deleteMinistry` |
+
+### 15.2 A recruitment unit that manages recruitment
+
+| Requirement | Where it is met |
+|---|---|
+| A standing unit with a name, code, mandate and contact details | `RecruitmentUnit`; `/admin/establishment/units` |
+| Officers assigned to the unit in named roles | `RecruitmentUnitMember`; `UNIT_MEMBER_ROLES` (eight roles) |
+| Applicants and deactivated accounts cannot be members | `addUnitMember` |
+| Past membership kept with an end date | `removeUnitMember`; the "Past membership" panel |
+| Recruitment exercises placed under a unit's management | `RecruitmentExercise.unitId`; `assignExerciseToUnit`; the exercise page |
+| The unit's page shows every exercise it manages, with vacancies and applications | `/admin/establishment/units/[id]` |
+| Separate permission for unit management | `unit.manage` |
+
+### 15.3 Applicants sit tests and examinations online
+
+| Requirement | Where it is met |
+|---|---|
+| A candidate sits an aptitude test or examination in the portal | `/portal/tests` lists them; the sitting itself is at `/examination/[id]` |
+| A timed sitting that cannot be extended | `ExamSitting.expiresAt`; `SittingTimer`; server-side expiry checks |
+| The paper submits itself when the time runs out | `SittingTimer` auto-submit, plus independent server checks in `saveAnswer`, `submitSitting` and the result page |
+| Answers saved as the candidate works, surviving a dropped connection | `saveAnswer` persists on every move |
+| Question navigator showing answered, unanswered and flagged questions | the sitting page |
+| Flag a question for review | `toggleFlag` |
+| Revisit and change any answer before submitting | the navigator and "Save and go back" |
+| A different paper for each candidate where the Commission requires it | `assemblePaper`, seeded per sitting; random draws per section |
+| The same paper on a reload | deterministic `seededRandom` keyed on the sitting |
+| Automatic marking | `markAnswer`, `markSitting` |
+| The score written back to the examination record and the application | `finaliseSitting` |
+| A candidate cannot open another candidate's sitting | ownership checked in every CBT action and on the sitting page |
+| A candidate cannot choose an option not shown to them | `saveAnswer` filters against `optionOrder` |
+| A submitted paper cannot be reopened | status checks and a redirect to the result page |
+| Score shown immediately only where the paper allows it | `ExamPaper.showResultToCandidate` |
+| A window during which the test may be started | `ExamSchedule.opensAt` / `closesAt` |
+| An officer may close an overdue sitting | `forceSubmitSitting`, audited |
+
+### 15.4 Officers set examinations
+
+| Requirement | Where it is met |
+|---|---|
+| Question banks by subject | `QuestionBank`; `/admin/exams/banks` |
+| Setting questions with options, marks, difficulty, topic and an explanation | `Question`, `QuestionOption`; `saveQuestion` |
+| Three question types, including multiple-answer | `QUESTION_TYPES`; marking is all-or-nothing for multiple answers |
+| Importing a batch of questions | `parseQuestionText`; `importQuestions` |
+| Examination papers with duration, pass mark and shuffling | `ExamPaper`; `/admin/exams/papers` |
+| Sections that draw at random from a bank, or name their questions | `ExamPaperSection.drawCount`; `setSectionQuestions` |
+| A paper cannot be published while a section is empty | `changePaperStatus` |
+| A paper that has been sat is locked, and can be copied | `updateExamPaper`, `copyExamPaper` |
+| A question that has been answered is withdrawn, not deleted | `deleteQuestion` |
+| Attaching a published paper to an examination, in online or hybrid mode | `examScheduleSchema`, `createExamSchedule`; `EXAM_MODES` |
+| Releasing the test to allocated candidates | `releaseOnlineTest` |
+| Live view of every sitting | the Online test panel on the examination page |
+| Reporting on online testing | `onlineTestSummary`; the Reports page |
+| Separate permission for setting examinations | `exam.set` |
+
+### 15.5 A professionally designed interface
+
+| Requirement | Where it is met |
+|---|---|
+| A design system rather than ad-hoc styling | `tailwind.config.ts`, `src/app/globals.css`, `src/components/ui.tsx` |
+| Typography chosen for a government record system | Source Serif 4 display, Public Sans text, IBM Plex Mono for references and figures, self-hosted through `next/font` |
+| A restrained institutional palette | four scales: kogi green, ceremonial gold, warm "ink" neutrals, four status tones |
+| Documentary form: hairline rules, small radii, minimal shadow, dense data tables, tabular figures | the component layer in `globals.css` |
+| A drawn seal that prints cleanly | `CommissionCrest` inline SVG |
+| A distraction-free examination hall | `/examination/[id]`, a top-level segment outside the portal chrome |
+| Accessibility: skip link, visible focus, status never by colour alone, labelled navigator, live countdown | documented in `docs/DESIGN-SYSTEM.md` |
+| Print styles for slips, score sheets and selection lists | `@media print` in `globals.css` |
+
+The design system is documented in full in `docs/DESIGN-SYSTEM.md`.

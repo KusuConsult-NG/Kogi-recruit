@@ -21,7 +21,7 @@ export function ProfileForm({ profile }: { profile: ProfileValues }) {
       {(state) => (
         <>
           <fieldset className="space-y-4">
-            <legend className="text-sm font-semibold text-slate-900">Personal information</legend>
+            <legend className="text-sm font-semibold text-ink-950">Personal information</legend>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <Field label="Surname" name="surname" required error={state.errors?.surname}>
                 <input id="surname" name="surname" required defaultValue={profile.surname} className="input" />
@@ -55,8 +55,8 @@ export function ProfileForm({ profile }: { profile: ProfileValues }) {
             </div>
           </fieldset>
 
-          <fieldset className="space-y-4 border-t border-slate-200 pt-5">
-            <legend className="text-sm font-semibold text-slate-900">Contact details</legend>
+          <fieldset className="space-y-4 border-t border-ink-200 pt-5">
+            <legend className="text-sm font-semibold text-ink-950">Contact details</legend>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Field label="Telephone number" name="phone" required error={state.errors?.phone} hint="e.g. 08031234567">
                 <input id="phone" name="phone" type="tel" required defaultValue={profile.phone} className="input" />
@@ -80,8 +80,8 @@ export function ProfileForm({ profile }: { profile: ProfileValues }) {
             </div>
           </fieldset>
 
-          <fieldset className="space-y-4 border-t border-slate-200 pt-5">
-            <legend className="text-sm font-semibold text-slate-900">State and Local Government of origin</legend>
+          <fieldset className="space-y-4 border-t border-ink-200 pt-5">
+            <legend className="text-sm font-semibold text-ink-950">State and Local Government of origin</legend>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Field label="State of origin" name="stateOfOrigin" required error={state.errors?.stateOfOrigin}>
                 <select
@@ -112,7 +112,7 @@ export function ProfileForm({ profile }: { profile: ProfileValues }) {
             </Field>
           </fieldset>
 
-          <div className="border-t border-slate-200 pt-5">
+          <div className="border-t border-ink-200 pt-5">
             <SubmitButton className="btn-primary" pendingLabel="Saving…">Save profile</SubmitButton>
           </div>
         </>

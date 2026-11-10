@@ -79,7 +79,7 @@ export default async function ShortlistsPage({
                       <Link href={`/admin/shortlists/${s.id}`} className="font-medium text-kogi-700 hover:underline">
                         {s.title}
                       </Link>
-                      {s.rejectionNote ? <p className="mt-0.5 text-xs text-red-700">Returned: {s.rejectionNote}</p> : null}
+                      {s.rejectionNote ? <p className="mt-0.5 text-xs text-[#9a2c20]">Returned: {s.rejectionNote}</p> : null}
                     </td>
                     <td className="text-xs">{s.exercise.reference}</td>
                     <td>{s._count.entries}</td>

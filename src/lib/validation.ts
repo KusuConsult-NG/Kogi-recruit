@@ -1,7 +1,8 @@
 import { z } from 'zod';
 import {
   GENDERS, MARITAL_STATUS, NIGERIAN_STATES, QUALIFICATIONS, GRADE_LEVELS,
-  ROLES, ARTICLE_TYPES,
+  ROLES, ARTICLE_TYPES, MDA_KINDS, UNIT_MEMBER_ROLES, QUESTION_TYPES,
+  DIFFICULTIES, EXAM_SUBJECTS, PAPER_KINDS, EXAM_MODES,
 } from './constants';
 
 const nonEmpty = (label: string, max = 200) =>
@@ -189,8 +190,9 @@ export const vacancySchema = z
   .object({
     jobTitle: nonEmpty('Job title', 200),
     gradeLevel: z.enum(GRADE_LEVELS),
+    ministryId: nonEmpty('Employing ministry, department or agency', 40),
+    ministryDeptId: z.string().trim().optional().or(z.literal('')),
     departmentId: z.string().trim().optional().or(z.literal('')),
-    agency: z.string().trim().max(200).optional().or(z.literal('')),
     positions: z.coerce.number().int().min(1, 'At least one position is required.').max(10000),
     description: z.string().trim().max(4000).optional().or(z.literal('')),
     qualifications: nonEmpty('Qualification requirements', 2000),
@@ -239,6 +241,11 @@ export const examScheduleSchema = z
     totalMarks: z.coerce.number().min(1).max(1000).default(100),
     passMark: z.coerce.number().min(0).max(1000).default(50),
     instructions: z.string().trim().max(4000).optional().or(z.literal('')),
+    mode: z.enum(EXAM_MODES.map((m) => m.code) as [string, ...string[]]).default('CENTRE'),
+    paperId: z.string().trim().optional().or(z.literal('')),
+    durationMinutes: optionalNumber({ int: true, min: 5, max: 480 }),
+    opensAt: optionalDate('Enter a valid opening time for the online test.'),
+    closesAt: optionalDate('Enter a valid closing time for the online test.'),
   })
   .refine((d) => d.passMark <= d.totalMarks, {
     message: 'The pass mark cannot exceed the total marks.',
@@ -444,3 +451,144 @@ export function parseForm<T extends z.ZodTypeAny>(
   if (result.success) return { success: true, data: result.data };
   return { success: false, errors: fieldErrors(result.error) };
 }
+
+// --- Establishment: Ministries, Departments and Agencies ---------------
+export const ministrySchema = z.object({
+  name: nonEmpty('Name', 200),
+  shortName: z.string().trim().max(60).optional().or(z.literal('')),
+  code: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .min(2, 'A short code of at least two characters is required.')
+    .max(20, 'The code is too long.')
+    .regex(/^[A-Z0-9-]+$/, 'Use capital letters, numbers and hyphens only.'),
+  kind: z.enum(MDA_KINDS.map((k) => k.code) as [string, ...string[]]).default('MINISTRY'),
+  mandate: z.string().trim().max(4000).optional().or(z.literal('')),
+  description: z.string().trim().max(4000).optional().or(z.literal('')),
+  headName: z.string().trim().max(150).optional().or(z.literal('')),
+  headTitle: z.string().trim().max(120).optional().or(z.literal('')),
+  email: emailSchema.optional().or(z.literal('')),
+  phone: z.string().trim().max(40).optional().or(z.literal('')),
+  website: z.string().trim().max(200).optional().or(z.literal('')),
+  address: z.string().trim().max(300).optional().or(z.literal('')),
+  lga: z.string().trim().max(100).optional().or(z.literal('')),
+  establishedYear: optionalNumber({ int: true, min: 1900, max: 2100 }),
+  staffStrength: optionalNumber({ int: true, min: 0, max: 1000000 }),
+  published: optionalBoolean(),
+  active: optionalBoolean(),
+});
+
+export const ministryDepartmentSchema = z.object({
+  name: nonEmpty('Department name', 200),
+  code: z.string().trim().max(30).optional().or(z.literal('')),
+  kind: z.enum(['DEPARTMENT', 'UNIT', 'DIVISION']).default('DEPARTMENT'),
+  headName: z.string().trim().max(150).optional().or(z.literal('')),
+});
+
+// --- Recruitment unit --------------------------------------------------
+export const recruitmentUnitSchema = z.object({
+  name: nonEmpty('Unit name', 150),
+  code: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .min(2, 'A short code of at least two characters is required.')
+    .max(20, 'The code is too long.')
+    .regex(/^[A-Z0-9-]+$/, 'Use capital letters, numbers and hyphens only.'),
+  mandate: z.string().trim().max(4000).optional().or(z.literal('')),
+  description: z.string().trim().max(4000).optional().or(z.literal('')),
+  email: emailSchema.optional().or(z.literal('')),
+  phone: z.string().trim().max(40).optional().or(z.literal('')),
+  office: z.string().trim().max(200).optional().or(z.literal('')),
+  active: optionalBoolean(),
+});
+
+export const unitMemberSchema = z.object({
+  userId: nonEmpty('Officer', 40),
+  unitRole: z
+    .enum(UNIT_MEMBER_ROLES.map((r) => r.code) as [string, ...string[]])
+    .default('MEMBER'),
+  notes: z.string().trim().max(500).optional().or(z.literal('')),
+});
+
+// --- Question banks, questions and papers ------------------------------
+export const questionBankSchema = z.object({
+  title: nonEmpty('Bank title', 200),
+  code: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .min(2, 'A short code of at least two characters is required.')
+    .max(24, 'The code is too long.')
+    .regex(/^[A-Z0-9-]+$/, 'Use capital letters, numbers and hyphens only.'),
+  subject: z.enum(EXAM_SUBJECTS.map((s) => s.code) as [string, ...string[]]).default('GENERAL'),
+  description: z.string().trim().max(2000).optional().or(z.literal('')),
+  active: optionalBoolean(),
+});
+
+export const questionSchema = z
+  .object({
+    type: z.enum(QUESTION_TYPES.map((t) => t.code) as [string, ...string[]]).default('SINGLE_CHOICE'),
+    stem: nonEmpty('Question', 4000),
+    topic: z.string().trim().max(120).optional().or(z.literal('')),
+    difficulty: z.enum(DIFFICULTIES).default('MEDIUM'),
+    marks: z.coerce.number().min(0.25, 'Marks must be at least 0.25.').max(100).default(1),
+    explanation: z.string().trim().max(2000).optional().or(z.literal('')),
+    active: optionalBoolean(),
+    options: z.array(z.string().trim()).min(2, 'At least two options are required.'),
+    correct: z.union([z.string(), z.array(z.string())]).optional(),
+  })
+  .superRefine((d, ctx) => {
+    const filled = d.options.map((o) => o.trim()).filter((o) => o.length > 0);
+    if (filled.length < 2) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['options'], message: 'Give at least two answer options.' });
+    }
+    const correct = Array.isArray(d.correct) ? d.correct : d.correct ? [d.correct] : [];
+    if (correct.length === 0) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['correct'], message: 'Mark at least one option as the correct answer.' });
+    }
+    if (d.type !== 'MULTI_CHOICE' && correct.length > 1) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['correct'], message: 'Only one option can be correct for this question type.' });
+    }
+    if (d.type === 'TRUE_FALSE' && filled.length !== 2) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['options'], message: 'A true or false question must have exactly two options.' });
+    }
+  });
+
+export const examPaperSchema = z
+  .object({
+    title: nonEmpty('Paper title', 200),
+    code: z
+      .string()
+      .trim()
+      .toUpperCase()
+      .min(2, 'A short code of at least two characters is required.')
+      .max(24, 'The code is too long.')
+      .regex(/^[A-Z0-9-]+$/, 'Use capital letters, numbers and hyphens only.'),
+    kind: z.enum(PAPER_KINDS.map((k) => k.code) as [string, ...string[]]).default('APTITUDE_TEST'),
+    instructions: z.string().trim().max(8000).optional().or(z.literal('')),
+    durationMinutes: z.coerce
+      .number()
+      .int()
+      .min(5, 'A paper must run for at least five minutes.')
+      .max(480, 'A paper cannot run for longer than eight hours.')
+      .default(60),
+    passMark: z.coerce.number().min(0).max(100).default(50),
+    shuffleQuestions: optionalBoolean(),
+    shuffleOptions: optionalBoolean(),
+    showResultToCandidate: optionalBoolean(),
+  })
+  .refine((d) => d.passMark <= 100, { message: 'The pass mark is a percentage.', path: ['passMark'] });
+
+export const paperSectionSchema = z.object({
+  title: nonEmpty('Section title', 150),
+  description: z.string().trim().max(1000).optional().or(z.literal('')),
+  bankId: z.string().trim().optional().or(z.literal('')),
+  drawCount: optionalNumber({ int: true, min: 1, max: 200 }),
+  marksPerQuestion: z.coerce.number().min(0.25).max(100).default(1),
+});
+
+export const bulkQuestionSchema = z.object({
+  payload: nonEmpty('Questions', 200000),
+});

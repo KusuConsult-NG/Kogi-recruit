@@ -22,7 +22,8 @@ await mkdir(OUT, { recursive: true });
 
 // Seeded records to link to, so the capture works against any seeded database.
 const prisma = new PrismaClient();
-const [selectedApp, qualifiedApp, exercise, article, exam, interview, selection, shortlist, tracked] =
+const [selectedApp, qualifiedApp, exercise, article, exam, interview, selection, shortlist, tracked,
+  ministry, unit, bank, paper, cbtExam, pendingSitting] =
   await Promise.all([
     prisma.application.findFirst({ where: { status: 'SELECTED' }, include: { applicant: true } }),
     prisma.application.findFirst({ where: { status: 'QUALIFIED' }, select: { id: true } }),
@@ -35,6 +36,19 @@ const [selectedApp, qualifiedApp, exercise, article, exam, interview, selection,
     prisma.application.findFirst({
       where: { status: { not: 'DRAFT' } },
       include: { applicant: { include: { applicantProfile: true } } },
+    }),
+    prisma.ministry.findFirst({ where: { vacancies: { some: {} } }, select: { id: true } }),
+    prisma.recruitmentUnit.findFirst({ select: { id: true } }),
+    prisma.questionBank.findFirst({ where: { questions: { some: {} } }, select: { id: true } }),
+    prisma.examPaper.findFirst({ where: { status: 'PUBLISHED' }, select: { id: true } }),
+    prisma.examSchedule.findFirst({ where: { mode: 'CBT' }, select: { id: true } }),
+    prisma.examSitting.findFirst({
+      where: { status: 'NOT_STARTED' },
+      include: {
+        candidate: {
+          select: { application: { select: { applicant: { select: { email: true } } } } },
+        },
+      },
     }),
   ]);
 await prisma.$disconnect();
@@ -83,6 +97,11 @@ console.log('Public portal (Module 1)');
   await shot(page, '/about', '05-public-about', 'The Commission');
   await shot(page, '/leadership', '06-public-leadership', 'Leadership');
   await shot(page, '/departments', '07-public-departments', 'Departments and units');
+  await shot(page, '/ministries', '07b-public-ministries', 'Ministries, departments and agencies');
+  if (ministry) {
+    await shot(page, `/recruitment?ministry=${ministry.id}`, '07c-public-vacancies-by-ministry',
+      'Vacancies filtered by employing MDA');
+  }
   await shot(page, `/news/${article.slug}`, '08-public-article', 'Published announcement');
   await shot(page, '/notices', '09-public-notices', 'Circulars and public notices');
   await shot(page, '/downloads', '10-public-downloads', 'Downloads');
@@ -115,6 +134,7 @@ console.log('Applicant portal (Modules 2.2–2.4, 3)');
   await shot(page, '/portal/documents', '19-applicant-documents', 'My documents');
   await shot(page, '/portal/notifications', '20-applicant-notifications', 'Notifications');
   await shot(page, '/portal/profile', '21-applicant-profile', 'Profile');
+  await shot(page, '/portal/tests', '21b-applicant-tests', 'Tests and examinations');
   await context.close();
 }
 
@@ -144,6 +164,61 @@ console.log('Administration (Modules 2, 4–8)');
   await shot(page, '/admin/records/repository', '38-admin-repository', 'Document repository');
   await shot(page, '/admin/approvals', '39-admin-approvals', 'Approvals queue');
   await shot(page, '/admin/settings', '40-admin-settings', 'System settings');
+
+  // Establishment, the recruitment unit and examination setting
+  await shot(page, '/admin/establishment/ministries', '40a-admin-ministries',
+    'Establishment register of MDAs');
+  if (ministry) {
+    await shot(page, `/admin/establishment/ministries/${ministry.id}`, '40b-admin-ministry',
+      'MDA record, departments and vacancies');
+  }
+  await shot(page, '/admin/establishment/units', '40c-admin-units', 'Recruitment unit');
+  if (unit) {
+    await shot(page, `/admin/establishment/units/${unit.id}`, '40d-admin-unit',
+      'Recruitment unit membership and exercises');
+  }
+  await shot(page, '/admin/exams/banks', '40e-admin-banks', 'Question banks');
+  if (bank) {
+    await shot(page, `/admin/exams/banks/${bank.id}`, '40f-admin-bank', 'Setting questions in a bank');
+  }
+  await shot(page, '/admin/exams/papers', '40g-admin-papers', 'Examination papers');
+  if (paper) {
+    await shot(page, `/admin/exams/papers/${paper.id}`, '40h-admin-paper', 'Paper sections and sittings');
+  }
+  if (cbtExam) {
+    await shot(page, `/admin/examinations/${cbtExam.id}`, '40i-admin-online-exam',
+      'Online examination and live sittings');
+  }
+  await context.close();
+}
+
+// ------------------------------------------------ the examination hall (CBT)
+if (pendingSitting) {
+  console.log('Computer-based testing (Module 2.6)');
+  const context = await desktop();
+  const page = await signIn(
+    context,
+    pendingSitting.candidate.application.applicant.email,
+    APPLICANT_PASSWORD,
+  );
+  await shot(page, '/portal/tests', '40j-cbt-before', 'Before beginning the test');
+
+  // Begin the sitting and capture the examination hall under the clock.
+  page.once('dialog', (d) => d.accept());
+  await page.locator('form:has(input[name=sittingId]) button[type=submit]').first().click();
+  await page.waitForURL((u) => /\/examination\/[a-z0-9]{8,}$/.test(u.pathname), { timeout: 30000 });
+  await page.waitForTimeout(1200);
+  await page.screenshot({ path: path.join(OUT, '40k-cbt-question.png'), fullPage: true });
+  count += 1;
+  console.log('  40k-cbt-question  The examination hall, under the clock');
+
+  // Answer one question so the navigator shows progress, then capture again.
+  await page.locator('input[name=selected]').first().check();
+  await page.locator('form:has(input[name=itemId]) button[type=submit]').first().click();
+  await page.waitForTimeout(2000);
+  await page.screenshot({ path: path.join(OUT, '40l-cbt-answered.png'), fullPage: true });
+  count += 1;
+  console.log('  40l-cbt-answered  An answered question and the navigator');
   await context.close();
 }
 

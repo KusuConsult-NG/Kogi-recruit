@@ -35,9 +35,9 @@ export default async function NewUserPage() {
           <CardBody>
             <ul className="space-y-3">
               {STAFF_ROLES.map((r) => (
-                <li key={r} className="border-b border-slate-100 pb-3 last:border-0 last:pb-0">
-                  <p className="text-sm font-semibold text-slate-900">{ROLE_LABELS[r]}</p>
-                  <p className="mt-0.5 text-xs text-slate-600">
+                <li key={r} className="border-b border-ink-100 pb-3 last:border-0 last:pb-0">
+                  <p className="text-sm font-semibold text-ink-950">{ROLE_LABELS[r]}</p>
+                  <p className="mt-0.5 text-xs text-ink-600">
                     {ROLE_PERMISSIONS[r].length} permission(s)
                   </p>
                 </li>

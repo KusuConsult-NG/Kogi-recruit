@@ -14,14 +14,14 @@ export default async function ChangePasswordPage() {
   return (
     <Card>
       <CardBody className="p-6 sm:p-8">
-        <h1 className="text-xl font-bold text-slate-900">Change your password</h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <h1 className="text-xl font-bold text-ink-950">Change your password</h1>
+        <p className="mt-1 text-sm text-ink-600">
           Signed in as {user.fullName} ({user.email}).
         </p>
         <div className="mt-6">
           <ChangePasswordForm />
         </div>
-        <p className="mt-6 border-t border-slate-200 pt-4 text-sm">
+        <p className="mt-6 border-t border-ink-200 pt-4 text-sm">
           <Link href={user.role === ROLES.APPLICANT ? '/portal' : '/admin'} className="text-kogi-700 hover:underline">
             ← Back to dashboard
           </Link>

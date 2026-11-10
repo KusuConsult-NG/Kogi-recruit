@@ -16,3 +16,4 @@ coverage/
 prisma/test.db
 prisma/test.db-journal
 screens/
+demo/

@@ -83,14 +83,14 @@ export default async function ExaminationsPage({
                       <Link href={`/admin/examinations/${s.id}`} className="font-medium text-kogi-700 hover:underline">
                         {s.title}
                       </Link>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-ink-500">
                         {s.totalMarks} marks · pass {s.passMark}
                         {s.resultsPublishedAt ? ' · results released' : ''}
                       </p>
                     </td>
                     <td className="text-xs">{s.exercise.reference}</td>
                     <td className="whitespace-nowrap text-xs">{formatDate(s.examDate)} {s.startTime}</td>
-                    <td>{s.centres.length} <span className="text-xs text-slate-500">({s.centres.reduce((a, c) => a + c.capacity, 0)} seats)</span></td>
+                    <td>{s.centres.length} <span className="text-xs text-ink-500">({s.centres.reduce((a, c) => a + c.capacity, 0)} seats)</span></td>
                     <td>{s.candidates.length}</td>
                     <td>{s.candidates.filter((c) => c.attendance === 'PRESENT').length}</td>
                     <td>{s.candidates.filter((c) => c.score !== null).length}</td>

@@ -11,6 +11,7 @@ export default async function PrivacyPage() {
   return (
     <div className="container-page py-10">
       <PageHeading
+        eyebrow="Information"
         title={page?.title ?? 'Privacy Notice'}
         description={page?.subtitle ?? 'How the Commission processes personal information submitted through this portal.'}
         breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Privacy Notice' }]}
