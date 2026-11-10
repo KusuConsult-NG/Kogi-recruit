@@ -77,13 +77,13 @@ export default async function MinistryDetail({ params }: { params: Promise<{ id:
         <StatCard label="Applications received" value={applications} tone="amber" />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <div className="space-y-6 xl:col-span-2">
+      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[19rem_minmax(0,1fr)]">
+        <div className="space-y-6 xl:sticky xl:top-24 xl:self-start">
           <Card>
             <CardHeader title="Establishment record" eyebrow="Register entry" />
             <CardBody>
               <DescriptionList
-                columns={2}
+                columns={1}
                 items={[
                   { label: 'Code', value: <span className="ref">{ministry.code}</span> },
                   { label: 'Classification', value: <StatusBadge status={ministry.kind} label={MDA_KIND_LABELS[ministry.kind] ?? ministry.kind} /> },
@@ -99,6 +99,9 @@ export default async function MinistryDetail({ params }: { params: Promise<{ id:
               />
             </CardBody>
           </Card>
+        </div>
+
+        <div className="space-y-6">
 
           <Card>
             <CardHeader
@@ -201,7 +204,6 @@ export default async function MinistryDetail({ params }: { params: Promise<{ id:
               </div>
             )}
           </Card>
-        </div>
 
         {canManage ? (
           <Card>
@@ -232,6 +234,7 @@ export default async function MinistryDetail({ params }: { params: Promise<{ id:
             </CardBody>
           </Card>
         ) : null}
+        </div>
       </div>
     </>
   );

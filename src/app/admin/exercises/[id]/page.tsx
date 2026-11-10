@@ -108,8 +108,118 @@ export default async function AdminExerciseDetail({ params }: { params: Promise<
         <StatCard label="Successful" value={countOf('SELECTED')} tone="green" />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <div className="space-y-6 xl:col-span-2">
+      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[19rem_minmax(0,1fr)]">
+        <div className="space-y-6 xl:sticky xl:top-24 xl:self-start">
+          <Card>
+            <div className="card-header"><h2 className="card-title">Lifecycle</h2></div>
+            <CardBody className="space-y-3">
+              <DescriptionList
+                columns={1}
+                items={[
+                  { label: 'Current status', value: <StatusBadge status={exercise.status} label={EXERCISE_STATUS_LABELS[exercise.status]} /> },
+                  { label: 'Opens', value: formatDateTime(exercise.opensAt) },
+                  { label: 'Closes', value: formatDateTime(exercise.closesAt) },
+                  { label: 'Approved', value: exercise.approvedAt ? formatDateTime(exercise.approvedAt) : '—' },
+                  { label: 'Published', value: exercise.publishedAt ? formatDateTime(exercise.publishedAt) : '—' },
+                  { label: 'Closed', value: exercise.closedAt ? formatDateTime(exercise.closedAt) : '—' },
+                  { label: 'Archived', value: exercise.archivedAt ? formatDateTime(exercise.archivedAt) : '—' },
+                  { label: 'Written examination', value: exercise.requireExam ? 'Applicable' : 'Not applicable' },
+                  { label: 'Interview', value: exercise.requireInterview ? 'Applicable' : 'Not applicable' },
+                ]}
+              />
+
+              {nextStates.length > 0 ? (
+                <div className="space-y-2 border-t border-ink-200 pt-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-ink-500">Available actions</p>
+                  {nextStates.includes(EXERCISE_STATUS.PENDING_APPROVAL) && canManage ? (
+                    <StatusActionForm exerciseId={exercise.id} to={EXERCISE_STATUS.PENDING_APPROVAL}
+                      label="Submit for approval" tone="btn-primary" />
+                  ) : null}
+                  {nextStates.includes(EXERCISE_STATUS.APPROVED) && canApprove ? (
+                    <StatusActionForm exerciseId={exercise.id} to={EXERCISE_STATUS.APPROVED}
+                      label="Approve exercise" tone="btn-primary" />
+                  ) : null}
+                  {nextStates.includes(EXERCISE_STATUS.PUBLISHED) && canApprove ? (
+                    <StatusActionForm exerciseId={exercise.id} to={EXERCISE_STATUS.PUBLISHED}
+                      label="Publish to the portal" tone="btn-primary"
+                      confirm="Publish this exercise? It will become visible to the public and open for applications." />
+                  ) : null}
+                  {nextStates.includes(EXERCISE_STATUS.DRAFT) && (canApprove || canManage) ? (
+                    <StatusActionForm exerciseId={exercise.id} to={EXERCISE_STATUS.DRAFT}
+                      label="Return to draft" requireNote notePlaceholder="Reason for returning" />
+                  ) : null}
+                  {nextStates.includes(EXERCISE_STATUS.SUSPENDED) && canManage ? (
+                    <StatusActionForm exerciseId={exercise.id} to={EXERCISE_STATUS.SUSPENDED}
+                      label="Suspend exercise" requireNote notePlaceholder="Reason for suspension" />
+                  ) : null}
+                  {nextStates.includes(EXERCISE_STATUS.CLOSED) && canManage ? (
+                    <StatusActionForm exerciseId={exercise.id} to={EXERCISE_STATUS.CLOSED}
+                      label="Close applications"
+                      confirm="Close this exercise? No further applications will be accepted." />
+                  ) : null}
+                  {nextStates.includes(EXERCISE_STATUS.ARCHIVED) && canManage ? (
+                    <StatusActionForm exerciseId={exercise.id} to={EXERCISE_STATUS.ARCHIVED}
+                      label="Archive records"
+                      confirm="Archive this exercise? Records are retained but the exercise becomes read-only." />
+                  ) : null}
+                </div>
+              ) : (
+                <p className="border-t border-ink-200 pt-3 text-xs text-ink-500">
+                  No further lifecycle actions are available from this status.
+                </p>
+              )}
+            </CardBody>
+          </Card>
+
+          <Card>
+            <div className="card-header"><h2 className="card-title">Recruitment stages</h2></div>
+            <CardBody className="space-y-2 text-sm">
+              {[
+                { label: 'Applications', count: exercise._count.applications, href: `/admin/applications?exercise=${exercise.id}` },
+                { label: 'Screening queue', count: countOf('SUBMITTED') + countOf('UNDER_SCREENING'), href: `/admin/screening?exercise=${exercise.id}` },
+                { label: 'Shortlists', count: exercise._count.shortlists, href: `/admin/shortlists?exercise=${exercise.id}` },
+                { label: 'Examinations', count: exercise._count.examSchedules, href: `/admin/examinations?exercise=${exercise.id}` },
+                { label: 'Interviews', count: exercise._count.interviewSchedules, href: `/admin/interviews?exercise=${exercise.id}` },
+                { label: 'Selection lists', count: exercise._count.selectionLists, href: `/admin/selection?exercise=${exercise.id}` },
+              ].map((row) => (
+                <Link key={row.label} href={row.href}
+                  className="flex items-center justify-between rounded border border-ink-200 px-3 py-2 hover:border-kogi-400 hover:bg-kogi-50">
+                  <span className="text-ink-700">{row.label}</span>
+                  <span className="font-semibold text-ink-950">{row.count}</span>
+                </Link>
+              ))}
+            </CardBody>
+          </Card>
+
+          {exercise.approvals.length > 0 ? (
+            <Card>
+              <div className="card-header"><h2 className="card-title">Approval history</h2></div>
+              <CardBody>
+                <ul className="space-y-2.5">
+                  {exercise.approvals.map((a) => (
+                    <li key={a.id} className="border-b border-ink-100 pb-2.5 last:border-0 last:pb-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs font-medium text-ink-800">{a.action.replace(/_/g, ' ').toLowerCase()}</p>
+                        <StatusBadge status={a.status} />
+                      </div>
+                      <p className="mt-0.5 text-2xs text-ink-500">
+                        Requested by {a.requestedByName ?? '—'} · {formatDateTime(a.createdAt)}
+                      </p>
+                      {a.decidedByName ? (
+                        <p className="text-2xs text-ink-500">
+                          Decided by {a.decidedByName} · {formatDateTime(a.decidedAt)}
+                        </p>
+                      ) : null}
+                      {a.note ? <p className="mt-0.5 text-2xs text-ink-600">{a.note}</p> : null}
+                    </li>
+                  ))}
+                </ul>
+              </CardBody>
+            </Card>
+          ) : null}
+        </div>
+
+        <div className="space-y-6">
           {/* Managing recruitment unit */}
           <Card>
             <div className="card-header">
@@ -310,118 +420,8 @@ export default async function AdminExerciseDetail({ params }: { params: Promise<
             </Card>
           ) : null}
         </div>
-
-        {/* Sidebar */}
-        <div className="space-y-6">
-          <Card>
-            <div className="card-header"><h2 className="card-title">Lifecycle</h2></div>
-            <CardBody className="space-y-3">
-              <DescriptionList
-                columns={1}
-                items={[
-                  { label: 'Current status', value: <StatusBadge status={exercise.status} label={EXERCISE_STATUS_LABELS[exercise.status]} /> },
-                  { label: 'Opens', value: formatDateTime(exercise.opensAt) },
-                  { label: 'Closes', value: formatDateTime(exercise.closesAt) },
-                  { label: 'Approved', value: exercise.approvedAt ? formatDateTime(exercise.approvedAt) : '—' },
-                  { label: 'Published', value: exercise.publishedAt ? formatDateTime(exercise.publishedAt) : '—' },
-                  { label: 'Closed', value: exercise.closedAt ? formatDateTime(exercise.closedAt) : '—' },
-                  { label: 'Archived', value: exercise.archivedAt ? formatDateTime(exercise.archivedAt) : '—' },
-                  { label: 'Written examination', value: exercise.requireExam ? 'Applicable' : 'Not applicable' },
-                  { label: 'Interview', value: exercise.requireInterview ? 'Applicable' : 'Not applicable' },
-                ]}
-              />
-
-              {nextStates.length > 0 ? (
-                <div className="space-y-2 border-t border-ink-200 pt-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-ink-500">Available actions</p>
-                  {nextStates.includes(EXERCISE_STATUS.PENDING_APPROVAL) && canManage ? (
-                    <StatusActionForm exerciseId={exercise.id} to={EXERCISE_STATUS.PENDING_APPROVAL}
-                      label="Submit for approval" tone="btn-primary" />
-                  ) : null}
-                  {nextStates.includes(EXERCISE_STATUS.APPROVED) && canApprove ? (
-                    <StatusActionForm exerciseId={exercise.id} to={EXERCISE_STATUS.APPROVED}
-                      label="Approve exercise" tone="btn-primary" />
-                  ) : null}
-                  {nextStates.includes(EXERCISE_STATUS.PUBLISHED) && canApprove ? (
-                    <StatusActionForm exerciseId={exercise.id} to={EXERCISE_STATUS.PUBLISHED}
-                      label="Publish to the portal" tone="btn-primary"
-                      confirm="Publish this exercise? It will become visible to the public and open for applications." />
-                  ) : null}
-                  {nextStates.includes(EXERCISE_STATUS.DRAFT) && (canApprove || canManage) ? (
-                    <StatusActionForm exerciseId={exercise.id} to={EXERCISE_STATUS.DRAFT}
-                      label="Return to draft" requireNote notePlaceholder="Reason for returning" />
-                  ) : null}
-                  {nextStates.includes(EXERCISE_STATUS.SUSPENDED) && canManage ? (
-                    <StatusActionForm exerciseId={exercise.id} to={EXERCISE_STATUS.SUSPENDED}
-                      label="Suspend exercise" requireNote notePlaceholder="Reason for suspension" />
-                  ) : null}
-                  {nextStates.includes(EXERCISE_STATUS.CLOSED) && canManage ? (
-                    <StatusActionForm exerciseId={exercise.id} to={EXERCISE_STATUS.CLOSED}
-                      label="Close applications"
-                      confirm="Close this exercise? No further applications will be accepted." />
-                  ) : null}
-                  {nextStates.includes(EXERCISE_STATUS.ARCHIVED) && canManage ? (
-                    <StatusActionForm exerciseId={exercise.id} to={EXERCISE_STATUS.ARCHIVED}
-                      label="Archive records"
-                      confirm="Archive this exercise? Records are retained but the exercise becomes read-only." />
-                  ) : null}
-                </div>
-              ) : (
-                <p className="border-t border-ink-200 pt-3 text-xs text-ink-500">
-                  No further lifecycle actions are available from this status.
-                </p>
-              )}
-            </CardBody>
-          </Card>
-
-          <Card>
-            <div className="card-header"><h2 className="card-title">Recruitment stages</h2></div>
-            <CardBody className="space-y-2 text-sm">
-              {[
-                { label: 'Applications', count: exercise._count.applications, href: `/admin/applications?exercise=${exercise.id}` },
-                { label: 'Screening queue', count: countOf('SUBMITTED') + countOf('UNDER_SCREENING'), href: `/admin/screening?exercise=${exercise.id}` },
-                { label: 'Shortlists', count: exercise._count.shortlists, href: `/admin/shortlists?exercise=${exercise.id}` },
-                { label: 'Examinations', count: exercise._count.examSchedules, href: `/admin/examinations?exercise=${exercise.id}` },
-                { label: 'Interviews', count: exercise._count.interviewSchedules, href: `/admin/interviews?exercise=${exercise.id}` },
-                { label: 'Selection lists', count: exercise._count.selectionLists, href: `/admin/selection?exercise=${exercise.id}` },
-              ].map((row) => (
-                <Link key={row.label} href={row.href}
-                  className="flex items-center justify-between rounded border border-ink-200 px-3 py-2 hover:border-kogi-400 hover:bg-kogi-50">
-                  <span className="text-ink-700">{row.label}</span>
-                  <span className="font-semibold text-ink-950">{row.count}</span>
-                </Link>
-              ))}
-            </CardBody>
-          </Card>
-
-          {exercise.approvals.length > 0 ? (
-            <Card>
-              <div className="card-header"><h2 className="card-title">Approval history</h2></div>
-              <CardBody>
-                <ul className="space-y-2.5">
-                  {exercise.approvals.map((a) => (
-                    <li key={a.id} className="border-b border-ink-100 pb-2.5 last:border-0 last:pb-0">
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="text-xs font-medium text-ink-800">{a.action.replace(/_/g, ' ').toLowerCase()}</p>
-                        <StatusBadge status={a.status} />
-                      </div>
-                      <p className="mt-0.5 text-2xs text-ink-500">
-                        Requested by {a.requestedByName ?? '—'} · {formatDateTime(a.createdAt)}
-                      </p>
-                      {a.decidedByName ? (
-                        <p className="text-2xs text-ink-500">
-                          Decided by {a.decidedByName} · {formatDateTime(a.decidedAt)}
-                        </p>
-                      ) : null}
-                      {a.note ? <p className="mt-0.5 text-2xs text-ink-600">{a.note}</p> : null}
-                    </li>
-                  ))}
-                </ul>
-              </CardBody>
-            </Card>
-          ) : null}
-        </div>
       </div>
     </>
   );
 }
+

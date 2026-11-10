@@ -81,8 +81,36 @@ export default async function QuestionBankDetail({ params }: { params: Promise<{
         </div>
       ) : null}
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <div className="space-y-6 xl:col-span-2">
+      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[19rem_minmax(0,1fr)]">
+        <div className="space-y-6 xl:sticky xl:top-24 xl:self-start">
+          <Card>
+            <CardHeader title="Bank settings" />
+            <CardBody>
+              <QuestionBankForm
+                initial={{
+                  id: bank.id,
+                  title: bank.title,
+                  code: bank.code,
+                  subject: bank.subject,
+                  description: bank.description ?? '',
+                  active: bank.active,
+                }}
+              />
+            </CardBody>
+          </Card>
+        </div>
+
+        <div className="space-y-6">
+          <Card>
+            <CardHeader
+              title="Set a question"
+              description="Questions are added to this bank and drawn into papers from it."
+            />
+            <CardBody>
+              <QuestionForm bankId={bank.id} />
+            </CardBody>
+          </Card>
+
           <Card>
             <CardHeader
               title="Questions"
@@ -190,31 +218,6 @@ export default async function QuestionBankDetail({ params }: { params: Promise<{
             />
             <CardBody>
               <QuestionImportForm bankId={bank.id} />
-            </CardBody>
-          </Card>
-        </div>
-
-        <div className="space-y-6">
-          <Card>
-            <CardHeader title="Set a question" />
-            <CardBody>
-              <QuestionForm bankId={bank.id} />
-            </CardBody>
-          </Card>
-
-          <Card>
-            <CardHeader title="Bank settings" />
-            <CardBody>
-              <QuestionBankForm
-                initial={{
-                  id: bank.id,
-                  title: bank.title,
-                  code: bank.code,
-                  subject: bank.subject,
-                  description: bank.description ?? '',
-                  active: bank.active,
-                }}
-              />
             </CardBody>
           </Card>
         </div>

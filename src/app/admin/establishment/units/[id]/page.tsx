@@ -82,8 +82,24 @@ export default async function UnitDetail({ params }: { params: Promise<{ id: str
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <div className="space-y-6 xl:col-span-2">
+      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[19rem_minmax(0,1fr)]">
+        <div className="space-y-6 xl:sticky xl:top-24 xl:self-start">
+          <Card>
+            <CardHeader title="Assign an officer" />
+            <CardBody>
+              {available.length === 0 ? (
+                <p className="text-sm text-ink-500">
+                  Every active member of staff is already on this unit.
+                </p>
+              ) : (
+                <UnitMemberForm unitId={unit.id} officers={available} />
+              )}
+            </CardBody>
+          </Card>
+
+        </div>
+
+        <div className="space-y-6">
           <Card>
             <CardHeader
               title="Unit membership"
@@ -193,21 +209,6 @@ export default async function UnitDetail({ params }: { params: Promise<{ id: str
                 </table>
               </div>
             )}
-          </Card>
-        </div>
-
-        <div className="space-y-6">
-          <Card>
-            <CardHeader title="Assign an officer" />
-            <CardBody>
-              {available.length === 0 ? (
-                <p className="text-sm text-ink-500">
-                  Every active member of staff is already on this unit.
-                </p>
-              ) : (
-                <UnitMemberForm unitId={unit.id} officers={available} />
-              )}
-            </CardBody>
           </Card>
 
           <Card>

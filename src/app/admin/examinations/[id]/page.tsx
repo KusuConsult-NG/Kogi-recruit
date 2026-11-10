@@ -116,8 +116,98 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
         <StatCard label="Passed" value={`${passed.length}/${scored.length}`} tone="green" />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <div className="space-y-6 xl:col-span-2">
+      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[19rem_minmax(0,1fr)]">
+        <div className="space-y-6 xl:sticky xl:top-24 xl:self-start">
+          <Card>
+            <div className="card-header"><h2 className="card-title">Examination details</h2></div>
+            <CardBody>
+              <DescriptionList
+                columns={1}
+                items={[
+                  { label: 'Status', value: <StatusBadge status={schedule.status} /> },
+                  { label: 'Mode', value: <StatusBadge status={schedule.mode} label={EXAM_MODE_LABELS[schedule.mode] ?? schedule.mode} /> },
+                  { label: 'Date', value: formatDate(schedule.examDate) },
+                  { label: 'Reporting time', value: schedule.startTime },
+                  { label: 'End time', value: schedule.endTime ?? '—' },
+                  { label: 'Total marks', value: schedule.totalMarks },
+                  { label: 'Pass mark', value: schedule.passMark },
+                  { label: 'Results released', value: schedule.resultsPublishedAt ? formatDateTime(schedule.resultsPublishedAt) : 'Not released' },
+                ]}
+              />
+              {schedule.instructions ? (
+                <div className="mt-3 border-t border-ink-100 pt-3">
+                  <p className="text-xs font-medium uppercase tracking-wide text-ink-500">Instructions</p>
+                  <p className="mt-1 whitespace-pre-line text-xs text-ink-700">{schedule.instructions}</p>
+                </div>
+              ) : null}
+            </CardBody>
+          </Card>
+
+          <Card>
+            <div className="card-header">
+              <h2 className="card-title">Examination centres</h2>
+              <span className="badge-slate">{totalCapacity} seats</span>
+            </div>
+            <CardBody className="space-y-4">
+              {schedule.centres.length === 0 ? (
+                <p className="text-sm text-ink-600">No centres configured.</p>
+              ) : (
+                <ul className="divide-y divide-ink-100">
+                  {schedule.centres.map((c) => (
+                    <li key={c.id} className="flex flex-wrap items-start justify-between gap-2 py-2.5 first:pt-0 last:pb-0">
+                      <div>
+                        <p className="text-sm font-medium text-ink-950">{c.name}</p>
+                        <p className="text-xs text-ink-500">
+                          {c.lga ? `${c.lga} · ` : ''}{c._count.candidates}/{c.capacity} allocated
+                          {c.supervisor ? ` · supervisor ${c.supervisor}` : ''}
+                        </p>
+                        {c.address ? <p className="text-xs text-ink-500">{c.address}</p> : null}
+                      </div>
+                      {canManage && c._count.candidates === 0 ? (
+                        <form action={deleteExamCentre}>
+                          <input type="hidden" name="id" value={c.id} />
+                          <button type="submit" className="btn-ghost btn-sm text-[#9a2c20]">Remove</button>
+                        </form>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {canManage ? <ExamCentreForm scheduleId={schedule.id} /> : null}
+            </CardBody>
+          </Card>
+
+          {canManage && schedule.status !== 'COMPLETED' ? (
+            <Card>
+              <div className="card-header"><h2 className="card-title">Validate and advance</h2></div>
+              <CardBody><ValidateExamForm scheduleId={schedule.id} /></CardBody>
+            </Card>
+          ) : null}
+
+          {schedule.status === 'COMPLETED' ? (
+            <Card>
+              <div className="card-header"><h2 className="card-title">Results summary</h2></div>
+              <CardBody>
+                <DescriptionList
+                  columns={1}
+                  items={[
+                    { label: 'Candidates assessed', value: scored.length },
+                    { label: 'Passed', value: `${passed.length} (${scored.length ? Math.round((passed.length / scored.length) * 100) : 0}%)` },
+                    { label: 'Failed', value: scored.length - passed.length },
+                    { label: 'Absent', value: absent.length },
+                    { label: 'Highest score', value: scored.length ? Math.max(...scored.map((c) => c.score ?? 0)) : '—' },
+                    { label: 'Average score', value: scored.length ? (scored.reduce((s, c) => s + (c.score ?? 0), 0) / scored.length).toFixed(2) : '—' },
+                  ]}
+                />
+                <Link href={`/admin/interviews?exercise=${schedule.exercise.id}`} className="btn-primary btn-sm mt-4 w-full">
+                  Proceed to interview stage
+                </Link>
+              </CardBody>
+            </Card>
+          ) : null}
+        </div>
+
+        <div className="space-y-6">
           <Card>
             <div className="card-header">
               <h2 className="card-title">Candidate list and score sheet</h2>
@@ -334,96 +424,6 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
             <Card>
               <div className="card-header"><h2 className="card-title">Bulk score upload</h2></div>
               <CardBody><BulkScoreForm scheduleId={schedule.id} /></CardBody>
-            </Card>
-          ) : null}
-        </div>
-
-        <div className="space-y-6">
-          <Card>
-            <div className="card-header"><h2 className="card-title">Examination details</h2></div>
-            <CardBody>
-              <DescriptionList
-                columns={1}
-                items={[
-                  { label: 'Status', value: <StatusBadge status={schedule.status} /> },
-                  { label: 'Mode', value: <StatusBadge status={schedule.mode} label={EXAM_MODE_LABELS[schedule.mode] ?? schedule.mode} /> },
-                  { label: 'Date', value: formatDate(schedule.examDate) },
-                  { label: 'Reporting time', value: schedule.startTime },
-                  { label: 'End time', value: schedule.endTime ?? '—' },
-                  { label: 'Total marks', value: schedule.totalMarks },
-                  { label: 'Pass mark', value: schedule.passMark },
-                  { label: 'Results released', value: schedule.resultsPublishedAt ? formatDateTime(schedule.resultsPublishedAt) : 'Not released' },
-                ]}
-              />
-              {schedule.instructions ? (
-                <div className="mt-3 border-t border-ink-100 pt-3">
-                  <p className="text-xs font-medium uppercase tracking-wide text-ink-500">Instructions</p>
-                  <p className="mt-1 whitespace-pre-line text-xs text-ink-700">{schedule.instructions}</p>
-                </div>
-              ) : null}
-            </CardBody>
-          </Card>
-
-          <Card>
-            <div className="card-header">
-              <h2 className="card-title">Examination centres</h2>
-              <span className="badge-slate">{totalCapacity} seats</span>
-            </div>
-            <CardBody className="space-y-4">
-              {schedule.centres.length === 0 ? (
-                <p className="text-sm text-ink-600">No centres configured.</p>
-              ) : (
-                <ul className="divide-y divide-ink-100">
-                  {schedule.centres.map((c) => (
-                    <li key={c.id} className="flex flex-wrap items-start justify-between gap-2 py-2.5 first:pt-0 last:pb-0">
-                      <div>
-                        <p className="text-sm font-medium text-ink-950">{c.name}</p>
-                        <p className="text-xs text-ink-500">
-                          {c.lga ? `${c.lga} · ` : ''}{c._count.candidates}/{c.capacity} allocated
-                          {c.supervisor ? ` · supervisor ${c.supervisor}` : ''}
-                        </p>
-                        {c.address ? <p className="text-xs text-ink-500">{c.address}</p> : null}
-                      </div>
-                      {canManage && c._count.candidates === 0 ? (
-                        <form action={deleteExamCentre}>
-                          <input type="hidden" name="id" value={c.id} />
-                          <button type="submit" className="btn-ghost btn-sm text-[#9a2c20]">Remove</button>
-                        </form>
-                      ) : null}
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {canManage ? <ExamCentreForm scheduleId={schedule.id} /> : null}
-            </CardBody>
-          </Card>
-
-          {canManage && schedule.status !== 'COMPLETED' ? (
-            <Card>
-              <div className="card-header"><h2 className="card-title">Validate and advance</h2></div>
-              <CardBody><ValidateExamForm scheduleId={schedule.id} /></CardBody>
-            </Card>
-          ) : null}
-
-          {schedule.status === 'COMPLETED' ? (
-            <Card>
-              <div className="card-header"><h2 className="card-title">Results summary</h2></div>
-              <CardBody>
-                <DescriptionList
-                  columns={1}
-                  items={[
-                    { label: 'Candidates assessed', value: scored.length },
-                    { label: 'Passed', value: `${passed.length} (${scored.length ? Math.round((passed.length / scored.length) * 100) : 0}%)` },
-                    { label: 'Failed', value: scored.length - passed.length },
-                    { label: 'Absent', value: absent.length },
-                    { label: 'Highest score', value: scored.length ? Math.max(...scored.map((c) => c.score ?? 0)) : '—' },
-                    { label: 'Average score', value: scored.length ? (scored.reduce((s, c) => s + (c.score ?? 0), 0) / scored.length).toFixed(2) : '—' },
-                  ]}
-                />
-                <Link href={`/admin/interviews?exercise=${schedule.exercise.id}`} className="btn-primary btn-sm mt-4 w-full">
-                  Proceed to interview stage
-                </Link>
-              </CardBody>
             </Card>
           ) : null}
         </div>

@@ -159,8 +159,47 @@ export default async function ExamPaperDetail({ params }: { params: Promise<{ id
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <div className="space-y-6 xl:col-span-2">
+      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[19rem_minmax(0,1fr)]">
+        <div className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+          <Card>
+            <CardHeader title="Paper settings" />
+            <CardBody>
+              <ExamPaperForm
+                locked={locked}
+                initial={{
+                  id: paper.id,
+                  title: paper.title,
+                  code: paper.code,
+                  kind: paper.kind,
+                  instructions: paper.instructions ?? '',
+                  durationMinutes: paper.durationMinutes,
+                  passMark: paper.passMark,
+                  shuffleQuestions: paper.shuffleQuestions,
+                  shuffleOptions: paper.shuffleOptions,
+                  showResultToCandidate: paper.showResultToCandidate,
+                }}
+              />
+            </CardBody>
+          </Card>
+
+          <Card>
+            <CardHeader title="How this paper is conducted" />
+            <CardBody>
+              <DescriptionList
+                columns={1}
+                items={[
+                  { label: 'Question order', value: paper.shuffleQuestions ? 'Shuffled per candidate' : 'Fixed order' },
+                  { label: 'Answer options', value: paper.shuffleOptions ? 'Shuffled per candidate' : 'Fixed order' },
+                  { label: 'Score shown to candidate', value: paper.showResultToCandidate ? 'Immediately on submission' : 'Withheld until results are published' },
+                  { label: 'Pass mark', value: `${paper.passMark}%` },
+                  { label: 'Marking', value: 'Automatic, as each answer is saved' },
+                ]}
+              />
+            </CardBody>
+          </Card>
+        </div>
+
+        <div className="space-y-6">
           <Card>
             <CardHeader
               title="Sections"
@@ -266,7 +305,6 @@ export default async function ExamPaperDetail({ params }: { params: Promise<{ id
               ) : null}
             </CardBody>
           </Card>
-
           <Card>
             <CardHeader title="Examinations set with this paper" />
             {paper.schedules.length === 0 ? (
@@ -343,46 +381,8 @@ export default async function ExamPaperDetail({ params }: { params: Promise<{ id
             </Card>
           ) : null}
         </div>
-
-        <div className="space-y-6">
-          <Card>
-            <CardHeader title="Paper settings" />
-            <CardBody>
-              <ExamPaperForm
-                locked={locked}
-                initial={{
-                  id: paper.id,
-                  title: paper.title,
-                  code: paper.code,
-                  kind: paper.kind,
-                  instructions: paper.instructions ?? '',
-                  durationMinutes: paper.durationMinutes,
-                  passMark: paper.passMark,
-                  shuffleQuestions: paper.shuffleQuestions,
-                  shuffleOptions: paper.shuffleOptions,
-                  showResultToCandidate: paper.showResultToCandidate,
-                }}
-              />
-            </CardBody>
-          </Card>
-
-          <Card>
-            <CardHeader title="How this paper is conducted" />
-            <CardBody>
-              <DescriptionList
-                columns={1}
-                items={[
-                  { label: 'Question order', value: paper.shuffleQuestions ? 'Shuffled per candidate' : 'Fixed order' },
-                  { label: 'Answer options', value: paper.shuffleOptions ? 'Shuffled per candidate' : 'Fixed order' },
-                  { label: 'Score shown to candidate', value: paper.showResultToCandidate ? 'Immediately on submission' : 'Withheld until results are published' },
-                  { label: 'Pass mark', value: `${paper.passMark}%` },
-                  { label: 'Marking', value: 'Automatic, as each answer is saved' },
-                ]}
-              />
-            </CardBody>
-          </Card>
-        </div>
       </div>
     </>
   );
 }
+

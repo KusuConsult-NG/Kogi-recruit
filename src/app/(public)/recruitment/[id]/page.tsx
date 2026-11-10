@@ -59,25 +59,7 @@ export default async function ExercisePublicPage({ params }: { params: Promise<{
         actions={<StatusBadge status={exercise.status} label={EXERCISE_STATUS_LABELS[exercise.status]} />}
       />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
-          <Card>
-            <div className="card-header"><h2 className="card-title">About this exercise</h2></div>
-            <CardBody>
-              <RichText body={exercise.description} />
-            </CardBody>
-          </Card>
-
-          {exercise.eligibility ? (
-            <Card>
-              <div className="card-header"><h2 className="card-title">Eligibility criteria</h2></div>
-              <CardBody><RichText body={exercise.eligibility} /></CardBody>
-            </Card>
-          ) : null}
-
-        </div>
-
-        {/* Key dates and the apply panel travel with the reader. */}
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[19rem_minmax(0,1fr)]">
         <div className="space-y-6 lg:sticky lg:top-28 lg:self-start">
           <Card>
             <div className="card-header"><h2 className="card-title">Key dates</h2></div>
@@ -140,6 +122,25 @@ export default async function ExercisePublicPage({ params }: { params: Promise<{
             </CardBody>
           </Card>
         </div>
+
+        <div className="space-y-6">
+          <Card>
+            <div className="card-header"><h2 className="card-title">About this exercise</h2></div>
+            <CardBody>
+              <RichText body={exercise.description} />
+            </CardBody>
+          </Card>
+
+          {exercise.eligibility ? (
+            <Card>
+              <div className="card-header"><h2 className="card-title">Eligibility criteria</h2></div>
+              <CardBody><RichText body={exercise.eligibility} /></CardBody>
+            </Card>
+          ) : null}
+
+        </div>
+
+        {/* Key dates and the apply panel travel with the reader. */}
       </div>
 
       {/* Long-form matter runs the full width of the page. */}
