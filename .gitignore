@@ -17,3 +17,4 @@ prisma/test.db
 prisma/test.db-journal
 screens/
 demo/
+demo-nocap/

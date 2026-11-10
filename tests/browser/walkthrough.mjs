@@ -53,8 +53,13 @@ const page = await context.newPage();
 const BRAND = '#16342a';
 const GOLD = '#cfa84f';
 
-/** A caption bar along the foot of the screen. */
+/** Captions are burned in unless CAPTIONS=0, which suits a voiceover track. */
+const CAPTIONS = process.env.CAPTIONS !== '0';
+
+/** A caption bar along the foot of the screen. The hold runs either way, so
+ *  turning captions off does not change the pacing of the recording. */
 async function say(text, sub = '', hold = 2600) {
+  if (!CAPTIONS) { await page.waitForTimeout(hold); return; }
   await page.evaluate(({ text, sub, BRAND, GOLD }) => {
     document.getElementById('demo-cap')?.remove();
     const bar = document.createElement('div');
